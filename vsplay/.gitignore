@@ -40,6 +40,7 @@ out/
 git_toolbox_prj.xml
 
 ### Configuration files ###
-*.yml
-*.properties
-*.env
+application.yml
+gradle-properties.properties
+build.gradle
+settings.gradle
