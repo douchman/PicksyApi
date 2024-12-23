@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: app
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/vsplay
+    driver-class-name: org.h2.Driver
+    username: sa
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        show_sql: true
+    open-in-view: false
+
+app:
+  cors:
+    allowed-origin : "http://localhost:8080"
+
+
+jwt:
+  key: "this-is-vsplay-256-bit-secret-key-for-testing-only"
+  access-token-expiration-minutes: 60
