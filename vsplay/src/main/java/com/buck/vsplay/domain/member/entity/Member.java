@@ -19,14 +19,17 @@ import java.time.LocalDateTime;
 public class Member {
 
     @Id
-    @Column(name = "MEMBER_ID")
+    @Column(name = "member_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MEMBER_SEQ_GENERATOR")
     private Long id;
 
+    @Column(name = "login_id")
     private String loginId;
 
+    @Column(name = "member_name")
     private String memberName;
 
+    @Column(name = "password")
     private String password;
 
     private LocalDateTime createdAt;
