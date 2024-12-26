@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @NoArgsConstructor
@@ -17,7 +18,7 @@ import lombok.ToString;
 public class VsTopic extends Timestamp{
 
     @Id
-    @Column(name = "TOPIC_ID")
+    @Column(name = "topic_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TOPIC_SEQ_GENERATOR")
     private Long id;
 
