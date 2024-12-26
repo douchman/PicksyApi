@@ -20,7 +20,13 @@ public class VsTopic extends Timestamp{
     @Column(name = "TOPIC_ID")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TOPIC_SEQ_GENERATOR")
     private Long id;
+
+    @Column(name = "title")
     private String title;
+
+    @Column(name = "subject")
     private String subject;
+
+    @Column(name = "description")
     private String description;
 }
