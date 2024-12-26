@@ -37,7 +37,4 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Embedded
-    private Address address;
-
 }
