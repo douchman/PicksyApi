@@ -1,13 +1,13 @@
 package com.buck.vsplay.domain.member.entity;
 
 import com.buck.vsplay.domain.member.role.Role;
+import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @ToString(exclude = "password")
 @SequenceGenerator( name = "MEMBER_SEQ_GENERATOR" , sequenceName = "MEMBER_SEQ")
 @Table(name = "MEMBER")
-public class Member {
+public class Member extends Timestamp {
 
     @Id
     @Column(name = "member_id")
@@ -31,8 +31,6 @@ public class Member {
 
     @Column(name = "password")
     private String password;
-
-    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     private Role role;
