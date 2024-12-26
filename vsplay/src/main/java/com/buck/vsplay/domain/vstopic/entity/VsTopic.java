@@ -22,13 +22,13 @@ public class VsTopic extends Timestamp{
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TOPIC_SEQ_GENERATOR")
     private Long id;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false, length = 25)
     private String title;
 
-    @Column(name = "subject")
+    @Column(name = "subject", nullable = false, length = 50)
     private String subject;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 200)
     private String description;
 
     @Enumerated(EnumType.STRING)
