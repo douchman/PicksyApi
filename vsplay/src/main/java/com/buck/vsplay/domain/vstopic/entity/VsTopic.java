@@ -29,4 +29,14 @@ public class VsTopic extends Timestamp{
 
     @Column(name = "description")
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visibility")
+    private Visibility visibility = Visibility.PUBLIC;
+
+    public enum Visibility{
+        PUBLIC,
+        PRIVATE,
+        FRIEND_ONLY
+    }
 }
