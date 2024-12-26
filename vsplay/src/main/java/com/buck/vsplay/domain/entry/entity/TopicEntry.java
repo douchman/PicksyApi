@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.enrty.entity;
+package com.buck.vsplay.domain.entry.entity;
 
 
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
