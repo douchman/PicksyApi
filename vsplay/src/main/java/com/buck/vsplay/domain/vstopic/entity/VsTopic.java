@@ -33,6 +33,7 @@ public class VsTopic extends Timestamp{
 
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility")
+    @ColumnDefault("'PUBLIC'")
     private Visibility visibility = Visibility.PUBLIC;
 
     public enum Visibility{
