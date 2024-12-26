@@ -39,7 +39,7 @@ public class TopicEntry extends Timestamp {
     private MediaType mediaType;
 
     public enum MediaType{
-        IMAGE, VIDEO;
+        IMAGE, VIDEO
     }
 
 }
