@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @NoArgsConstructor
@@ -17,21 +18,22 @@ import lombok.ToString;
 public class VsTopic extends Timestamp{
 
     @Id
-    @Column(name = "TOPIC_ID")
+    @Column(name = "topic_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TOPIC_SEQ_GENERATOR")
     private Long id;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false, length = 25)
     private String title;
 
-    @Column(name = "subject")
+    @Column(name = "subject", nullable = false, length = 50)
     private String subject;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 200)
     private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility")
+    @ColumnDefault("'PUBLIC'")
     private Visibility visibility = Visibility.PUBLIC;
 
     public enum Visibility{
