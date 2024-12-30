@@ -1,4 +1,4 @@
-package com.buck.vsplay.global.security.service;
+package com.buck.vsplay.global.security.jwt;
 
 import com.buck.vsplay.global.security.user.CustomUserDetail;
 import io.jsonwebtoken.Jwts;
@@ -47,7 +47,6 @@ public class JwtService{
                 .parseClaimsJws(token)
                 .getBody()
                 .get("username", String.class);
-
     }
 
     public boolean isTokenExpired(String token){
