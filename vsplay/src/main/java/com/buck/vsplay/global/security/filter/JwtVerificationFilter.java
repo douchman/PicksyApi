@@ -1,6 +1,6 @@
 package com.buck.vsplay.global.security.filter;
 
-import com.buck.vsplay.global.security.service.impl.AuthUserService;
+import com.buck.vsplay.global.security.user.UserLookupService;
 import com.buck.vsplay.global.security.jwt.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,7 +20,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtVerificationFilter extends OncePerRequestFilter {
 
-    private final AuthUserService authUserService;
+    private final UserLookupService userLookupService;
     private final JwtService jwtService;
 
     @Override
@@ -38,7 +38,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         username = jwtService.extractUsername(jwt);
 
         if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = authUserService.loadUserByUsername(username);
+            UserDetails userDetails = userLookupService.loadUserByUsername(username);
 
             if(jwtService.validateToken(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken =
