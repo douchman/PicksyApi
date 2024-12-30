@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.vstopic.entity;
 
+import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,6 +20,10 @@ public class VsTopic extends Timestamp{
     @Column(name = "topic_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TOPIC_SEQ_GENERATOR")
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Column(name = "title", nullable = false, length = 25)
     private String title;
