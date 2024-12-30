@@ -2,7 +2,7 @@ package com.buck.vsplay.global.security.filter;
 
 
 import com.buck.vsplay.global.security.service.CustomUserDetailService;
-import com.buck.vsplay.global.security.service.JwtService;
+import com.buck.vsplay.global.security.jwt.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -5,7 +5,7 @@ import com.buck.vsplay.global.security.filter.JwtAuthenticationFilter;
 import com.buck.vsplay.global.security.handler.VsPlayAuthenticationFailureHandler;
 import com.buck.vsplay.global.security.handler.VsPlayAuthenticationSuccessHandler;
 import com.buck.vsplay.global.security.service.CustomUserDetailService;
-import com.buck.vsplay.global.security.service.JwtService;
+import com.buck.vsplay.global.security.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
