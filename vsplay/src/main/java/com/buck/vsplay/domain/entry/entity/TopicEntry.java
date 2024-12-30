@@ -7,13 +7,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Table(name = "TOPIC_ENTRY")
 @SequenceGenerator(name ="ENTRY_SEQ_GENERATOR", sequenceName = "ENTRY_SEQ")
 public class TopicEntry extends Timestamp {
@@ -25,7 +23,6 @@ public class TopicEntry extends Timestamp {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "topic_id")
-    @ToString.Exclude
     private VsTopic topic;
 
     @Column(name = "entry_name", nullable = false, length = 30)
