@@ -1,18 +1,17 @@
 package com.buck.vsplay.domain.vstopic.entity;
 
+import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Table(name = "VS_TOPIC")
 @SequenceGenerator(name = "TOPIC_SEQ_GENERATOR", sequenceName = "TOPIC_SEQ")
 public class VsTopic extends Timestamp{
@@ -21,6 +20,10 @@ public class VsTopic extends Timestamp{
     @Column(name = "topic_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TOPIC_SEQ_GENERATOR")
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Column(name = "title", nullable = false, length = 25)
     private String title;
