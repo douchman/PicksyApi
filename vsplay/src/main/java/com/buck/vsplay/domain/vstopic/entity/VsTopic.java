@@ -5,14 +5,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Table(name = "VS_TOPIC")
 @SequenceGenerator(name = "TOPIC_SEQ_GENERATOR", sequenceName = "TOPIC_SEQ")
 public class VsTopic extends Timestamp{
