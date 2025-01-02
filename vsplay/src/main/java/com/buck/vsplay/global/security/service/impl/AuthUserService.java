@@ -21,12 +21,12 @@ public class AuthUserService implements IAuthUserService {
     @Override
     public Member getAuthUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetail customUserDetail)) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof Long memberId)) {
             throw new IllegalStateException("JWT Token is missing in the authentication context");
         }
 
-        return memberRepository.findById(customUserDetail.getId())
-                .orElseThrow( () -> new IllegalStateException("Member not found"));
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalStateException("Member not found"));
     }
 
     @Override
