@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -47,13 +46,13 @@ public class JwtService{
                 .compact();
     }
 
-    public String extractUsername(String token){
+    public Long extractUserId(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(getKeyFromSecretKey(secretKey))
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .get("username", String.class);
+                .get("id", Long.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -80,9 +79,9 @@ public class JwtService{
         return expiration.before(new Date());
     }
 
-    public boolean validateToken(String token, UserDetails userDetails){
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public boolean validateToken(String token){
+        // TODO 토큰 검증 로직 수정 필요
+        return !isTokenExpired(token);
     }
 
     private Key getKeyFromSecretKey(String secretKey) {
