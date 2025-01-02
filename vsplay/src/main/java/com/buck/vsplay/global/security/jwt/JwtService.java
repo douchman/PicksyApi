@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -24,12 +26,14 @@ public class JwtService{
 
     public String generateAccessToken(CustomUserDetail customUserDetail) {
         Key key = getKeyFromSecretKey(secretKey);
-
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", customUserDetail.getId());
-        claims.put("username", customUserDetail.getUsername());
 
-        log.info("claims => {} " , claims);
+        List<String> roles = customUserDetail.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        claims.put("roles", roles);
+
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setClaims(claims)
