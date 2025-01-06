@@ -1,10 +1,11 @@
 package com.buck.vsplay.global.security.jwt;
 
+import com.buck.vsplay.global.security.jwt.exception.JwtException;
+import com.buck.vsplay.global.security.jwt.exception.JwtExceptionCode;
 import com.buck.vsplay.global.security.user.CustomUserDetail;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,6 +27,9 @@ public class JwtService{
     @Value("${jwt.key}")
     private String secretKey;
 
+    @Value("${jwt.issuer}")
+    private String issuer;
+
     public String generateAccessToken(CustomUserDetail customUserDetail) {
         Key key = getKeyFromSecretKey(secretKey);
         Map<String, Object> claims = new HashMap<>();
@@ -40,6 +44,7 @@ public class JwtService{
                 .setHeaderParam("typ", "JWT")
                 .setClaims(claims)
                 .setSubject("accessToken")
+                .setIssuer(issuer)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -80,8 +85,29 @@ public class JwtService{
     }
 
     public boolean validateToken(String token){
-        // TODO 토큰 검증 로직 수정 필요
-        return !isTokenExpired(token);
+        try{
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey.getBytes())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            // 발급자 검증
+            if(issuer.equals(claims.getIssuer())){
+                throw new JwtException(JwtExceptionCode.INVALID_ISSUER);
+            }
+            return true;
+        }catch (ExpiredJwtException e){
+            throw new JwtException(JwtExceptionCode.EXPIRED_TOKEN);
+        }catch (UnsupportedJwtException e){
+            throw new JwtException(JwtExceptionCode.UNSUPPORTED_TOKEN);
+        }catch (MalformedJwtException e){
+            throw new JwtException(JwtExceptionCode.MALFORMED_TOKEN);
+        }catch (SignatureException e){
+            throw new JwtException(JwtExceptionCode.INVALID_SIGNATURE);
+        }catch (IllegalArgumentException e){
+            throw new JwtException(JwtExceptionCode.ILLEGAL_ARGUMENT);
+        }
     }
 
     private Key getKeyFromSecretKey(String secretKey) {
