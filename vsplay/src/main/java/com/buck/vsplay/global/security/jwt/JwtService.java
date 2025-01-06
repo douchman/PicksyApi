@@ -1,9 +1,7 @@
 package com.buck.vsplay.global.security.jwt;
 
 import com.buck.vsplay.global.security.user.CustomUserDetail;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +24,9 @@ public class JwtService{
     @Value("${jwt.key}")
     private String secretKey;
 
+    @Value("${jwt.issuer}")
+    private String issuer;
+
     public String generateAccessToken(CustomUserDetail customUserDetail) {
         Key key = getKeyFromSecretKey(secretKey);
         Map<String, Object> claims = new HashMap<>();
@@ -40,6 +41,7 @@ public class JwtService{
                 .setHeaderParam("typ", "JWT")
                 .setClaims(claims)
                 .setSubject("accessToken")
+                .setIssuer(issuer)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
                 .signWith(key, SignatureAlgorithm.HS256)
