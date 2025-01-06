@@ -5,6 +5,7 @@ import com.buck.vsplay.global.security.filter.JwtAuthenticationFilter;
 import com.buck.vsplay.global.security.handler.VsPlayAuthenticationFailureHandler;
 import com.buck.vsplay.global.security.handler.VsPlayAuthenticationSuccessHandler;
 import com.buck.vsplay.global.security.jwt.JwtService;
+import com.buck.vsplay.global.security.jwt.exception.JwtExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtService jwtService;
+    private final JwtExceptionHandler jwtExceptionHandler;
 
     @Bean
     SecurityFilterChain securityFilterChain(final HttpSecurity httpSecurity) throws Exception {
@@ -66,7 +68,7 @@ public class SecurityConfig {
         AuthenticationManager authenticationManager = authenticationManager(httpSecurity.getSharedObject(AuthenticationConfiguration.class));
 
         JwtAuthenticationFilter jwtAuthenticationFilter = jwtAuthenticationFilter(authenticationManager);
-        JwtVerificationFilter jwtVerificationFilter = new JwtVerificationFilter(jwtService);
+        JwtVerificationFilter jwtVerificationFilter = new JwtVerificationFilter(jwtService, jwtExceptionHandler);
 
         httpSecurity
                 .addFilter(jwtAuthenticationFilter)

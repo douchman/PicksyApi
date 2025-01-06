@@ -1,6 +1,8 @@
 package com.buck.vsplay.global.security.filter;
 
 import com.buck.vsplay.global.security.jwt.JwtService;
+import com.buck.vsplay.global.security.jwt.exception.JwtException;
+import com.buck.vsplay.global.security.jwt.exception.JwtExceptionHandler;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +21,7 @@ import java.io.IOException;
 public class JwtVerificationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final JwtExceptionHandler jwtExceptionHandler;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -32,7 +35,8 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
         jwt = authHeader.substring(7);
 
-        if(SecurityContextHolder.getContext().getAuthentication() == null && jwtService.validateToken(jwt)) {
+        try {
+            if(SecurityContextHolder.getContext().getAuthentication() == null && jwtService.validateToken(jwt)) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(jwtService.extractUserId(jwt), null, jwtService.extractAuthorities(jwt));
 
@@ -41,6 +45,8 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
                 filterChain.doFilter(request, response);
             }
-
+        } catch (JwtException e){
+            jwtExceptionHandler.handleJwtException(response, e);
+        }
     }
 }
