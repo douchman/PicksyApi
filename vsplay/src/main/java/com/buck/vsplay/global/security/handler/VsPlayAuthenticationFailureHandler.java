@@ -2,7 +2,6 @@ package com.buck.vsplay.global.security.handler;
 
 import com.buck.vsplay.global.security.dto.AuthenticationDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +16,6 @@ import java.nio.charset.StandardCharsets;
 public class VsPlayAuthenticationFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException{
-        log.error("Authentication Failure : {}", exception.getMessage());
-
         ObjectMapper objectMapper = new ObjectMapper();
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
