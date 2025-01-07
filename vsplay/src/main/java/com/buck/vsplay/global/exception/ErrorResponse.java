@@ -1,7 +1,6 @@
 package com.buck.vsplay.global.exception;
 
-
-
+import com.buck.vsplay.global.util.DateTimeUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.ConstraintViolation;
 import lombok.Builder;
@@ -9,7 +8,6 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -29,7 +27,7 @@ public class ErrorResponse {
                 .status(exceptionCode.getStatus())
                 .message(exceptionCode.getMessage())
                 .errorCode(exceptionCode.getErrorCode())
-                .timestamp(String.valueOf(LocalDateTime.now()))
+                .timestamp(DateTimeUtil.formatNow())
                 .build();
     }
 
@@ -37,7 +35,7 @@ public class ErrorResponse {
         return ErrorResponse.builder()
                 .fieldErrors(FieldError.of(bindingResult))
                 .status(HttpStatus.BAD_REQUEST.value())
-                .timestamp(String.valueOf(LocalDateTime.now()))
+                .timestamp(DateTimeUtil.formatNow())
                 .build();
     }
 
@@ -45,7 +43,7 @@ public class ErrorResponse {
         return ErrorResponse.builder()
                 .violationErrors(ConstraintViolationError.of(constraintViolations))
                 .status(HttpStatus.BAD_REQUEST.value())
-                .timestamp(String.valueOf(LocalDateTime.now()))
+                .timestamp(DateTimeUtil.formatNow())
                 .build();
     }
 }
