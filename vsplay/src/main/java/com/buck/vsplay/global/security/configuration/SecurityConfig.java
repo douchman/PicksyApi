@@ -38,8 +38,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/vstopic").hasRole("GENERAL")
-                        .requestMatchers(HttpMethod.POST, "/member").permitAll()
-                        .requestMatchers("/member/login").permitAll()
+                        .requestMatchers(SecurityPaths.getPublicPostPaths()).permitAll()
                         .anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
