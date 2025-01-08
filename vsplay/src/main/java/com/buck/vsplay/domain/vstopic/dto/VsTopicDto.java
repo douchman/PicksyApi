@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 
 @Data
@@ -29,7 +28,6 @@ public class VsTopicDto {
         @NotNull(message = "대결 주제는 필수 입력 항목입니다.")
         private String subject;
         private String description;
-        private MultipartFile thumbnail;
     }
 
 }
