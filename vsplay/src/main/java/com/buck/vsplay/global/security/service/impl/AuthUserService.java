@@ -1,6 +1,8 @@
 package com.buck.vsplay.global.security.service.impl;
 
 import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.member.exception.MemberException;
+import com.buck.vsplay.domain.member.exception.MemberExceptionCode;
 import com.buck.vsplay.domain.member.repository.MemberRepository;
 import com.buck.vsplay.global.security.service.IAuthUserService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,6 @@ public class AuthUserService implements IAuthUserService {
         }
 
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalStateException("Member not found"));
+                .orElseThrow(() -> new MemberException(MemberExceptionCode.MEMBER_NOT_FOUND));
     }
 }
