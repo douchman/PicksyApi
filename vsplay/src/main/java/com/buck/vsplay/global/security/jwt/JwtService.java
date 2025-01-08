@@ -93,7 +93,7 @@ public class JwtService{
                     .getBody();
 
             // 발급자 검증
-            if(issuer.equals(claims.getIssuer())){
+            if(!issuer.equals(claims.getIssuer())){
                 throw new JwtException(JwtExceptionCode.INVALID_ISSUER);
             }
             return true;
