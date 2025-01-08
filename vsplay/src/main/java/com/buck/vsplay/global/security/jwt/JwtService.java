@@ -74,16 +74,6 @@ public class JwtService{
                 .collect(Collectors.toList());
     }
 
-    public boolean isTokenExpired(String token){
-        Date expiration = Jwts.parserBuilder()
-                .setSigningKey(secretKey.getBytes())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-        return expiration.before(new Date());
-    }
-
     public boolean validateToken(String token){
         try{
             Claims claims = Jwts.parserBuilder()
