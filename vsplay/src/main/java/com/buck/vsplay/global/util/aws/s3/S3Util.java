@@ -49,20 +49,29 @@ public class S3Util {
         return s3Presigner.presignGetObject(preSignRequest).url().toString();
     }
 
-    public String putObject(MultipartFile file) throws IOException {
-        String objectKey = file.getOriginalFilename();
+    public String putObject(MultipartFile file, String objectPath) {
+        try {
 
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(objectKey)
-                .contentDisposition(file.getContentType())
-                .build();
+            validateFile(file);
 
-        s3Client.putObject(
-                putObjectRequest,
-                RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            String fileExtension = getFileExtension(file.getOriginalFilename());
+            String objectName = generateRandomFileName() + fileExtension;
+            String objectKey = objectPath + objectName;
 
-        return objectKey;
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(
+                    putObjectRequest,
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+            return objectKey;
+        } catch ( IOException e){
+            throw new S3Exception(S3ExceptionCode.UPLOAD_FAILED);
+        }
     }
 
     private String generateRandomFileName(){
