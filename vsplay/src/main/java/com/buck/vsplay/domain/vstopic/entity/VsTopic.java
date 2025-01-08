@@ -34,6 +34,9 @@ public class VsTopic extends Timestamp{
     @Column(name = "description", length = 200)
     private String description;
 
+    @Column(name = "thumbnail", length = 200)
+    private String thumbnail;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility")
     @ColumnDefault("'PUBLIC'")
