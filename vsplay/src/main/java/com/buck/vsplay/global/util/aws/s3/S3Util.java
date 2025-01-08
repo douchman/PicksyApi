@@ -19,9 +19,6 @@ import java.util.UUID;
 @Service
 public class S3Util {
 
-    @Value("${aws.region}")
-    private String region;
-
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
