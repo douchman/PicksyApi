@@ -1,5 +1,7 @@
 package com.buck.vsplay.global.util.aws.s3;
 
+import com.buck.vsplay.global.util.aws.s3.exception.S3Exception;
+import com.buck.vsplay.global.util.aws.s3.exception.S3ExceptionCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,12 +14,10 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.UUID;
 
 @Service
 public class S3Util {
-
-    @Value("${aws.region}")
-    private String region;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -46,19 +46,42 @@ public class S3Util {
         return s3Presigner.presignGetObject(preSignRequest).url().toString();
     }
 
-    public String putObject(MultipartFile file) throws IOException {
-        String objectKey = file.getOriginalFilename();
+    public String putObject(MultipartFile file, String objectPath) {
+        try {
 
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(objectKey)
-                .contentDisposition(file.getContentType())
-                .build();
+            validateFile(file);
 
-        s3Client.putObject(
-                putObjectRequest,
-                RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            String fileExtension = getFileExtension(file.getOriginalFilename());
+            String objectName = generateRandomFileName() + fileExtension;
+            String objectKey = objectPath + objectName;
 
-        return objectKey;
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(
+                    putObjectRequest,
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+            return objectKey;
+        } catch ( IOException e){
+            throw new S3Exception(S3ExceptionCode.UPLOAD_FAILED);
+        }
+    }
+
+    private String generateRandomFileName(){
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
+    private String getFileExtension(String originalFileName){
+        return originalFileName.substring(originalFileName.lastIndexOf("."));
+    }
+
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty() || file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
+            throw new S3Exception(S3ExceptionCode.FILE_EMPTY_OR_INVALID);
+        }
     }
 }
