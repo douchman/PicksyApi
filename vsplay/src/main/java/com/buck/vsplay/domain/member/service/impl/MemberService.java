@@ -33,8 +33,6 @@ public class MemberService implements IMemberService {
 
     @Override
     public void registerMember(MemberDto.MemberInfo member) {
-        log.info("Registering member: {}", member);
-
         if (memberRepository.findByLoginId(member.getLoginId()).isPresent()) {
             throw new MemberException(MemberExceptionCode.MEMBER_DUPLICATE_ID);
         }
