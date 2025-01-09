@@ -23,7 +23,7 @@ public class Member extends Timestamp {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MEMBER_SEQ_GENERATOR")
     private Long id;
 
-    @Column(name = "login_id")
+    @Column(name = "login_id", unique = true, nullable = false)
     private String loginId;
 
     @Column(name = "member_name")
