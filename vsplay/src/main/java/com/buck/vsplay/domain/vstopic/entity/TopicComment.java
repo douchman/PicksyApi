@@ -5,6 +5,7 @@ import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Comment;
 
 @Entity
 @Table(name = "TOPIC_COMMENT")
@@ -14,6 +15,7 @@ import org.hibernate.annotations.ColumnDefault;
 @NoArgsConstructor
 @AllArgsConstructor
 @SequenceGenerator(name = "COMMENT_SEQ_GENERATOR" , sequenceName = "COMMENT_SEQ")
+@Comment("주제에 대한 사용자들의 댓글(피드백)")
 public class TopicComment extends Timestamp {
 
     @Id
