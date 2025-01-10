@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Comment;
 
 
 @Entity
@@ -24,6 +25,7 @@ public class Member extends Timestamp {
     private Long id;
 
     @Column(name = "login_id", unique = true, nullable = false)
+    @Comment("회원 로그인 아이디")
     private String loginId;
 
     @Column(name = "member_name")
