@@ -39,6 +39,10 @@ public class TopicEntry extends Timestamp {
     @Comment("엔트리 미디어 타입 (사진, 영상링크 등 )")
     private MediaType mediaType = MediaType.IMAGE;
 
+    @Column(name = "media_url")
+    @Comment("엔트리 미디어 주소")
+    private String mediaUrl;
+
     public enum MediaType{
         IMAGE, VIDEO
     }
