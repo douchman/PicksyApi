@@ -34,4 +34,8 @@ public class TournamentStatistics extends Timestamp {
     @Comment("진행 횟수")
     private Integer stageMatches;
 
+    @Column(name = "is_active", nullable = false)
+    @Comment("활성화 여부")
+    private boolean active;
+
 }
