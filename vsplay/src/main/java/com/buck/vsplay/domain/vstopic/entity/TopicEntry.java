@@ -37,7 +37,11 @@ public class TopicEntry extends Timestamp {
     @Enumerated(EnumType.STRING)
     @Column(name = "media_type", nullable = false)
     @Comment("엔트리 미디어 타입 (사진, 영상링크 등 )")
-    private MediaType mediaType;
+    private MediaType mediaType = MediaType.IMAGE;
+
+    @Column(name = "media_url")
+    @Comment("엔트리 미디어 주소")
+    private String mediaUrl;
 
     public enum MediaType{
         IMAGE, VIDEO
