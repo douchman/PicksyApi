@@ -24,7 +24,7 @@ public class TopicPlayRecord extends Timestamp {
     @JoinColumn(name = "topic_id")
     private VsTopic topic;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
