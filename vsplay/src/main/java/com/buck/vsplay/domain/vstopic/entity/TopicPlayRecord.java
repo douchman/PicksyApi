@@ -27,4 +27,7 @@ public class TopicPlayRecord extends Timestamp {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Column(name = "tournament", nullable = false)
+    private Integer tournament;
 }
