@@ -1,5 +1,7 @@
 package com.buck.vsplay.global.util.aws.s3;
 
+import com.buck.vsplay.global.constants.MediaType;
+import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
 import com.buck.vsplay.global.util.aws.s3.exception.S3Exception;
 import com.buck.vsplay.global.util.aws.s3.exception.S3ExceptionCode;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +48,7 @@ public class S3Util {
         return s3Presigner.presignGetObject(preSignRequest).url().toString();
     }
 
-    public String putObject(MultipartFile file, String objectPath) {
+    public S3Dto.S3UploadResult putObject(MultipartFile file, String objectPath) {
         try {
 
             validateFile(file);
@@ -54,6 +56,8 @@ public class S3Util {
             String fileExtension = getFileExtension(file.getOriginalFilename());
             String objectName = generateRandomFileName() + fileExtension;
             String objectKey = objectPath + objectName;
+
+            MediaType mediaType = determineMediaType(file.getContentType());
 
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
@@ -65,7 +69,11 @@ public class S3Util {
                     putObjectRequest,
                     RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-            return objectKey;
+            return S3Dto.S3UploadResult.builder()
+                    .objectKey(objectKey)
+                    .mediaType(mediaType)
+                    .build();
+
         } catch ( IOException e){
             throw new S3Exception(S3ExceptionCode.UPLOAD_FAILED);
         }
@@ -87,5 +95,17 @@ public class S3Util {
 
     public String buildS3Path(String ... parts){
         return String.join("/", parts);
+    }
+
+    private MediaType determineMediaType(String contentType) {
+        if (contentType == null || contentType.isEmpty()) {
+            return MediaType.IMAGE;
+        }
+        if (contentType.startsWith("image")) {
+            return MediaType.IMAGE;
+        } else if (contentType.startsWith("video")) {
+            return MediaType.VIDEO;
+        }
+        return MediaType.IMAGE;
     }
 }
