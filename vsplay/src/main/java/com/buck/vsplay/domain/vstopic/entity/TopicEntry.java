@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.entity;
 
 
+import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -42,9 +43,5 @@ public class TopicEntry extends Timestamp {
     @Column(name = "media_url")
     @Comment("엔트리 미디어 주소")
     private String mediaUrl;
-
-    public enum MediaType{
-        IMAGE, VIDEO
-    }
 
 }
