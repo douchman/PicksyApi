@@ -8,6 +8,7 @@ import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
+import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +27,11 @@ public class VsTopicService implements IVsTopicService {
     @Override
     public void createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
-        String filename = s3Util.putObject(createVsTopicRequest.getThumbnail() , existMember.getId().toString());
+        S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(createVsTopicRequest.getThumbnail() , existMember.getId().toString());
 
         VsTopic vsTopic = vsTopicMapper.toEntity(createVsTopicRequest);
         vsTopic.setMember(existMember);
-        vsTopic.setThumbnail(filename);
+        vsTopic.setThumbnail(s3UploadResult.getObjectKey());
 
         vsTopicRepository.save(vsTopic);
     }
