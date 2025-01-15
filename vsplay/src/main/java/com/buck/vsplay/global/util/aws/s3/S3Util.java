@@ -84,4 +84,8 @@ public class S3Util {
             throw new S3Exception(S3ExceptionCode.FILE_EMPTY_OR_INVALID);
         }
     }
+
+    public String buildS3Path(String ... parts){
+        return String.join("/", parts);
+    }
 }
