@@ -94,7 +94,8 @@ public class S3Util {
     }
 
     public String buildS3Path(String ... parts){
-        return String.join("/", parts);
+        String joinedPath = String.join("/", parts);
+        return joinedPath.endsWith("/") ? joinedPath : joinedPath + "/";
     }
 
     private MediaType determineMediaType(String contentType) {
