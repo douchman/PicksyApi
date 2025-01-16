@@ -8,13 +8,11 @@ import com.buck.vsplay.global.util.aws.s3.S3Util;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface TopicEntryMapper {
-    TopicEntryMapper INSTANCE = Mappers.getMapper(TopicEntryMapper.class);
 
     @Mapping(target = "topic", expression = "java(vsTopic)")
     TopicEntry toTopicEntryWithTopic(EntryDto.Entry topicEntry, @Context VsTopic vsTopic);
