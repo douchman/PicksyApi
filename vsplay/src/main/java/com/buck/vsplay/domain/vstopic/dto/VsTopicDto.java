@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.dto;
 
 
+import com.buck.vsplay.global.constants.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -38,6 +39,7 @@ public class VsTopicDto {
         private String subject;
         private String description;
         private MultipartFile thumbnail;
+        private Visibility visibility;
     }
 
 }
