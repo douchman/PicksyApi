@@ -24,5 +24,12 @@ public class VsTopicController {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()),HttpStatus.OK );
     }
 
-
+    @PatchMapping("{id}")
+    public ResponseEntity<SingleResponseDto<Integer>> updateTopic(
+            @PathVariable("id") Long topicId,
+            @ModelAttribute VsTopicDto.VsTopicUpdateRequest topicDUpdateVsTopicRequest
+    ){
+        vsTopicService.updateVsTopic(topicId, topicDUpdateVsTopicRequest);
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()),HttpStatus.OK );
+    }
 }

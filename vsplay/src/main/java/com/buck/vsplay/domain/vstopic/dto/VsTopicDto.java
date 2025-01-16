@@ -32,4 +32,12 @@ public class VsTopicDto {
         private MultipartFile thumbnail;
     }
 
+    @Data
+    public static class VsTopicUpdateRequest{
+        private String title;
+        private String subject;
+        private String description;
+        private MultipartFile thumbnail;
+    }
+
 }
