@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.entity;
 
 import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -47,10 +48,4 @@ public class VsTopic extends Timestamp{
     @ColumnDefault("'PUBLIC'")
     @Comment("대결 공개 범위")
     private Visibility visibility = Visibility.PUBLIC;
-
-    public enum Visibility{
-        PUBLIC,
-        PRIVATE,
-        FRIEND_ONLY
-    }
 }
