@@ -19,7 +19,7 @@ public class EntryDto {
     }
 
     @Data
-    public static class createEntriesRequest{
+    public static class CreateEntriesRequest{
         Long topicId;
         List<Entry> entries;
     }

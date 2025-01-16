@@ -19,7 +19,7 @@ public class EntryController {
 
     @PostMapping("vstopic/entries")
     public ResponseEntity<SingleResponseDto<Integer>> createEntries(
-            @ModelAttribute EntryDto.createEntriesRequest request
+            @ModelAttribute EntryDto.CreateEntriesRequest request
     ){
 
         entryService.createEntries(request);

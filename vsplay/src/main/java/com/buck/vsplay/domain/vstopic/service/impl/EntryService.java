@@ -35,7 +35,7 @@ public class EntryService implements IEntryService {
     private final EntryRepository entryRepository;
 
     @Override
-    public void createEntries(EntryDto.createEntriesRequest request) {
+    public void createEntries(EntryDto.CreateEntriesRequest request) {
         Member authUser = authUserService.getAuthUser();
         Long topicId = request.getTopicId();
         VsTopic vsTopic = topicRepository.findById(topicId).orElseThrow(() ->
