@@ -20,7 +20,7 @@ public class EntryDto {
 
     @Data
     public static class createEntriesRequest{
-        Integer topicId;
+        Long topicId;
         List<Entry> entries;
     }
 }

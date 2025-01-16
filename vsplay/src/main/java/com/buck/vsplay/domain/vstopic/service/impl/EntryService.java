@@ -37,7 +37,7 @@ public class EntryService implements IEntryService {
     @Override
     public void createEntries(EntryDto.createEntriesRequest request) {
         Member authUser = authUserService.getAuthUser();
-        Integer topicId = request.getTopicId();
+        Long topicId = request.getTopicId();
         VsTopic vsTopic = topicRepository.findById(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
