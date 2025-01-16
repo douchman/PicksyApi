@@ -35,6 +35,18 @@ public class EntryService implements IEntryService {
     private final EntryRepository entryRepository;
 
     @Override
+    public EntryDto.CreatedEntryList getEntriesByTopicId(Long topicId) {
+        EntryDto.CreatedEntryList createdEntryList = new EntryDto.CreatedEntryList();
+
+        topicRepository.findById(topicId).orElseThrow(
+                () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+
+        createdEntryList.setEntries(topicEntryMapper.toCreatedEntryDtoList(entryRepository.findByTopicId(topicId), s3Util));
+
+        return createdEntryList;
+    }
+
+    @Override
     public void createEntries(EntryDto.CreateEntriesRequest request) {
         Member authUser = authUserService.getAuthUser();
         Long topicId = request.getTopicId();
@@ -57,4 +69,6 @@ public class EntryService implements IEntryService {
         entryRepository.saveAll(topicEntries);
 
     }
+
+
 }
