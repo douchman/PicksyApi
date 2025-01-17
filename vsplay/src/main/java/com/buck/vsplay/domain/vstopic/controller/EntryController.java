@@ -23,12 +23,13 @@ public class EntryController {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), entryService.getEntriesByTopicId(topicId)) ,HttpStatus.OK);
     }
 
-    @PostMapping("vstopic/entries")
+    @PostMapping("vstopic/{id}/entries")
     public ResponseEntity<SingleResponseDto<Integer>> createEntries(
+            @PathVariable("id") Long topicId,
             @ModelAttribute EntryDto.CreateEntriesRequest request
     ){
 
-        entryService.createEntries(request);
+        entryService.createEntries(topicId, request);
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
     }
 }
