@@ -38,4 +38,8 @@ public class EntryDto {
     public static class CreatedEntryList{
         List<Entry> entries;
     }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public static class UpdateEntryRequest extends CreateEntry{}
 }
