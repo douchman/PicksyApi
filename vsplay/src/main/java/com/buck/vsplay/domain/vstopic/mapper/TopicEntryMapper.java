@@ -19,9 +19,9 @@ public interface TopicEntryMapper {
 
     @Mapping(source = "id", target ="entryId")
     @Mapping(target = "mediaUrl" , expression = "java(s3Util.getUploadedObjectUrl(topicEntry.getMediaUrl()))")
-    EntryDto.CreatedEntry toCreatedEntry(TopicEntry topicEntry, @Context S3Util s3Util);
+    EntryDto.Entry toCreatedEntry(TopicEntry topicEntry, @Context S3Util s3Util);
 
-    default List<EntryDto.CreatedEntry> toCreatedEntryDtoList(List<TopicEntry> entries, @Context S3Util s3Util){
+    default List<EntryDto.Entry> toCreatedEntryList(List<TopicEntry> entries, @Context S3Util s3Util){
         return entries.stream()
                 .map(entry -> toCreatedEntry(entry, s3Util))
                 .toList();

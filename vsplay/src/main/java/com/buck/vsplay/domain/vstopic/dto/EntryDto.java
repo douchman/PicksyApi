@@ -13,19 +13,19 @@ import java.util.List;
 public class EntryDto {
 
     @Data
-    public static class CreateEntry{
-        private String entryName;
-        private String description;
-        private MultipartFile file;
-    }
-
-    @Data
-    public static class CreatedEntry{
+    public static class Entry{
         private Long entryId;
         private String entryName;
         private String description;
         private MediaType mediaType;
         private String mediaUrl;
+    }
+
+    @Data
+    public static class CreateEntry{
+        private String entryName;
+        private String description;
+        private MultipartFile file;
     }
 
     @Data
@@ -36,6 +36,6 @@ public class EntryDto {
 
     @Data
     public static class CreatedEntryList{
-        List<CreatedEntry> entries;
+        List<Entry> entries;
     }
 }
