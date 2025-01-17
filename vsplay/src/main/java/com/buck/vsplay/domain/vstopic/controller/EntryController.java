@@ -15,7 +15,7 @@ public class EntryController {
 
     private final EntryService entryService;
 
-    @GetMapping("vstopic/entries/{id}")
+    @GetMapping("vstopic/{id}/entries")
     public ResponseEntity<SingleResponseDto<EntryDto.CreatedEntryList>> getAllEntries(
             @PathVariable("id") Long topicId
     ) {
