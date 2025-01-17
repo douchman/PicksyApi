@@ -13,7 +13,7 @@ import java.util.List;
 public class EntryDto {
 
     @Data
-    public static class Entry{
+    public static class CreateEntry{
         private String entryName;
         private String description;
         private MultipartFile file;
@@ -31,7 +31,7 @@ public class EntryDto {
     @Data
     public static class CreateEntriesRequest{
         Long topicId;
-        List<Entry> entries;
+        List<CreateEntry> entries;
     }
 
     @Data

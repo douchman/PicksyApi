@@ -15,7 +15,7 @@ import java.util.List;
 public interface TopicEntryMapper {
 
     @Mapping(target = "topic", expression = "java(vsTopic)")
-    TopicEntry toTopicEntryWithTopic(EntryDto.Entry topicEntry, @Context VsTopic vsTopic);
+    TopicEntry toTopicEntryWithTopic(EntryDto.CreateEntry topicEntry, @Context VsTopic vsTopic);
 
     @Mapping(source = "id", target ="entryId")
     @Mapping(target = "mediaUrl" , expression = "java(s3Util.getUploadedObjectUrl(topicEntry.getMediaUrl()))")

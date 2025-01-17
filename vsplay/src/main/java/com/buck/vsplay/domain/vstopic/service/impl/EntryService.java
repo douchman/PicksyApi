@@ -54,11 +54,11 @@ public class EntryService implements IEntryService {
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
 
-        List<EntryDto.Entry> entries = request.getEntries();
+        List<EntryDto.CreateEntry> entries = request.getEntries();
         List<TopicEntry> topicEntries = new ArrayList<>();
         String objectPath = s3Util.buildS3Path(String.valueOf(authUser.getId()), String.valueOf(vsTopic.getId()));
 
-        for (EntryDto.Entry entry : entries) {
+        for (EntryDto.CreateEntry entry : entries) {
             S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(entry.getFile(), objectPath);
             TopicEntry topicEntry = topicEntryMapper.toTopicEntryWithTopic(entry, vsTopic);
             topicEntry.setMediaUrl(s3UploadResult.getObjectKey());
