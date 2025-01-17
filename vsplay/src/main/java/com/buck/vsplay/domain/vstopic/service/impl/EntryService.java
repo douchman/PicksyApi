@@ -4,6 +4,8 @@ import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
@@ -17,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,5 +72,30 @@ public class EntryService implements IEntryService {
 
     }
 
+    @Override
+    public void updateEntries(Long topicId, Long entryId, EntryDto.UpdateEntryRequest updatedRequest) {
 
+        Member authUser = authUserService.getAuthUser();
+        if( !topicRepository.existsById(topicId) ) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        TopicEntry topicEntry = entryRepository.findById(entryId).orElseThrow(
+                () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND));
+
+        topicEntryMapper.applyChangesToTopicEntry(updatedRequest, topicEntry);
+
+        MultipartFile uploadFile = updatedRequest.getFile();
+        boolean isFileExist = (uploadFile != null && !uploadFile.isEmpty());
+
+        if(isFileExist){
+            String objectKey = s3Util.buildS3Path(String.valueOf(authUser.getId()), String.valueOf(topicId));
+            S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(uploadFile, objectKey);
+
+            topicEntry.setMediaUrl(s3UploadResult.getObjectKey());
+            topicEntry.setMediaType(s3UploadResult.getMediaType());
+        }
+
+        entryRepository.save(topicEntry);
+    }
 }

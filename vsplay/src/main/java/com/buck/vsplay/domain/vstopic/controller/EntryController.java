@@ -32,4 +32,14 @@ public class EntryController {
         entryService.createEntries(topicId, request);
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
     }
+
+    @PatchMapping("vstopic/{topicId}/entries/{entryId}")
+    public ResponseEntity<SingleResponseDto<Integer>> updateEntry(
+            @PathVariable("topicId") Long topicId,
+            @PathVariable("entryId") Long entryId,
+            @ModelAttribute EntryDto.UpdateEntryRequest request
+    ){
+        entryService.updateEntries(topicId, entryId, request);
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
+    }
 }
