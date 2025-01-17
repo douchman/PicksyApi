@@ -41,8 +41,9 @@ public class EntryService implements IEntryService {
     public EntryDto.CreatedEntryList getEntriesByTopicId(Long topicId) {
         EntryDto.CreatedEntryList createdEntryList = new EntryDto.CreatedEntryList();
 
-        topicRepository.findById(topicId).orElseThrow(
-                () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+        if(!topicRepository.existsById(topicId)) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
 
         createdEntryList.setEntries(topicEntryMapper.toCreatedEntryList(entryRepository.findByTopicId(topicId), s3Util));
 
