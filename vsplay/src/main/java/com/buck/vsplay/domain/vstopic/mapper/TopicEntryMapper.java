@@ -15,13 +15,13 @@ import java.util.List;
 public interface TopicEntryMapper {
 
     @Mapping(target = "topic", expression = "java(vsTopic)")
-    TopicEntry toTopicEntryWithTopic(EntryDto.Entry topicEntry, @Context VsTopic vsTopic);
+    TopicEntry toTopicEntryWithTopic(EntryDto.CreateEntry topicEntry, @Context VsTopic vsTopic);
 
     @Mapping(source = "id", target ="entryId")
     @Mapping(target = "mediaUrl" , expression = "java(s3Util.getUploadedObjectUrl(topicEntry.getMediaUrl()))")
-    EntryDto.CreatedEntry toCreatedEntry(TopicEntry topicEntry, @Context S3Util s3Util);
+    EntryDto.Entry toCreatedEntry(TopicEntry topicEntry, @Context S3Util s3Util);
 
-    default List<EntryDto.CreatedEntry> toCreatedEntryDtoList(List<TopicEntry> entries, @Context S3Util s3Util){
+    default List<EntryDto.Entry> toCreatedEntryList(List<TopicEntry> entries, @Context S3Util s3Util){
         return entries.stream()
                 .map(entry -> toCreatedEntry(entry, s3Util))
                 .toList();
