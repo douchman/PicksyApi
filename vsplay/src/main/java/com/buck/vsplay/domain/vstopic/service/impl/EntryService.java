@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
 import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.statistics.event.TournamentUpdateEvent;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
@@ -23,6 +24,7 @@ import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +44,7 @@ public class EntryService implements IEntryService {
     private final AuthUserService authUserService;
     private final EntryRepository entryRepository;
     private final TournamentRepository tournamentRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     public EntryDto.CreatedEntryList getEntriesByTopicId(Long topicId) {
@@ -127,7 +130,8 @@ public class EntryService implements IEntryService {
             }
 
             if( !isTournamentExist(vsTopic, tournamentStage) ) {
-                saveTournament(vsTopic, tournamentStage);
+                TopicTournament saveTournament = saveTournament(vsTopic, tournamentStage); // 토너먼트 엔티티 커밋
+                applicationEventPublisher.publishEvent(new TournamentUpdateEvent(saveTournament)); // 커밋된 엔티티로 이벤트 발행
             }
 
             power++;
@@ -138,13 +142,14 @@ public class EntryService implements IEntryService {
         return tournamentRepository.existsByVsTopicIdAndTournamentStage(vsTopic.getId(), tournamentStage);
 
     }
-    private void saveTournament(VsTopic vsTopic, int tournamentStage) {
+
+    private TopicTournament saveTournament(VsTopic vsTopic, int tournamentStage) {
 
         TopicTournament topicTournament = new TopicTournament();
         topicTournament.setVsTopic(vsTopic);
         topicTournament.setTournamentName(TournamentStage.findStageNameByStage(tournamentStage).orElseThrow( () ->
                 new TournamentException(TournamentExceptionCode.SERVER_ERROR)));
         topicTournament.setTournamentStage(tournamentStage);
-        tournamentRepository.save(topicTournament);
+        return tournamentRepository.save(topicTournament);
     }
 }
