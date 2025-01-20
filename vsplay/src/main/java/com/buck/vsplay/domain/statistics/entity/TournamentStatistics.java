@@ -4,9 +4,7 @@ package com.buck.vsplay.domain.statistics.entity;
 import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 @Entity
@@ -14,8 +12,10 @@ import org.hibernate.annotations.Comment;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @SequenceGenerator(name = "TOURNAMENT_STATS_SEQ_GENERATOR" , sequenceName = "TOURNAMENT_STATS_SEQ")
 @Comment("토너먼트 분석 데이터")
+@Builder
 public class TournamentStatistics extends Timestamp {
 
     @Id
@@ -33,10 +33,12 @@ public class TournamentStatistics extends Timestamp {
 
     @Column(name = "stage_matches")
     @Comment("진행 횟수")
-    private Integer stageMatches;
+    @Builder.Default
+    private Integer stageMatches = 0;
 
     @Column(name = "is_active", nullable = false)
     @Comment("활성화 여부")
-    private boolean active;
+    @Builder.Default
+    private boolean active = true;
 
 }
