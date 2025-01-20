@@ -18,6 +18,7 @@ public class TopicTournament extends Timestamp {
 
     @Id
     @Column(name = "tournament_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "TOPIC_TOURNAMENT_SEQ_GENERATOR")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
