@@ -2,6 +2,7 @@ package com.buck.vsplay.domain.vstopic.entity;
 
 
 import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.global.constants.PlayStatus;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -30,4 +31,9 @@ public class TopicPlayRecord extends Timestamp {
 
     @Column(name = "tournament", nullable = false)
     private Integer tournament;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    @Comment("진행상태")
+    private PlayStatus status = PlayStatus.IN_PROGRESS;
 }
