@@ -57,4 +57,11 @@ public class VsTopicService implements IVsTopicService {
         vsTopicRepository.save(vsTopic);
 
     }
+
+    @Override
+    public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
+        VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
+                () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+        return vsTopicMapper.toVsTopicDetailWithTournaments(vsTopic, vsTopic.getTournaments());
+    }
 }

@@ -10,6 +10,8 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
+import java.util.List;
+
 @Entity
 @NoArgsConstructor
 @Getter
@@ -48,4 +50,7 @@ public class VsTopic extends Timestamp{
     @ColumnDefault("'PUBLIC'")
     @Comment("대결 공개 범위")
     private Visibility visibility = Visibility.PUBLIC;
+
+    @OneToMany(mappedBy = "vsTopic", fetch = FetchType.LAZY)
+    private List<TopicTournament> tournaments;
 }
