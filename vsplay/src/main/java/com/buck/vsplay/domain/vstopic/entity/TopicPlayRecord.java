@@ -19,7 +19,7 @@ import org.hibernate.annotations.Comment;
 @Builder
 public class TopicPlayRecord extends Timestamp {
     @Id
-    @Column(name = "record_id")
+    @Column(name = "play_record_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TOPIC_RECORD_SEQ_GENERATOR`")
     private Long id;
 
