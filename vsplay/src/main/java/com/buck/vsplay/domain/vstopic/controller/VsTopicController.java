@@ -32,4 +32,12 @@ public class VsTopicController {
         vsTopicService.updateVsTopic(topicId, topicDUpdateVsTopicRequest);
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()),HttpStatus.OK );
     }
+
+    @GetMapping("{id}")
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicDetailWithTournamentsResponse>> getTopicDetailWithTournaments (
+            @PathVariable("id") Long topicId
+    ) {
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailWithTournaments(topicId)),HttpStatus.OK );
+    }
+
 }
