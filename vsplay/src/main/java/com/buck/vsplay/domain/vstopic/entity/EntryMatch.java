@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.vstopic.entity;
 
+import com.buck.vsplay.global.constants.PlayStatus;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -48,10 +49,7 @@ public class EntryMatch extends Timestamp {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     @Comment("진행상태")
-    private EntryMatch.Status status = EntryMatch.Status.IN_PROGRESS;
+    private PlayStatus status = PlayStatus.IN_PROGRESS;
 
-    public enum Status{
-        IN_PROGRESS,
-        COMPLETED
-    }
+
 }
