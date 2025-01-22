@@ -44,7 +44,7 @@ import java.util.*;
 
             TopicPlayRecord savedTopicPlayRecord = topicPlayRecordRepository.save(TopicPlayRecord.builder()
                     .topic(topic)
-                    .tournament(playRecordRequest.getTournamentStage())
+                    .selectedTournament(playRecordRequest.getTournamentStage())
                     .status(PlayStatus.IN_PROGRESS)
                     .build());
 
@@ -67,7 +67,7 @@ import java.util.*;
         List<TopicEntry> entryList = entryRepository.findByTopicId(topicPlayRecord.getTopic().getId());
         Collections.shuffle(entryList); // 무작위 순서 셔플
 
-        entryList = entryList.subList(0, topicPlayRecord.getTournament()); // 셔플 후 토너먼트 진행에 필요한 최대 엔트리 갯수만큼 자르기
+        entryList = entryList.subList(0, topicPlayRecord.getSelectedTournament()); // 셔플 후 토너먼트 진행에 필요한 최대 엔트리 갯수만큼 자르기
 
         int seq = 1;
         while (!entryList.isEmpty()) {
@@ -78,7 +78,7 @@ import java.util.*;
                     .seq(seq)
                     .entryA(entryA)
                     .entryB(entryB)
-                    .tournamentRound(topicPlayRecord.getTournament())
+                    .tournamentRound(topicPlayRecord.getSelectedTournament())
                     .status(PlayStatus.IN_PROGRESS)
                     .build());
 
