@@ -25,6 +25,9 @@ public class EntryMatch extends Timestamp {
     @JoinColumn(name = "topic_record_id", nullable = false)
     private TopicPlayRecord topicPlayRecord;
 
+    @Column(name = "seq", nullable = false)
+    private Integer seq;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entry_a", nullable = false)
     private TopicEntry entryA;
