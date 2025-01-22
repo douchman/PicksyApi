@@ -67,14 +67,15 @@ import java.util.*;
         List<TopicEntry> entryList = entryRepository.findByTopicId(topicPlayRecord.getTopic().getId());
         Collections.shuffle(entryList); // 무작위 순서 셔플
 
-
         entryList = entryList.subList(0, topicPlayRecord.getTournament()); // 셔플 후 토너먼트 진행에 필요한 최대 엔트리 갯수만큼 자르기
 
+        int seq = 1;
         while (!entryList.isEmpty()) {
             TopicEntry entryA = entryList.get(0); // 순서대로 엔트리 조회
             TopicEntry entryB = entryList.get(1);
             entryMatchRepository.save(EntryMatch.builder()
                     .topicPlayRecord(topicPlayRecord)
+                    .seq(seq)
                     .entryA(entryA)
                     .entryB(entryB)
                     .tournamentRound(topicPlayRecord.getTournament())
@@ -83,6 +84,7 @@ import java.util.*;
 
             entryList.remove(entryA); // 매칭이 완료된 엔트리는 리스트에서 제거
             entryList.remove(entryB);
+            seq++;
         }
     }
 
