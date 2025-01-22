@@ -26,6 +26,7 @@ public class EntryMatch extends Timestamp {
     private TopicPlayRecord topicPlayRecord;
 
     @Column(name = "seq", nullable = false)
+    @Comment("순서")
     private Integer seq;
 
     @ManyToOne(fetch = FetchType.LAZY)
