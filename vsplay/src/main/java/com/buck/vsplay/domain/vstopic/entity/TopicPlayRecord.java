@@ -31,8 +31,13 @@ public class TopicPlayRecord extends Timestamp {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(name = "tournament", nullable = false)
-    private Integer tournament;
+    @Column(name = "selected_tournament", nullable = false)
+    @Comment("선택된 토너먼트")
+    private Integer selectedTournament;
+
+    @Column(name = "current_tournament_stage", nullable = false)
+    @Comment("현재 진행중인 토너먼트")
+    private Integer currentTournamentStage;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
