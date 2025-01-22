@@ -18,6 +18,7 @@ import org.hibernate.annotations.Comment;
 public class EntryMatch extends Timestamp {
     @Id
     @Column(name = "match_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ENTRY_MATCH_SEQ_GENERATOR")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
