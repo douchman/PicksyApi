@@ -3,9 +3,7 @@ package com.buck.vsplay.domain.vstopic.entity;
 import com.buck.vsplay.global.constants.PlayStatus;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 @Entity
@@ -15,9 +13,12 @@ import org.hibernate.annotations.Comment;
 @Table(name = "ENTRY_MATCH")
 @SequenceGenerator(name = "ENTRY_MATCH_SEQ_GENERATOR", sequenceName = "ENTRY_MATCH_SEQ")
 @Comment("엔트리 간 대결 기록")
+@AllArgsConstructor
+@Builder
 public class EntryMatch extends Timestamp {
     @Id
     @Column(name = "match_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ENTRY_MATCH_SEQ_GENERATOR")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,12 +34,12 @@ public class EntryMatch extends Timestamp {
     private TopicEntry entryB;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "winner_entry", nullable = false)
+    @JoinColumn(name = "winner_entry")
     @Comment("승리한 엔트리")
     private TopicEntry winnerEntry;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "loser_entry", nullable = false)
+    @JoinColumn(name = "loser_entry")
     @Comment("패배한 엔트리")
     private TopicEntry loserEntry;
 
@@ -50,6 +51,4 @@ public class EntryMatch extends Timestamp {
     @Column(name = "status")
     @Comment("진행상태")
     private PlayStatus status = PlayStatus.IN_PROGRESS;
-
-
 }
