@@ -34,12 +34,12 @@ public class EntryMatch extends Timestamp {
     private TopicEntry entryB;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "winner_entry", nullable = false)
+    @JoinColumn(name = "winner_entry")
     @Comment("승리한 엔트리")
     private TopicEntry winnerEntry;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "loser_entry", nullable = false)
+    @JoinColumn(name = "loser_entry")
     @Comment("패배한 엔트리")
     private TopicEntry loserEntry;
 
