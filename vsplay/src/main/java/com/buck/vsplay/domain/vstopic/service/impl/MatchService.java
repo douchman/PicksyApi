@@ -45,6 +45,7 @@ import java.util.*;
             TopicPlayRecord savedTopicPlayRecord = topicPlayRecordRepository.save(TopicPlayRecord.builder()
                     .topic(topic)
                     .selectedTournament(playRecordRequest.getTournamentStage())
+                    .currentTournamentStage(playRecordRequest.getTournamentStage())
                     .status(PlayStatus.IN_PROGRESS)
                     .build());
 
