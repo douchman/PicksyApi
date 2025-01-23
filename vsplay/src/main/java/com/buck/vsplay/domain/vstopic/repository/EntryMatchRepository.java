@@ -19,4 +19,8 @@ public interface EntryMatchRepository extends JpaRepository<EntryMatch, Long> {
         LIMIT 1
     """, nativeQuery = true)
     EntryMatch findFirstByTopicPlayRecordOrderBySeqAsc(@Param("playRecordId") Long playRecordId);
+
+
+    @Query("SELECT em FROM EntryMatch em JOIN FETCH em.entryA JOIN FETCH em.entryB WHERE em.id = :matchId")
+    EntryMatch findWithEntriesById(Long matchId);
 }
