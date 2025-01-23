@@ -1,18 +1,22 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
+import com.buck.vsplay.domain.vstopic.dto.EntryMatchDto;
 import com.buck.vsplay.domain.vstopic.dto.TopicPlayRecordDto;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.TopicPlayRecord;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.playrecord.PlayRecordException;
+import com.buck.vsplay.domain.vstopic.exception.playrecord.PlayRecordExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.tournament.TournamentException;
 import com.buck.vsplay.domain.vstopic.exception.tournament.TournamentExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
+import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.*;
 import com.buck.vsplay.domain.vstopic.service.IMatchService;
 import com.buck.vsplay.global.constants.PlayStatus;
+import com.buck.vsplay.global.util.aws.s3.S3Util;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +30,13 @@ import java.util.*;
 @Transactional
  public class MatchService implements IMatchService {
 
+    private final S3Util s3Util;
     private final VsTopicRepository vsTopicRepository;
     private final EntryRepository entryRepository;
     private final TopicPlayRecordRepository topicPlayRecordRepository;
     private final TournamentRepository tournamentRepository;
     private final EntryMatchRepository entryMatchRepository;
+    private final TopicEntryMapper topicEntryMapper;
 
     @Override
     public TopicPlayRecordDto.PlayRecordResponse createTopicPlayRecord(Long topicId, TopicPlayRecordDto.PlayRecordRequest playRecordRequest) {
@@ -57,6 +63,33 @@ import java.util.*;
             log.error("토너먼트 대진표 초기화 중 오류가 발생했습니다", e);
             throw e;
         }
+    }
+
+    @Override
+    public EntryMatchDto.EntryMatchResponse getEntryMatch(Long playRecordId) {
+
+        EntryMatchDto.EntryMatchResponse entryMatchResponse = new EntryMatchDto.EntryMatchResponse();
+
+        if(!topicPlayRecordRepository.existsById(playRecordId)) {
+            throw  new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND);
+        }
+
+        EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(playRecordId);
+        EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
+
+        entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
+        entryMatchResponse.getEntryMatch()
+                .setEntryA(
+                        topicEntryMapper.toEntryDtoFromEntity(
+                                entryMatchWithEntries.getEntryA(), s3Util
+                        ));
+        entryMatchResponse.getEntryMatch()
+                .setEntryB(
+                        topicEntryMapper.toEntryDtoFromEntity(
+                                entryMatchWithEntries.getEntryB(), s3Util
+                        ));
+
+        return entryMatchResponse;
     }
 
     /**

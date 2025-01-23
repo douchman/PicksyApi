@@ -22,7 +22,7 @@ public class EntryMatch extends Timestamp {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "topic_record_id", nullable = false)
+    @JoinColumn(name = "play_record_id", nullable = false)
     private TopicPlayRecord topicPlayRecord;
 
     @Column(name = "seq", nullable = false)

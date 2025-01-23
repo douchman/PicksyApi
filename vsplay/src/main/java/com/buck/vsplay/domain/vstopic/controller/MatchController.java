@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.vstopic.controller;
 
+import com.buck.vsplay.domain.vstopic.dto.EntryMatchDto;
 import com.buck.vsplay.domain.vstopic.dto.TopicPlayRecordDto;
 import com.buck.vsplay.domain.vstopic.service.impl.MatchService;
 import com.buck.vsplay.global.dto.SingleResponseDto;
@@ -20,5 +21,12 @@ public class MatchController {
             @RequestBody TopicPlayRecordDto.PlayRecordRequest playRecordRequest
     ){
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), matchService.createTopicPlayRecord(topicId, playRecordRequest)), HttpStatus.OK);
+    }
+
+    @GetMapping("vstopic/play-record/{playRecordId}/match")
+    public ResponseEntity<SingleResponseDto<EntryMatchDto.EntryMatchResponse>> getEntryMatch(
+            @PathVariable("playRecordId") Long playRecordId
+    ){
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(),matchService.getEntryMatch(playRecordId)), HttpStatus.OK);
     }
 }
