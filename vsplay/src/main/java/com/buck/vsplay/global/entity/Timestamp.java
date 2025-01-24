@@ -3,6 +3,7 @@ package com.buck.vsplay.global.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,11 @@ public class Timestamp {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
     @Column(name = "created_at")
