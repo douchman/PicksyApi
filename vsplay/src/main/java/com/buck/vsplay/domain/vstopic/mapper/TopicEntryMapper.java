@@ -31,7 +31,7 @@ public interface TopicEntryMapper {
 
     default List<EntryDto.Entry> toCreatedEntryList(List<TopicEntry> entries){
         return entries.stream()
-                .map(entry -> toCreatedEntry(entry))
+                .map(this::toCreatedEntry)
                 .toList();
     }
 
