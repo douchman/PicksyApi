@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.repository;
 
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
+import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.TopicPlayRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,4 +30,7 @@ public interface EntryMatchRepository extends JpaRepository<EntryMatch, Long> {
     EntryMatch findWithEntriesById(Long matchId);
 
     List<EntryMatch> findByTopicPlayRecord(TopicPlayRecord topicPlayRecord);
+
+    @Query("SELECT em.winnerEntry FROM EntryMatch em WHERE em.topicPlayRecord.id = :topicPlayRecordId AND em.tournamentRound = :tournamentRound")
+    List<TopicEntry> findWinnerByTournamentRound(@Param("topicPlayRecordId") Long topicPlayRecordId, @Param("tournamentRound") Integer tournamentRound);
 }
