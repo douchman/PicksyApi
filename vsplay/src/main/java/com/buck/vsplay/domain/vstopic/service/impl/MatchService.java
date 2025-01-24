@@ -125,6 +125,9 @@ import java.util.*;
         entryMatch.setStatus(PlayStatus.COMPLETED);
         entryMatchRepository.save(entryMatch);
 
+        if(isTournamentStageFinish(topicPlayRecord)){
+            // TODO 토너먼트 종료 -> 다음 토너먼트 대진표 생성
+        }
     }
 
     /**
@@ -155,6 +158,18 @@ import java.util.*;
             entryList.remove(entryB);
             seq++;
         }
+    }
+
+    private boolean isTournamentStageFinish(TopicPlayRecord topicPlayRecord){
+
+        List<EntryMatch> entryMatchList = entryMatchRepository.findByTopicPlayRecord(topicPlayRecord);
+
+        for( EntryMatch entryMatch : entryMatchList){
+            if( entryMatch.getStatus().equals(PlayStatus.IN_PROGRESS)){
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isTournamentExist(VsTopic vsTopic, int tournamentStage) {
