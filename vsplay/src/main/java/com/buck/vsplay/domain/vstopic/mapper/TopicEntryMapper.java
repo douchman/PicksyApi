@@ -9,7 +9,7 @@ import org.mapstruct.*;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = S3Util.class)
 public interface TopicEntryMapper {
 
     @Mapping(target = "topic", expression = "java(vsTopic)")
