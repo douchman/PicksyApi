@@ -68,11 +68,10 @@ import java.util.*;
 
         EntryMatchDto.EntryMatchResponse entryMatchResponse = new EntryMatchDto.EntryMatchResponse();
 
-        if(!topicPlayRecordRepository.existsById(playRecordId)) {
-            throw  new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND);
-        }
+        TopicPlayRecord topicPlayRecord = topicPlayRecordRepository.findById(playRecordId).orElseThrow(
+                () -> new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND));
 
-        EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(playRecordId);
+        EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
         EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
 
         entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
