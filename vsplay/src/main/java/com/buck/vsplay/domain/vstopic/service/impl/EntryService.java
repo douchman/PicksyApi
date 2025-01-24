@@ -54,7 +54,7 @@ public class EntryService implements IEntryService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        createdEntryList.setEntries(topicEntryMapper.toCreatedEntryList(entryRepository.findByTopicId(topicId), s3Util));
+        createdEntryList.setEntries(topicEntryMapper.toCreatedEntryList(entryRepository.findByTopicId(topicId)));
 
         return createdEntryList;
     }
