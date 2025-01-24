@@ -16,7 +16,6 @@ import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.*;
 import com.buck.vsplay.domain.vstopic.service.IMatchService;
 import com.buck.vsplay.global.constants.PlayStatus;
-import com.buck.vsplay.global.util.aws.s3.S3Util;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,6 @@ import java.util.*;
 @Transactional
  public class MatchService implements IMatchService {
 
-    private final S3Util s3Util;
     private final VsTopicRepository vsTopicRepository;
     private final EntryRepository entryRepository;
     private final TopicPlayRecordRepository topicPlayRecordRepository;
@@ -81,12 +79,12 @@ import java.util.*;
         entryMatchResponse.getEntryMatch()
                 .setEntryA(
                         topicEntryMapper.toEntryDtoFromEntity(
-                                entryMatchWithEntries.getEntryA(), s3Util
+                                entryMatchWithEntries.getEntryA()
                         ));
         entryMatchResponse.getEntryMatch()
                 .setEntryB(
                         topicEntryMapper.toEntryDtoFromEntity(
-                                entryMatchWithEntries.getEntryB(), s3Util
+                                entryMatchWithEntries.getEntryB()
                         ));
 
         return entryMatchResponse;

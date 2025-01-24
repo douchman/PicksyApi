@@ -4,6 +4,7 @@ import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
 import com.buck.vsplay.global.util.aws.s3.exception.S3Exception;
 import com.buck.vsplay.global.util.aws.s3.exception.S3ExceptionCode;
+import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +33,7 @@ public class S3Util {
         this.s3Client = s3Client;
     }
 
+    @Named("signedMediaUrl")
     public String getUploadedObjectUrl(String objectKey){
         // S3 GetObject
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
