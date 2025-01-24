@@ -16,16 +16,22 @@ public interface TopicEntryMapper {
     TopicEntry toTopicEntryWithTopic(EntryDto.CreateEntry topicEntry, @Context VsTopic vsTopic);
 
     @Mapping(source = "id", target ="entryId")
-    @Mapping(target = "mediaUrl" , expression = "java(s3Util.getUploadedObjectUrl(topicEntry.getMediaUrl()))")
-    EntryDto.Entry toCreatedEntry(TopicEntry topicEntry, @Context S3Util s3Util);
+    @Mapping(target = "mediaUrl" , qualifiedByName = "signedMediaUrl")
+    EntryDto.Entry toCreatedEntry(TopicEntry topicEntry);
 
     @Mapping(source = "id", target ="entryId")
-    @Mapping(target = "mediaUrl", expression = "java(s3Util.getUploadedObjectUrl(topicEntry.getMediaUrl()))")
-    EntryDto.Entry toEntryDtoFromEntity(TopicEntry topicEntry, @Context S3Util s3Util);
+    @Mapping(target = "mediaUrl", qualifiedByName = "signedMediaUrl")
+    EntryDto.Entry toEntryDtoFromEntity(TopicEntry topicEntry);
 
-    default List<EntryDto.Entry> toCreatedEntryList(List<TopicEntry> entries, @Context S3Util s3Util){
+    @Named("signedMediaUrl")
+    default String signedMediaUrl(String mediaUrl, @Context S3Util s3Util) {
+        return s3Util.getUploadedObjectUrl(mediaUrl);
+    }
+
+
+    default List<EntryDto.Entry> toCreatedEntryList(List<TopicEntry> entries){
         return entries.stream()
-                .map(entry -> toCreatedEntry(entry, s3Util))
+                .map(entry -> toCreatedEntry(entry))
                 .toList();
     }
 
