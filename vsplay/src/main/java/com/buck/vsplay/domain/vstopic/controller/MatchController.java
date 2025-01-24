@@ -7,6 +7,7 @@ import com.buck.vsplay.global.dto.SingleResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,5 +29,15 @@ public class MatchController {
             @PathVariable("playRecordId") Long playRecordId
     ){
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(),matchService.getEntryMatch(playRecordId)), HttpStatus.OK);
+    }
+
+    @PatchMapping("vstopic/play-record/{playRecordId}/match/{matchId}")
+    public ResponseEntity<SingleResponseDto<Integer>> updateEntryMatch(
+            @PathVariable("playRecordId") Long playRecordId,
+            @PathVariable("matchId") Long matchId,
+            @RequestBody @Validated EntryMatchDto.EntryMatchResultRequest entryMatchResultRequest
+    ){
+        matchService.updateEntryMatchResult(playRecordId, matchId, entryMatchResultRequest);
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
     }
 }

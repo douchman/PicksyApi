@@ -6,6 +6,8 @@ import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.TopicPlayRecord;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.playrecord.PlayRecordException;
 import com.buck.vsplay.domain.vstopic.exception.playrecord.PlayRecordExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.tournament.TournamentException;
@@ -87,6 +89,42 @@ import java.util.*;
                         ));
 
         return entryMatchResponse;
+    }
+
+    @Override
+    public void updateEntryMatchResult(Long playRecordId, Long matchId, EntryMatchDto.EntryMatchResultRequest entryMatchResultRequest) {
+
+        TopicPlayRecord topicPlayRecord = topicPlayRecordRepository.findById(playRecordId).orElseThrow(
+                () -> new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND));
+
+        EntryMatch entryMatch = entryMatchRepository.findById(matchId).orElseThrow(
+                () -> new PlayRecordException(PlayRecordExceptionCode.MATCH_NOT_FOUND));
+
+        if( !entryMatch.getTopicPlayRecord().getId().equals(topicPlayRecord.getId())){ // 매치와 기록의 식별자 일치여부
+            throw new PlayRecordException(PlayRecordExceptionCode.MATCH_NOT_ASSOCIATED_WITH_RECORD);
+        }
+
+        if ( entryMatch.getStatus().equals(PlayStatus.COMPLETED)){ // 이미 완료된 매치 확인
+            throw new PlayRecordException(PlayRecordExceptionCode.MATCH_ALREADY_COMPLETED);
+        }
+
+        Long winnerEntryId = entryMatchResultRequest.getWinnerEntryId();
+        Long loserEntryId = entryMatchResultRequest.getLoserEntryId();
+
+        if( winnerEntryId.equals(loserEntryId)){ // 동일한 엔트리 검사
+            throw new PlayRecordException(PlayRecordExceptionCode.DUPLICATE_WINNER_LOSER_ENTRY);
+        }
+
+        entryMatch.setWinnerEntry(
+                entryRepository.findById(winnerEntryId).orElseThrow(
+                () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND)));
+        entryMatch.setLoserEntry(
+                entryRepository.findById(loserEntryId).orElseThrow(
+                () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND)));
+
+        entryMatch.setStatus(PlayStatus.COMPLETED);
+        entryMatchRepository.save(entryMatch);
+
     }
 
     /**
