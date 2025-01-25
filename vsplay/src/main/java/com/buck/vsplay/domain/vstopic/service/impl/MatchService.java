@@ -111,6 +111,15 @@ import java.util.*;
         Long winnerEntryId = entryMatchResultRequest.getWinnerEntryId();
         Long loserEntryId = entryMatchResultRequest.getLoserEntryId();
 
+        List<Long> matchEntryIds = List.of(
+                entryMatch.getEntryA().getId(),
+                entryMatch.getEntryB().getId()
+        );
+
+        if (!matchEntryIds.contains(winnerEntryId) || !matchEntryIds.contains(loserEntryId)) {
+            throw new PlayRecordException(PlayRecordExceptionCode.INVALID_ENTRY_FOR_MATCH);
+        }
+
         if( winnerEntryId.equals(loserEntryId)){ // 동일한 엔트리 검사
             throw new PlayRecordException(PlayRecordExceptionCode.DUPLICATE_WINNER_LOSER_ENTRY);
         }
