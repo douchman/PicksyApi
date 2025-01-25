@@ -15,6 +15,15 @@ public class EntryController {
 
     private final EntryService entryService;
 
+    @PostMapping("vstopic/{id}/entries/dummy")
+    public ResponseEntity<SingleResponseDto<Integer>> createDummyEntries(
+            @PathVariable("id") Long topicId
+    ){
+
+        entryService.createDummyEntries(topicId);
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
+    }
+
     @GetMapping("vstopic/{id}/entries")
     public ResponseEntity<SingleResponseDto<EntryDto.CreatedEntryList>> getAllEntries(
             @PathVariable("id") Long topicId

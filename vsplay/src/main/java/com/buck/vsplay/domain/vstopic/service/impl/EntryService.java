@@ -17,6 +17,7 @@ import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.TournamentRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IEntryService;
+import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.TournamentStage;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
@@ -75,6 +76,29 @@ public class EntryService implements IEntryService {
             TopicEntry topicEntry = topicEntryMapper.toTopicEntryWithTopic(entry, vsTopic);
             topicEntry.setMediaUrl(s3UploadResult.getObjectKey());
             topicEntry.setMediaType(s3UploadResult.getMediaType());
+            topicEntries.add(topicEntry); // DTO -> Entity 매핑
+        }
+
+        entryRepository.saveAll(topicEntries);
+        updateTopicTournament(vsTopic);
+    }
+
+    @Override
+    public void createDummyEntries(Long topicId) {
+        int dummyCount = 32;
+        VsTopic vsTopic = topicRepository.findById(topicId).orElseThrow(() ->
+                new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+
+
+        List<TopicEntry> topicEntries = new ArrayList<>();
+
+        for (int i = 0; i < dummyCount; i++) {
+            TopicEntry topicEntry = new TopicEntry();
+            topicEntry.setTopic(vsTopic);
+            topicEntry.setEntryName("더미 엔트리" + (i+1));
+            topicEntry.setDescription("더미 엔트리 설명 " + (i+1));
+            topicEntry.setMediaUrl("1/1/c89ba7dbebb64aa297a9ec063644470e.png");
+            topicEntry.setMediaType(MediaType.IMAGE);
             topicEntries.add(topicEntry); // DTO -> Entity 매핑
         }
 
