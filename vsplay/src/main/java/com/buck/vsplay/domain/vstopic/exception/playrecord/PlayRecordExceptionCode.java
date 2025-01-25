@@ -10,7 +10,9 @@ public enum PlayRecordExceptionCode implements BaseExceptionCode {
     MATCH_NOT_FOUND(404, "존재하지 않는 엔트리 매치 입니다.", "PLAY_RECORD_003"),
     MATCH_NOT_ASSOCIATED_WITH_RECORD(400, "대결기록과 매치가 일치하지 않습니다.", "PLAY_RECORD_004"),
     DUPLICATE_WINNER_LOSER_ENTRY(400, "승리 엔트리와 패배엔트리가 동일합니다.", "PLAY_RECORD_005"),
-    MATCH_ALREADY_COMPLETED(400, "이미 완료된 매치입니다.", "PLAY_RECORD_006")
+    MATCH_ALREADY_COMPLETED(400, "이미 완료된 매치입니다.", "PLAY_RECORD_006"),
+    INVALID_ENTRY_FOR_MATCH(400, "매치에 포함되지 않는 엔트리입니다.", "PLAY_RECORD_007"),
+
     ;
 
 
