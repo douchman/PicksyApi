@@ -126,7 +126,8 @@ import java.util.*;
         entryMatchRepository.save(entryMatch);
 
         if(isTournamentStageFinish(topicPlayRecord)){
-            // TODO 토너먼트 종료 -> 다음 토너먼트 대진표 생성
+            log.info("현재 토너먼트가 끝났습니다. 다음 토너먼트 대진표를 생성합니다.");
+            createNextTournamentStageEntryMatches(topicPlayRecord);
         }
     }
 
@@ -158,6 +159,36 @@ import java.util.*;
             entryList.remove(entryB);
             seq++;
         }
+    }
+
+    private void createNextTournamentStageEntryMatches(TopicPlayRecord topicPlayRecord) {
+        Integer currentTournamentStage = topicPlayRecord.getCurrentTournamentStage();
+
+        if( currentTournamentStage.equals(2)) return;
+
+        Integer nextTournamentStage = currentTournamentStage / 2;
+        List<TopicEntry> winnerEntries = entryMatchRepository.findWinnerByTournamentRound(topicPlayRecord.getId(),currentTournamentStage);
+        Collections.shuffle(winnerEntries); // 승리한 엔트리 셔플
+
+        int seq = 1;
+        while(!winnerEntries.isEmpty()) {
+            TopicEntry entryA = winnerEntries.get(0);
+            TopicEntry entryB = winnerEntries.get(1);
+            entryMatchRepository.save( EntryMatch.builder()
+                    .topicPlayRecord(topicPlayRecord)
+                    .seq(seq)
+                    .entryA(entryA)
+                    .entryB(entryB)
+                    .tournamentRound(nextTournamentStage)
+                    .status(PlayStatus.IN_PROGRESS)
+                    .build());
+            winnerEntries.remove(entryA);
+            winnerEntries.remove(entryB);
+            seq++;
+        }
+
+        topicPlayRecord.setCurrentTournamentStage(nextTournamentStage); // 진행 스테이지 변경
+        topicPlayRecordRepository.save(topicPlayRecord);
     }
 
     private boolean isTournamentStageFinish(TopicPlayRecord topicPlayRecord){
