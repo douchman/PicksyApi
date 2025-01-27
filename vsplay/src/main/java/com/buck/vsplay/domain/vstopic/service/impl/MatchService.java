@@ -73,6 +73,10 @@ import java.util.*;
         TopicPlayRecord topicPlayRecord = topicPlayRecordRepository.findById(playRecordId).orElseThrow(
                 () -> new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND));
 
+        if(topicPlayRecord.getStatus().equals(PlayStatus.COMPLETED)){
+            throw new PlayRecordException(PlayRecordExceptionCode.PLAY_RECORD_ALREADY_COMPLETED);
+        }
+
         EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
         EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
 
