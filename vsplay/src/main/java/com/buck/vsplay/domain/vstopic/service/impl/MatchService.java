@@ -134,7 +134,7 @@ import java.util.*;
         entryMatch.setStatus(PlayStatus.COMPLETED);
         entryMatchRepository.save(entryMatch);
 
-        if(isTournamentStageFinish(topicPlayRecord)){
+        if(isCurrentTournamentStageFinish(topicPlayRecord)){
             log.info("현재 토너먼트가 끝났습니다. 다음 토너먼트 대진표를 생성합니다.");
             createNextTournamentStageEntryMatches(topicPlayRecord);
         }
@@ -200,7 +200,7 @@ import java.util.*;
         topicPlayRecordRepository.save(topicPlayRecord);
     }
 
-    private boolean isTournamentStageFinish(TopicPlayRecord topicPlayRecord){
+    private boolean isCurrentTournamentStageFinish(TopicPlayRecord topicPlayRecord){
 
         List<EntryMatch> entryMatchList = entryMatchRepository.findByTopicPlayRecord(topicPlayRecord);
 
