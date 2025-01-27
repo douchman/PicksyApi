@@ -2,9 +2,7 @@ package com.buck.vsplay.domain.vstopic.dto;
 
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EntryMatchDto {
@@ -28,5 +26,15 @@ public class EntryMatchDto {
 
         @NotNull(message = "패배 엔트리가 비었습니다.")
         Long loserEntryId;
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class UpdateEntryMatchResultResponse{
+        String message;
+        boolean isAllMatchedCompleted;
+        Integer nextTournament;
     }
 }
