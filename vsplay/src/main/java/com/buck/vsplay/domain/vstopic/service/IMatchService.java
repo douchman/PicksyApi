@@ -8,5 +8,5 @@ public interface IMatchService {
 
     TopicPlayRecordDto.PlayRecordResponse createTopicPlayRecord(Long topicId, TopicPlayRecordDto.PlayRecordRequest playRecordRequest);
     EntryMatchDto.EntryMatchResponse getEntryMatch(Long playRecordId);
-    void updateEntryMatchResult (Long playRecordId, Long matchId, EntryMatchDto.EntryMatchResultRequest entryMatchResultRequest);
+    EntryMatchDto.UpdateEntryMatchResultResponse updateEntryMatchResult (Long playRecordId, Long matchId, EntryMatchDto.EntryMatchResultRequest entryMatchResultRequest);
 }

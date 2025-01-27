@@ -32,12 +32,11 @@ public class MatchController {
     }
 
     @PatchMapping("vstopic/play-record/{playRecordId}/match/{matchId}")
-    public ResponseEntity<SingleResponseDto<Integer>> updateEntryMatch(
+    public ResponseEntity<SingleResponseDto<EntryMatchDto.UpdateEntryMatchResultResponse>> updateEntryMatch(
             @PathVariable("playRecordId") Long playRecordId,
             @PathVariable("matchId") Long matchId,
             @RequestBody @Validated EntryMatchDto.EntryMatchResultRequest entryMatchResultRequest
     ){
-        matchService.updateEntryMatchResult(playRecordId, matchId, entryMatchResultRequest);
-        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), matchService.updateEntryMatchResult(playRecordId, matchId, entryMatchResultRequest)), HttpStatus.OK);
     }
 }
