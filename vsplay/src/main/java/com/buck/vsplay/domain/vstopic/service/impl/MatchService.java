@@ -92,7 +92,7 @@ import java.util.*;
     }
 
     @Override
-    public void updateEntryMatchResult(Long playRecordId, Long matchId, EntryMatchDto.EntryMatchResultRequest entryMatchResultRequest) {
+    public EntryMatchDto.UpdateEntryMatchResultResponse updateEntryMatchResult(Long playRecordId, Long matchId, EntryMatchDto.EntryMatchResultRequest entryMatchResultRequest) {
 
         TopicPlayRecord topicPlayRecord = topicPlayRecordRepository.findById(playRecordId).orElseThrow(
                 () -> new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND));
@@ -134,10 +134,22 @@ import java.util.*;
         entryMatch.setStatus(PlayStatus.COMPLETED);
         entryMatchRepository.save(entryMatch);
 
+        boolean isAllTournamentStageFinish = isAllTournamentStageFinish(topicPlayRecord);
+
         if(isCurrentTournamentStageFinish(topicPlayRecord)){
-            log.info("현재 토너먼트가 끝났습니다. 다음 토너먼트 대진표를 생성합니다.");
             createNextTournamentStageEntryMatches(topicPlayRecord);
         }
+
+        if (isAllTournamentStageFinish) {
+            topicPlayRecord.setStatus(PlayStatus.COMPLETED);
+            topicPlayRecordRepository.save(topicPlayRecord);
+        }
+
+        return EntryMatchDto.UpdateEntryMatchResultResponse.builder()
+                .message( isAllTournamentStageFinish ? "모든 대결이 완료되었습니다." : "다음 대결을 진행하세요.")
+                .nextTournament(topicPlayRecord.getCurrentTournamentStage())
+                .isAllMatchedCompleted(isAllTournamentStageFinish)
+                .build();
     }
 
     /**
@@ -211,6 +223,20 @@ import java.util.*;
         }
         return true;
     }
+
+    private boolean isAllTournamentStageFinish(TopicPlayRecord topicPlayRecord){
+        Integer currentTournamentStage = topicPlayRecord.getCurrentTournamentStage();
+
+        if( !currentTournamentStage.equals(2)){ // 결승전이 아님
+            return false;
+        }
+
+        EntryMatch entryMatch = entryMatchRepository.findByPlayRecordIdAndTournamentRoundOrderBySeqAsc(topicPlayRecord.getId(),currentTournamentStage);
+
+        return entryMatch.getStatus().equals(PlayStatus.COMPLETED);
+    }
+
+
 
     private boolean isTournamentExist(VsTopic vsTopic, int tournamentStage) {
         return tournamentRepository.existsByVsTopicIdAndTournamentStage(vsTopic.getId(), tournamentStage);
