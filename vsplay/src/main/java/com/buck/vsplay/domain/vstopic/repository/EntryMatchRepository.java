@@ -33,4 +33,7 @@ public interface EntryMatchRepository extends JpaRepository<EntryMatch, Long> {
 
     @Query("SELECT em.winnerEntry FROM EntryMatch em WHERE em.topicPlayRecord.id = :topicPlayRecordId AND em.tournamentRound = :tournamentRound")
     List<TopicEntry> findWinnerByTournamentRound(@Param("topicPlayRecordId") Long topicPlayRecordId, @Param("tournamentRound") Integer tournamentRound);
+
+    @Query("SELECT em FROM EntryMatch em WHERE em.topicPlayRecord.id = :topicPlayRecordId AND em.tournamentRound = :tournamentRound ORDER BY em.seq")
+    EntryMatch findByPlayRecordIdAndTournamentRoundOrderBySeqAsc(@Param("topicPlayRecordId") Long topicPlayRecordId, @Param("tournamentRound") Integer tournamentRound);
 }
