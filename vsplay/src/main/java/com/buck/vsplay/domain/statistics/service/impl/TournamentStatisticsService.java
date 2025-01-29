@@ -22,13 +22,28 @@ public class TournamentStatisticsService implements ITournamentStatisticsService
         createTournamentStatistics(topicCreateEvent.getTopicTournament());
     }
 
+
+    @EventListener
+    public void handleTopicTournamentPlayed(TournamentEvent.PlayEvent topicPlayEvent) {
+        recordMatchStat(topicPlayEvent.getTopicTournament());
+    }
+
     @Override
     public void createTournamentStatistics(TopicTournament topicTournament) {
-        log.info(" updateTournamentStatistics 메서드 실행");
         tournamentStatisticsRepository.save(TournamentStatistics.builder()
                 .topicTournament(topicTournament)
                 .tournamentStage(topicTournament.getTournamentStage())
                 .build());
 
+    }
+
+    @Override
+    public void recordMatchStat(TopicTournament topicTournament) {
+        TournamentStatistics tournamentStatistics =
+                tournamentStatisticsRepository.findByTournamentIdAndTournamentStage(topicTournament.getId(), topicTournament.getTournamentStage());
+
+        tournamentStatistics.increaseStageMatches();
+
+        tournamentStatisticsRepository.save(tournamentStatistics);
     }
 }
