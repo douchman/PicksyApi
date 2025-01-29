@@ -19,12 +19,11 @@ public class TournamentStatisticsService implements ITournamentStatisticsService
 
     @EventListener // 생성된 토너먼트 엔티티에 대한 이벤트 구독
     public void handleTopicTournamentUpdated(TournamentEvent.CreateEvent topicCreateEvent) {
-
-        updateTournamentStatistics(topicCreateEvent.getTopicTournament());
+        createTournamentStatistics(topicCreateEvent.getTopicTournament());
     }
 
     @Override
-    public void updateTournamentStatistics(TopicTournament topicTournament) {
+    public void createTournamentStatistics(TopicTournament topicTournament) {
         log.info(" updateTournamentStatistics 메서드 실행");
         tournamentStatisticsRepository.save(TournamentStatistics.builder()
                 .topicTournament(topicTournament)
