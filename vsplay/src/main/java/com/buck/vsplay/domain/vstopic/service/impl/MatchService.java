@@ -150,6 +150,7 @@ import java.util.*;
             if ( isAllTournamentStageFinish){ // 현 토너먼트 완료 및 예정되어있는 모든 대진표를 완료 시
                 topicPlayRecord.setStatus(PlayStatus.COMPLETED);
                 topicPlayRecordRepository.save(topicPlayRecord);
+                applicationEventPublisher.publishEvent(new TopicEvent.PlayCompleteEvent(topicPlayRecord.getTopic())); // 완전히 종료된 대결 횟수 갱신 이벤트 발행
             } else{ // 현 토너먼트 종료 -> 남아있는 다음 토너먼트 대진표 생성
                 createNextTournamentStageEntryMatches(topicPlayRecord);
             }
