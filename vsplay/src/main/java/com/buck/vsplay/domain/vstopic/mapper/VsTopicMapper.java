@@ -20,6 +20,11 @@ public interface VsTopicMapper {
     VsTopicDto.VsTopic toVsTopicDto(VsTopic vsTopic);
     VsTopicDto.Tournament toTournamentDtoFromTournamentEntity(TopicTournament topicTournament);
     List<VsTopicDto.Tournament> toTournamentDtoListFromTournamentEntityList(List<TopicTournament> topicTournaments);
-    VsTopicDto.VsTopicDetailWithTournamentsResponse toVsTopicDetailWithTournaments(VsTopic vsTopic, List<TopicTournament> tournamentList);
+
+    @Mapping(target = "topic", expression = "java(toVsTopicDto(vsTopic))")
+    @Mapping(target = "tournamentList", expression = "java(toTournamentDtoListFromTournamentEntityList(tournamentList))")
+    VsTopicDto.VsTopicDetailWithTournamentsResponse toVsTopicDetailWithTournaments(
+            VsTopic vsTopic, List<TopicTournament> tournamentList
+    );
 
 }
