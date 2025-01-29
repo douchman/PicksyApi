@@ -13,4 +13,10 @@ public class TournamentEvent {
     public static class CreateEvent{
         TopicTournament topicTournament;
     }
+
+    @Data
+    @AllArgsConstructor
+    public static class PlayEvent{
+        TopicTournament topicTournament;
+    }
 }
