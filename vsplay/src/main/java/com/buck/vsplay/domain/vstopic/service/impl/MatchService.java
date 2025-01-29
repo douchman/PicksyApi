@@ -245,11 +245,4 @@ import java.util.*;
 
         return entryMatch.getStatus().equals(PlayStatus.COMPLETED);
     }
-
-
-
-    private boolean isTournamentExist(VsTopic vsTopic, int tournamentStage) {
-        return tournamentRepository.existsByVsTopicIdAndTournamentStage(vsTopic.getId(), tournamentStage);
-
-    }
 }
