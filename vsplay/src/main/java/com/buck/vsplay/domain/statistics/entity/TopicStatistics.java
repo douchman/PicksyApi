@@ -71,7 +71,7 @@ public class TopicStatistics extends Timestamp {
 
         LocalDateTime now = LocalDateTime.now();
 
-        if(this.firstPlayedAt != null) {
+        if(this.firstPlayedAt == null) {
             this.firstPlayedAt = now;
         }
 
