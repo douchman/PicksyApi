@@ -64,7 +64,7 @@ public class TopicStatistics extends Timestamp {
     }
 
     public void increaseTotalPlayers() {
-        this.totalMatches += 1;
+        this.totalPlayers += 1;
     }
 
     public void updatePlayedDates() {
