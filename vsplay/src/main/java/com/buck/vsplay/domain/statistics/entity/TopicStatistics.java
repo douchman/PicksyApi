@@ -63,10 +63,6 @@ public class TopicStatistics extends Timestamp {
         this.totalMatches += 1;
     }
 
-    public void increaseTotalPlayers() {
-        this.totalPlayers += 1;
-    }
-
     public void increaseCompletedMatches() {
         this.completedMatches += 1;
     }

@@ -49,7 +49,6 @@ public class TopicStatisticsService implements ITopicStatisticsService {
         TopicStatistics topicStatistics = topicStatisticsRepository.findByVsTopic(vsTopic.getId());
 
         topicStatistics.increaseTotalMatches();
-        topicStatistics.increaseTotalPlayers();
         topicStatistics.updatePlayedDates();
 
         topicStatisticsRepository.save(topicStatistics);
