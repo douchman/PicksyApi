@@ -12,4 +12,10 @@ public class TopicEvent{
     public static class CreateEvent{
         VsTopic topic;
     }
+
+    @Data
+    @AllArgsConstructor
+    public static class PlayEvent{
+        VsTopic topic;
+    }
 }

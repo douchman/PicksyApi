@@ -58,4 +58,23 @@ public class TopicStatistics extends Timestamp {
     @Column(name = "last_played_at")
     @Comment("가장 최근 진행 날짜")
     private LocalDateTime lastPlayedAt;
+
+    public void increaseTotalMatches() {
+        this.totalMatches += 1;
+    }
+
+    public void increaseTotalPlayers() {
+        this.totalPlayers += 1;
+    }
+
+    public void updatePlayedDates() {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if(this.firstPlayedAt != null) {
+            this.firstPlayedAt = now;
+        }
+
+        this.lastPlayedAt = now;
+    }
 }

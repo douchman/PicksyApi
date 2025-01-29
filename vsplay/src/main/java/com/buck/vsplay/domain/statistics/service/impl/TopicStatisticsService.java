@@ -20,6 +20,11 @@ public class TopicStatisticsService implements ITopicStatisticsService {
         createTopicStatistics(topiCreateEvent.getTopic());
     }
 
+    @EventListener
+    public void handleVsTopicPlayed(TopicEvent.PlayEvent topiPlayEvent) {
+        recordPlayStats(topiPlayEvent.getTopic());
+    }
+
     @Override
     public void createTopicStatistics(VsTopic vsTopic) {
         topicStatisticsRepository.save(TopicStatistics.builder()
@@ -29,5 +34,16 @@ public class TopicStatisticsService implements ITopicStatisticsService {
                 .completedMatches(0)
                 .completedPlayers(0)
                 .build());
+    }
+
+    @Override
+    public void recordPlayStats(VsTopic vsTopic) {
+        TopicStatistics topicStatistics = topicStatisticsRepository.findByVsTopic(vsTopic.getId());
+
+        topicStatistics.increaseTotalMatches();
+        topicStatistics.increaseTotalPlayers();
+        topicStatistics.updatePlayedDates();
+
+        topicStatisticsRepository.save(topicStatistics);
     }
 }
