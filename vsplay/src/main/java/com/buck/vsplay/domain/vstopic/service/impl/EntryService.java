@@ -1,7 +1,7 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
 import com.buck.vsplay.domain.member.entity.Member;
-import com.buck.vsplay.domain.statistics.event.TournamentUpdateEvent;
+import com.buck.vsplay.domain.statistics.event.TournamentEvent;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
@@ -131,7 +131,7 @@ public class EntryService implements IEntryService {
 
             if( !isTournamentExist(vsTopic, tournamentStage) ) {
                 TopicTournament saveTournament = saveTournament(vsTopic, tournamentStage); // 토너먼트 엔티티 커밋
-                applicationEventPublisher.publishEvent(new TournamentUpdateEvent(saveTournament)); // 커밋된 엔티티로 이벤트 발행
+                applicationEventPublisher.publishEvent(new TournamentEvent.CreateEvent(saveTournament)); // 커밋된 엔티티로 이벤트 발행
             }
 
             power++;
