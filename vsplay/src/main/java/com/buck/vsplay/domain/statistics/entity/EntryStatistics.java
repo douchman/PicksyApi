@@ -4,18 +4,18 @@ package com.buck.vsplay.domain.statistics.entity;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 @Entity
 @Table(name = "ENTRY_STATISTICS")
 @Getter
 @Setter
+@AllArgsConstructor
 @NoArgsConstructor
 @SequenceGenerator(name = "ENTRY_STATS_SEQ_GENERATOR" , sequenceName = "ENTRY_STATS_SEQ")
 @Comment("엔트리 분석 데이터(대결횟수, 승리/패배 등의 기록)")
+@Builder
 public class EntryStatistics extends Timestamp {
 
     @Id
