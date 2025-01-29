@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
 import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
@@ -79,6 +80,7 @@ public class EntryService implements IEntryService {
         }
 
         entryRepository.saveAll(topicEntries);
+        applicationEventPublisher.publishEvent(new EntryEvent.CreateEvent(topicEntries));
         updateTopicTournament(vsTopic);
     }
 
