@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
+import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.vstopic.dto.EntryMatchDto;
 import com.buck.vsplay.domain.vstopic.dto.TopicPlayRecordDto;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
@@ -21,6 +22,7 @@ import com.buck.vsplay.global.constants.PlayStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
@@ -31,6 +33,7 @@ import java.util.*;
 @Transactional
  public class MatchService implements IMatchService {
 
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final VsTopicRepository vsTopicRepository;
     private final EntryRepository entryRepository;
     private final TopicPlayRecordRepository topicPlayRecordRepository;
@@ -57,6 +60,7 @@ import java.util.*;
 
             initializeFirstTournament(savedTopicPlayRecord); // 대결 진행 기록 후 첫 대진표 생성
 
+            applicationEventPublisher.publishEvent(new TopicEvent.PlayEvent(topic));
             return new TopicPlayRecordDto.PlayRecordResponse(savedTopicPlayRecord.getId());
 
         }catch (PlayRecordException e) {
