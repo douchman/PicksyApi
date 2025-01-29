@@ -43,4 +43,20 @@ public class EntryStatistics extends Timestamp {
     @Comment("가장 높이 올라간 토너먼트")
     private Integer highestTournament;
 
+    public void increaseTotalMatches() {
+        this.totalMatches += 1;
+    }
+
+    public void increaseTotalWins() {
+        this.totalWins += 1;
+    }
+
+    public void increaseTotalLosses() {
+        this.totalLosses += 1;
+    }
+
+    public void calculateWinRate() {
+
+        this.winRate = (totalMatches.equals(0) ? 0.0 : (double) this.totalWins / this.totalMatches) * 100;
+    }
 }
