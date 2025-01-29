@@ -136,13 +136,13 @@ import java.util.*;
 
         boolean isAllTournamentStageFinish = isAllTournamentStageFinish(topicPlayRecord);
 
-        if(isCurrentTournamentStageFinish(topicPlayRecord)){
-            createNextTournamentStageEntryMatches(topicPlayRecord);
-        }
-
-        if (isAllTournamentStageFinish) {
-            topicPlayRecord.setStatus(PlayStatus.COMPLETED);
-            topicPlayRecordRepository.save(topicPlayRecord);
+        if(isCurrentTournamentStageFinish(topicPlayRecord)){ // 진행중인 토너먼트 종료 여부 확인
+            if ( isAllTournamentStageFinish){ // 현 토너먼트 완료 및 예정되어있는 모든 대진표를 완료 시
+                topicPlayRecord.setStatus(PlayStatus.COMPLETED);
+                topicPlayRecordRepository.save(topicPlayRecord);
+            } else{ // 현 토너먼트 종료 -> 남아있는 다음 토너먼트 대진표 생성
+                createNextTournamentStageEntryMatches(topicPlayRecord);
+            }
         }
 
         return EntryMatchDto.UpdateEntryMatchResultResponse.builder()
