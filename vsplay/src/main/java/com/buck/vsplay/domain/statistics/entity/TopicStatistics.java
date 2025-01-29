@@ -5,9 +5,7 @@ import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 import java.time.LocalDateTime;
@@ -16,9 +14,11 @@ import java.time.LocalDateTime;
 @Table(name = "TOPIC_STATISTICS")
 @Getter
 @Setter
+@AllArgsConstructor
 @NoArgsConstructor
 @SequenceGenerator(name = "TOPIC_STATS_SEQ_GENERATOR" , sequenceName = "TOPIC_STATS_SEQ")
 @Comment("주제 분석 데이터")
+@Builder
 public class TopicStatistics extends Timestamp {
 
     @Id
