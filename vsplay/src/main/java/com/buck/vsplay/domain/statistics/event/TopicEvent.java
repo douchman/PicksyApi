@@ -18,4 +18,10 @@ public class TopicEvent{
     public static class PlayEvent{
         VsTopic topic;
     }
+
+    @Data
+    @AllArgsConstructor
+    public static class PlayCompleteEvent{
+        VsTopic topic;
+    }
 }

@@ -5,12 +5,14 @@ import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.repository.TopicStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.ITopicStatisticsService;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class TopicStatisticsService implements ITopicStatisticsService {
 
     private final TopicStatisticsRepository topicStatisticsRepository;
@@ -23,6 +25,12 @@ public class TopicStatisticsService implements ITopicStatisticsService {
     @EventListener
     public void handleVsTopicPlayed(TopicEvent.PlayEvent topiPlayEvent) {
         recordPlayStats(topiPlayEvent.getTopic());
+    }
+
+
+    @EventListener
+    public void handleVsTopicPlayRecordCompleted(TopicEvent.PlayCompleteEvent topiPlayCompleteEvent) {
+        recordCompletedMatchStats(topiPlayCompleteEvent.getTopic());
     }
 
     @Override
@@ -43,6 +51,15 @@ public class TopicStatisticsService implements ITopicStatisticsService {
         topicStatistics.increaseTotalMatches();
         topicStatistics.increaseTotalPlayers();
         topicStatistics.updatePlayedDates();
+
+        topicStatisticsRepository.save(topicStatistics);
+    }
+
+    @Override
+    public void recordCompletedMatchStats(VsTopic vsTopic) {
+        TopicStatistics topicStatistics = topicStatisticsRepository.findByVsTopic(vsTopic.getId());
+
+        topicStatistics.increaseCompletedMatches();
 
         topicStatisticsRepository.save(topicStatistics);
     }

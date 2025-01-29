@@ -67,6 +67,10 @@ public class TopicStatistics extends Timestamp {
         this.totalPlayers += 1;
     }
 
+    public void increaseCompletedMatches() {
+        this.completedMatches += 1;
+    }
+
     public void updatePlayedDates() {
 
         LocalDateTime now = LocalDateTime.now();
