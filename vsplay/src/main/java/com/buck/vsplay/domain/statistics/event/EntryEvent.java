@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.statistics.event;
 
+import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,5 +16,11 @@ public class EntryEvent {
     @AllArgsConstructor
     public static class CreateEvent{
         List<TopicEntry> topicEntryList;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class MatchCompleteEvent{
+        EntryMatch entryMatch;
     }
 }
