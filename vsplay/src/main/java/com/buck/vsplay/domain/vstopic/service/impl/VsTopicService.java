@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
 import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
@@ -14,6 +15,7 @@ import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @Slf4j
 public class VsTopicService implements IVsTopicService {
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final S3Util s3Util;
     private final VsTopicRepository vsTopicRepository;
     private final VsTopicMapper vsTopicMapper;
@@ -37,6 +40,7 @@ public class VsTopicService implements IVsTopicService {
         vsTopic.setThumbnail(s3UploadResult.getObjectKey());
 
         vsTopicRepository.save(vsTopic);
+        applicationEventPublisher.publishEvent(new TopicEvent.CreateEvent(vsTopic));
     }
 
     @Override
