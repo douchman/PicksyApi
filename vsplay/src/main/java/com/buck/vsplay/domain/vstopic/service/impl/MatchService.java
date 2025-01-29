@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
+import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
 import com.buck.vsplay.domain.vstopic.dto.EntryMatchDto;
@@ -143,6 +144,7 @@ import java.util.*;
 
         entryMatch.setStatus(PlayStatus.COMPLETED);
         entryMatchRepository.save(entryMatch);
+        applicationEventPublisher.publishEvent(new EntryEvent.MatchCompleteEvent(entryMatch));
 
         boolean isAllTournamentStageFinish = isAllTournamentStageFinish(topicPlayRecord);
 
