@@ -1,12 +1,10 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
+import com.buck.vsplay.domain.statistics.event.TournamentEvent;
 import com.buck.vsplay.domain.vstopic.dto.EntryMatchDto;
 import com.buck.vsplay.domain.vstopic.dto.TopicPlayRecordDto;
-import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
-import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
-import com.buck.vsplay.domain.vstopic.entity.TopicPlayRecord;
-import com.buck.vsplay.domain.vstopic.entity.VsTopic;
+import com.buck.vsplay.domain.vstopic.entity.*;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.playrecord.PlayRecordException;
@@ -47,7 +45,9 @@ import java.util.*;
             VsTopic topic = vsTopicRepository.findById(topicId).orElseThrow(
                     () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-            if (!isTournamentExist(topic, playRecordRequest.getTournamentStage())){
+            TopicTournament topicTournament = tournamentRepository.findByTopicIdAndTournamentStage(topicId, playRecordRequest.getTournamentStage());
+
+            if( topicTournament == null ){
                 throw new TournamentException(TournamentExceptionCode.TOURNAMENT_INVALID);
             }
 
@@ -61,6 +61,8 @@ import java.util.*;
             initializeFirstTournament(savedTopicPlayRecord); // 대결 진행 기록 후 첫 대진표 생성
 
             applicationEventPublisher.publishEvent(new TopicEvent.PlayEvent(topic));
+            applicationEventPublisher.publishEvent(new TournamentEvent.PlayEvent(topicTournament));
+
             return new TopicPlayRecordDto.PlayRecordResponse(savedTopicPlayRecord.getId());
 
         }catch (PlayRecordException e) {
@@ -242,12 +244,5 @@ import java.util.*;
         EntryMatch entryMatch = entryMatchRepository.findByPlayRecordIdAndTournamentRoundOrderBySeqAsc(topicPlayRecord.getId(),currentTournamentStage);
 
         return entryMatch.getStatus().equals(PlayStatus.COMPLETED);
-    }
-
-
-
-    private boolean isTournamentExist(VsTopic vsTopic, int tournamentStage) {
-        return tournamentRepository.existsByVsTopicIdAndTournamentStage(vsTopic.getId(), tournamentStage);
-
     }
 }

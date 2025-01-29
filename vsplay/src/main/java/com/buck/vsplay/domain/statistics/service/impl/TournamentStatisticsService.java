@@ -1,7 +1,7 @@
 package com.buck.vsplay.domain.statistics.service.impl;
 
 import com.buck.vsplay.domain.statistics.entity.TournamentStatistics;
-import com.buck.vsplay.domain.statistics.event.TournamentUpdateEvent;
+import com.buck.vsplay.domain.statistics.event.TournamentEvent;
 import com.buck.vsplay.domain.statistics.repository.TournamentStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.ITournamentStatisticsService;
 import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
@@ -18,18 +18,32 @@ public class TournamentStatisticsService implements ITournamentStatisticsService
     private final TournamentStatisticsRepository tournamentStatisticsRepository;
 
     @EventListener // 생성된 토너먼트 엔티티에 대한 이벤트 구독
-    public void handleTopicTournamentUpdated(TournamentUpdateEvent tournamentUpdateEvent){
+    public void handleTopicTournamentUpdated(TournamentEvent.CreateEvent topicCreateEvent) {
+        createTournamentStatistics(topicCreateEvent.getTopicTournament());
+    }
 
-        updateTournamentStatistics(tournamentUpdateEvent.getTopicTournament());
+
+    @EventListener
+    public void handleTopicTournamentPlayed(TournamentEvent.PlayEvent topicPlayEvent) {
+        recordMatchStat(topicPlayEvent.getTopicTournament());
     }
 
     @Override
-    public void updateTournamentStatistics(TopicTournament topicTournament) {
-        log.info(" updateTournamentStatistics 메서드 실행");
+    public void createTournamentStatistics(TopicTournament topicTournament) {
         tournamentStatisticsRepository.save(TournamentStatistics.builder()
                 .topicTournament(topicTournament)
                 .tournamentStage(topicTournament.getTournamentStage())
                 .build());
 
+    }
+
+    @Override
+    public void recordMatchStat(TopicTournament topicTournament) {
+        TournamentStatistics tournamentStatistics =
+                tournamentStatisticsRepository.findByTournamentIdAndTournamentStage(topicTournament.getId(), topicTournament.getTournamentStage());
+
+        tournamentStatistics.increaseStageMatches();
+
+        tournamentStatisticsRepository.save(tournamentStatistics);
     }
 }

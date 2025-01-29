@@ -41,4 +41,8 @@ public class TournamentStatistics extends Timestamp {
     @Builder.Default
     private boolean active = true;
 
+    public void increaseStageMatches() {
+        this.stageMatches +=1;
+    }
+
 }
