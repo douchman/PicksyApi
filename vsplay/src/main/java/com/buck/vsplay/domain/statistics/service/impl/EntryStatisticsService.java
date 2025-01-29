@@ -4,6 +4,7 @@ import com.buck.vsplay.domain.statistics.entity.EntryStatistics;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.repository.EntryStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryStatisticsService;
+import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,11 @@ public class EntryStatisticsService implements IEntryStatisticsService {
         createEntryStatistics(entryCreateEvent.getTopicEntryList());
     }
 
+    @EventListener
+    public void handleEntryMatchCompleteEvent(EntryEvent.MatchCompleteEvent entryMatchCompleteEvent){
+        recordEntryMatchStats(entryMatchCompleteEvent.getEntryMatch());
+    }
+
     @Override
     public void createEntryStatistics(List<TopicEntry> topicEntryList) {
 
@@ -40,5 +46,23 @@ public class EntryStatisticsService implements IEntryStatisticsService {
         }
 
         entryStatisticsRepository.saveAll(entryStatisticsList);
+    }
+
+    @Override
+    public void recordEntryMatchStats(EntryMatch entryMatch) {
+
+        EntryStatistics winnerEntry = entryStatisticsRepository.findByEntryId(entryMatch.getWinnerEntry().getId());
+        EntryStatistics loserEntry = entryStatisticsRepository.findByEntryId(entryMatch.getLoserEntry().getId());
+
+        winnerEntry.increaseTotalMatches();
+        winnerEntry.increaseTotalWins();
+        winnerEntry.calculateWinRate();
+
+        loserEntry.increaseTotalMatches();
+        loserEntry.increaseTotalLosses();
+        loserEntry.calculateWinRate();
+
+        entryStatisticsRepository.save(winnerEntry);
+        entryStatisticsRepository.save(loserEntry);
     }
 }
