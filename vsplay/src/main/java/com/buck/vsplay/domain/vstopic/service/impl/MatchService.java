@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
+import com.buck.vsplay.domain.statistics.event.TournamentEvent;
 import com.buck.vsplay.domain.vstopic.dto.EntryMatchDto;
 import com.buck.vsplay.domain.vstopic.dto.TopicPlayRecordDto;
 import com.buck.vsplay.domain.vstopic.entity.*;
@@ -60,6 +61,8 @@ import java.util.*;
             initializeFirstTournament(savedTopicPlayRecord); // 대결 진행 기록 후 첫 대진표 생성
 
             applicationEventPublisher.publishEvent(new TopicEvent.PlayEvent(topic));
+            applicationEventPublisher.publishEvent(new TournamentEvent.PlayEvent(topicTournament));
+
             return new TopicPlayRecordDto.PlayRecordResponse(savedTopicPlayRecord.getId());
 
         }catch (PlayRecordException e) {
