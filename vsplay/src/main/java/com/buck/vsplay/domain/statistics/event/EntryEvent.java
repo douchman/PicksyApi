@@ -23,4 +23,10 @@ public class EntryEvent {
     public static class MatchCompleteEvent{
         EntryMatch entryMatch;
     }
+
+    @Data
+    @AllArgsConstructor
+    public static class VersusStatisticsEvent{
+        EntryMatch entryMatch;
+    }
 }
