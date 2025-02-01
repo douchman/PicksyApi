@@ -59,4 +59,10 @@ public class EntryStatistics extends Timestamp {
 
         this.winRate = (totalMatches.equals(0) ? 0.0 : (double) this.totalWins / this.totalMatches) * 100;
     }
+
+    public void checkAndUpdateHighestTournament(Integer currentTournament) {
+        if( this.highestTournament.equals(0) || currentTournament < this.highestTournament ){
+            this.highestTournament = currentTournament;
+        }
+    }
 }

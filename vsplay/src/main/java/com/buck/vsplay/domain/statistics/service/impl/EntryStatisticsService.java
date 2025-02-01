@@ -51,16 +51,20 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     @Override
     public void recordEntryMatchStats(EntryMatch entryMatch) {
 
+        Integer currentTournamentRound = entryMatch.getTournamentRound();
+
         EntryStatistics winnerEntry = entryStatisticsRepository.findByEntryId(entryMatch.getWinnerEntry().getId());
         EntryStatistics loserEntry = entryStatisticsRepository.findByEntryId(entryMatch.getLoserEntry().getId());
 
         winnerEntry.increaseTotalMatches();
         winnerEntry.increaseTotalWins();
         winnerEntry.calculateWinRate();
+        winnerEntry.checkAndUpdateHighestTournament(currentTournamentRound);
 
         loserEntry.increaseTotalMatches();
         loserEntry.increaseTotalLosses();
         loserEntry.calculateWinRate();
+        loserEntry.checkAndUpdateHighestTournament(currentTournamentRound);
 
         entryStatisticsRepository.save(winnerEntry);
         entryStatisticsRepository.save(loserEntry);
