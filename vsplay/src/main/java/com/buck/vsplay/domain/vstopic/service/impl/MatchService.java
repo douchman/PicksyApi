@@ -145,6 +145,7 @@ import java.util.*;
         entryMatch.setStatus(PlayStatus.COMPLETED);
         entryMatchRepository.save(entryMatch);
         applicationEventPublisher.publishEvent(new EntryEvent.MatchCompleteEvent(entryMatch));
+        applicationEventPublisher.publishEvent(new EntryEvent.VersusStatisticsEvent(entryMatch)); // 대결이 종료되면 상성 데이터 업데이트 ( 비동기 )
 
         boolean isAllTournamentStageFinish = isAllTournamentStageFinish(topicPlayRecord);
 
