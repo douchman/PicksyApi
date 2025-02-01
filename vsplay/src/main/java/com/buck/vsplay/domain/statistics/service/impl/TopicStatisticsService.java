@@ -2,6 +2,7 @@ package com.buck.vsplay.domain.statistics.service.impl;
 
 import com.buck.vsplay.domain.statistics.entity.TopicStatistics;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
+import com.buck.vsplay.domain.statistics.projection.MostPopularEntry;
 import com.buck.vsplay.domain.statistics.repository.TopicStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.ITopicStatisticsService;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
@@ -9,6 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +61,11 @@ public class TopicStatisticsService implements ITopicStatisticsService {
     public void recordCompletedMatchStats(VsTopic vsTopic) {
         TopicStatistics topicStatistics = topicStatisticsRepository.findByVsTopic(vsTopic.getId());
 
+        List<MostPopularEntry> mostPopularEntries = topicStatisticsRepository.findMostPopularEntriesByTopicId(vsTopic.getId()); // 결승전에서 승리한 엔트리와 승리 횟수 조회
+        MostPopularEntry mostPopularEntry = mostPopularEntries.get(0); // 가장 높은 승리 횟수를 기록한 엔트리 선별
+
         topicStatistics.increaseCompletedMatches();
+        topicStatistics.setMostPopularEntry(mostPopularEntry.getEntry());
 
         topicStatisticsRepository.save(topicStatistics);
     }
