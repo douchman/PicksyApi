@@ -9,7 +9,10 @@ import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +28,8 @@ public class EntryStatisticsService implements IEntryStatisticsService {
         createEntryStatistics(entryCreateEvent.getTopicEntryList());
     }
 
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @EventListener
     public void handleEntryMatchCompleteEvent(EntryEvent.MatchCompleteEvent entryMatchCompleteEvent){
         recordEntryMatchStats(entryMatchCompleteEvent.getEntryMatch());
