@@ -33,7 +33,7 @@ jobs:
 
     # 환경변수 설정 (SPRING_PROFILE_ACTIVE=test)
     - name: Set environment variables
-      run: echo "SPRING_PROFILE_ACTIVE=prod" >> $GITHUB_ENV
+      run: echo "SPRING_PROFILE_ACTIVE=test" >> $GITHUB_ENV
 
     - name: Debug - Check Environment Variables  # 환경 변수 확인
       run: env | grep SPRING_PROFILE_ACTIVE
