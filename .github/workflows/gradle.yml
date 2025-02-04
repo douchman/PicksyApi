@@ -31,8 +31,13 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
+    # 환경변수 설정 (SPRING_PROFILE_ACTIVE=test)
+    - name: Set environment variables
+      run: echo "SPRING_PROFILE_ACTIVE=test" >> $GITHUB_ENV
+
+    - name: Debug - Check Environment Variables  # 환경 변수 확인
+      run: env | grep SPRING_PROFILE_ACTIVE
+     
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
       
