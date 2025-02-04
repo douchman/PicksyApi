@@ -43,12 +43,13 @@ jobs:
       run: chmod +x ./gradlew  # 실행 권한 부여
       working-directory: ./vsplay
 
-
     - name: Build with Gradle Wrapper
-      run: ./gradlew build
+      run: ./gradlew clean build -Dspring.profiles.active=test
       working-directory: ./vsplay
 
-
+    - name: Run Tests with Gradle  # ✅ 추가: 테스트 실행 명확히 구분
+      run: ./gradlew test -Dspring.profiles.active=test
+      working-directory: ./vsplay
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
     # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
     #
