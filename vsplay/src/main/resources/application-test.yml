@@ -1,4 +1,7 @@
 spring:
+  config:
+    active:
+      on-profile: test
   application:
     name: app
   datasource:
