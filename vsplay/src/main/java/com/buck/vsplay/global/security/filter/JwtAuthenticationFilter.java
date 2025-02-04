@@ -1,7 +1,7 @@
 package com.buck.vsplay.global.security.filter;
 
 import com.buck.vsplay.global.security.dto.AuthenticationDto;
-import com.buck.vsplay.global.security.service.JwtService;
+import com.buck.vsplay.global.security.jwt.JwtService;
 import com.buck.vsplay.global.security.user.CustomUserDetail;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;

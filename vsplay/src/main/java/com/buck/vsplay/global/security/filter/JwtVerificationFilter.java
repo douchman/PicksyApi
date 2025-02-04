@@ -1,34 +1,42 @@
 package com.buck.vsplay.global.security.filter;
 
-
-import com.buck.vsplay.global.security.service.CustomUserDetailService;
-import com.buck.vsplay.global.security.service.JwtService;
+import com.buck.vsplay.global.security.configuration.SecurityPaths;
+import com.buck.vsplay.global.security.jwt.JwtService;
+import com.buck.vsplay.global.security.jwt.exception.JwtException;
+import com.buck.vsplay.global.security.jwt.exception.JwtExceptionHandler;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Slf4j
 @RequiredArgsConstructor
 public class JwtVerificationFilter extends OncePerRequestFilter {
 
-    private final CustomUserDetailService userDetailService;
     private final JwtService jwtService;
+    private final JwtExceptionHandler jwtExceptionHandler;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request){
+        // 검증필터 제외 경로 설정
+        return Arrays.stream(SecurityPaths.getPublicPostPaths())
+                .anyMatch(path -> path.matches(request.getRequestURI()));
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String username;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -36,20 +44,19 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
-        username = jwtService.extractUsername(jwt);
 
-        if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailService.loadUserByUsername(username);
-
-            if(jwtService.validateToken(jwt, userDetails)) {
+        try {
+            if(SecurityContextHolder.getContext().getAuthentication() == null && jwtService.validateToken(jwt)) {
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        new UsernamePasswordAuthenticationToken(jwtService.extractUserId(jwt), null, jwtService.extractAuthorities(jwt));
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
                 filterChain.doFilter(request, response);
             }
+        } catch (JwtException e){
+            jwtExceptionHandler.handleJwtException(response, e);
         }
     }
 }

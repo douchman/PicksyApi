@@ -2,6 +2,8 @@ package com.buck.vsplay.domain.member.service.impl;
 
 import com.buck.vsplay.domain.member.dto.MemberDto;
 import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.member.exception.MemberException;
+import com.buck.vsplay.domain.member.exception.MemberExceptionCode;
 import com.buck.vsplay.domain.member.mapper.MemberMapper;
 import com.buck.vsplay.domain.member.repository.MemberRepository;
 import com.buck.vsplay.domain.member.role.Role;
@@ -31,7 +33,10 @@ public class MemberService implements IMemberService {
 
     @Override
     public void registerMember(MemberDto.MemberInfo member) {
-        log.info("Registering member: {}", member);
+        if (memberRepository.findByLoginId(member.getLoginId()).isPresent()) {
+            throw new MemberException(MemberExceptionCode.MEMBER_DUPLICATE_ID);
+        }
+
         Member registerMember = memberMapper.toEntity(member);
         registerMember.setPassword(passwordEncoder.encode(member.getPassword()));
         registerMember.setRole(Role.GENERAL);

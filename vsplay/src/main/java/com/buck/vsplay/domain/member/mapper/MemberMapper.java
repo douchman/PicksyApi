@@ -4,14 +4,12 @@ import com.buck.vsplay.domain.member.dto.MemberDto;
 import com.buck.vsplay.domain.member.entity.Address;
 import com.buck.vsplay.domain.member.entity.Member;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface MemberMapper {
     MemberMapper INSTANCE = Mappers.getMapper(MemberMapper.class);
 
-    @Mapping(target = "address" , source = "addressInfo")
     Member toEntity(MemberDto.MemberInfo dto);
     MemberDto.MemberInfo toDto(Member entity);
 

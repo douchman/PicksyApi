@@ -35,3 +35,12 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### git_toolbox_prj ###
+git_toolbox_prj.xml
+
+### Configuration files ###
+application.yml
+gradle-properties.properties
+build.gradle
+settings.gradle
