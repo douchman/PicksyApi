@@ -39,6 +39,12 @@ jobs:
     - name: Grant execute permission for Gradle Wrapper
       run: chmod +x gradlew  # 실행 권한 부여
       
+    - name: Debug - Check current directory  # ✅ 추가: 현재 작업 디렉토리 확인
+      run: pwd
+
+    - name: Debug - List files  # ✅ 추가: 현재 디렉토리의 파일 목록 확인
+      run: ls -la
+      
     - name: Build with Gradle Wrapper
       run: ./gradlew build -Dspring.profiles.active=test
       working-directory: ./vsplay
