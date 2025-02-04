@@ -30,26 +30,18 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-
-    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
       
     - name: Grant execute permission for Gradle Wrapper
-      run: chmod +x gradlew  # 실행 권한 부여
+      run: chmod +x gradlew
       
-    - name: Debug - Check current directory  # ✅ 추가: 현재 작업 디렉토리 확인
-      run: pwd
-
-    - name: Debug - List files  # ✅ 추가: 현재 디렉토리의 파일 목록 확인
-      run: ls -la
+    - name: Init gradle wrapper
+      run: gradle wrapper
       
+    - name: Change wrapper permissions
+      run: chmod +x ./gradlew
+  
     - name: Build with Gradle Wrapper
-      run: ./gradlew build -Dspring.profiles.active=test
-
-    - name: Run Tests  # ✅ 추가: 테스트 실행 시 test 프로파일 적용
-      run: ./gradlew test -Dspring.profiles.active=test
+      run: ./gradlew build
 
       
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
