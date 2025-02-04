@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:tcp://localhost/~/vsplay
     driver-class-name: org.h2.Driver
     username: sa
   jpa:
@@ -29,3 +29,4 @@ aws:
     access-key : ${VSPLAY_S3_ACCESS_KEY}
     secret-key: ${VSPLAY_S3_SECRET}
   region: ${VSPLAY_S3_REGION}
+
