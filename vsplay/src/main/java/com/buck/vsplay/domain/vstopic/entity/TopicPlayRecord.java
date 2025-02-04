@@ -20,7 +20,7 @@ import org.hibernate.annotations.Comment;
 public class TopicPlayRecord extends Timestamp {
     @Id
     @Column(name = "play_record_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TOPIC_RECORD_SEQ_GENERATOR`")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TOPIC_RECORD_SEQ_GENERATOR")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
