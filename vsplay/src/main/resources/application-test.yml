@@ -1,13 +1,11 @@
 spring:
-  application:
-    name: app
   datasource:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
     username: sa
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -18,21 +16,16 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-app:
-  cors:
-    allowed-origin : "http://localhost:8080"
-
 
 jwt:
-  key: "this-is-vsplay-256-bit-secret-key-for-testing-only"
-  issuer : "jwt-buck"
+  key: ${VSPLAY_JWT_KEY}
+  issuer : ${VSPLAY_ISSUER}
   access-token-expiration-minutes: 60
 
 aws:
   s3:
-    bucket-name: "vsplay"
+    bucket-name: ${VSPLAY_S3_NAME}
   credentials:
-    access-key : "AKIAVWABJ3JLWULO5MGY"
-    secret-key: "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"
-  region: "ap-northeast-2"
-
+    access-key : ${VSPLAY_S3_ACCESS_KEY}
+    secret-key: ${VSPLAY_S3_SECRET}
+  region: ${VSPLAY_S3_REGION}
