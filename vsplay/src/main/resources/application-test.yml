@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: app
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        show_sql: true
+    open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+app:
+  cors:
+    allowed-origin : "http://localhost:8080"
+
+
+jwt:
+  key: "this-is-vsplay-256-bit-secret-key-for-testing-only"
+  issuer : "jwt-buck"
+  access-token-expiration-minutes: 60
+
+aws:
+  s3:
+    bucket-name: "vsplay"
+  credentials:
+    access-key : "AKIAVWABJ3JLWULO5MGY"
+    secret-key: "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"
+  region: "ap-northeast-2"
+
