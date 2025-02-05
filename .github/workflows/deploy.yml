@@ -43,7 +43,7 @@ jobs:
       working-directory: ./vsplay
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew clean build
+      run: ./gradlew clean build --info
       working-directory: ./vsplay
 
     # Docker 빌드 
