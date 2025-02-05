@@ -82,5 +82,3 @@ jobs:
             docker stop vsplay-api || true
             docker rm vsplay-api || true
             docker run -d --name vsplay-api -p 8080:8080 vsplay-api
-
-
