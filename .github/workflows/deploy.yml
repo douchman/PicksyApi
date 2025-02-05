@@ -65,9 +65,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "./vsplay/vsplay-api.tar"
           target: "/home/ubuntu/app"
-          
 
 
+        
   deploy:
     needs: build
     runs-on: ubuntu-latest
