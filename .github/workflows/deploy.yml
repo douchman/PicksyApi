@@ -64,7 +64,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "./vsplay/vsplay-api.tar"
-          target: "/home/ubuntu"
+          target: "/home/ubuntu/app"
           
 
 
@@ -79,9 +79,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/vsplay
-            docker load -i /home/ubuntu/vsplay/vsplay-api.tar
-            docker stop vsplay-api || true
-            docker rm vsplay-api || true
-            docker run -d --name vsplay-api -p 8080:8080 vsplay-api
+            cd /home/ubuntu/app/vsplay
+            docker load -i /home/ubuntu/app/vsplay/vsplay-api.tar
+            docker-compose down || true  # 기존 컨테이너 중지
+            docker-compose up -d --force-recreate  # 새 컨테이너 실행
 
