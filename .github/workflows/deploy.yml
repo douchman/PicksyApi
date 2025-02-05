@@ -86,3 +86,5 @@ jobs:
             docker compose down || true  # 기존 컨테이너 중지
             docker compose up -d --force-recreate  # 새 컨테이너 실행
 
+
+
