@@ -28,6 +28,9 @@ jobs:
     - name: Set environment variables
       run: |
         echo "SPRING_PROFILE_ACTIVE=prod" >> $GITHUB_ENV
+        echo "DB_URL=${{secrets.DB_URL}}" >> $GITHUB_ENV
+        echo "DB_USER=${{secrets.DB_USER}}" >> $GITHUB_ENV
+        echo "DB_PASSWORD=${{secrets.DB_PASSWORD}}" >> $GITHUB_ENV
         echo "VSPLAY_JWT_KEY=${{secrets.JWT_KEY}}" >> $GITHUB_ENV
         echo "VSPLAY_ISSUER=${{secrets.JWT_ISSUER}}" >> $GITHUB_ENV
         echo "VSPLAY_S3_NAME=${{secrets.S3_NAME}}" >> $GITHUB_ENV
