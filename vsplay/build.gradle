@@ -42,6 +42,8 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	implementation(platform("software.amazon.awssdk:bom:2.27.21"))
 	implementation("software.amazon.awssdk:s3")
+	implementation 'com.h2database:h2' //  for Local and Dev
+	implementation 'com.mysql:mysql-connector-j' // for Prod
 
 	compileOnly 'org.projectlombok:lombok'
 
@@ -56,25 +58,6 @@ dependencies {
 
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-// ✅ H2와 MySQL을 환경별로 나누기
-configurations {
-	h2RuntimeOnly
-	mysqlRuntimeOnly
-}
-
-dependencies {
-	h2RuntimeOnly 'com.h2database:h2' //  for Local and Dev
-	mysqlRuntimeOnly 'com.mysql:mysql-connector-j' // for Prod
-}
-
-configurations.runtimeOnly {
-	if (System.getenv("SPRING_PROFILE_ACTIVE") == "prod") {
-		extendsFrom(configurations.mysqlRuntimeOnly)
-	} else {
-		extendsFrom(configurations.h2RuntimeOnly)
-	}
 }
 
 tasks.named('test') {
