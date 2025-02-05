@@ -24,6 +24,10 @@ repositories {
 }
 
 jar {
+	enabled = false
+}
+
+bootJar {
 	archiveBaseName.set('vsplay')
 	archiveVersion.set('')
 	archiveClassifier.set('')
