@@ -64,7 +64,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "./vsplay/vsplay-api.tar"
-          target: "/home/ubuntu/vsplay"
+          target: "/home/ubuntu"
           
 
 
