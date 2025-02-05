@@ -27,7 +27,7 @@ jobs:
     # 환경변수 설정 (SPRING_PROFILE_ACTIVE=test)
     - name: Set environment variables
       run: |
-        echo "SPRING_PROFILE_ACTIVE=test" >> $GITHUB_ENV
+        echo "SPRING_PROFILE_ACTIVE=prod" >> $GITHUB_ENV
         echo "VSPLAY_JWT_KEY=${{secrets.JWT_KEY}}" >> $GITHUB_ENV
         echo "VSPLAY_ISSUER=${{secrets.JWT_ISSUER}}" >> $GITHUB_ENV
         echo "VSPLAY_S3_NAME=${{secrets.S3_NAME}}" >> $GITHUB_ENV
