@@ -1,11 +1,4 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-
-name: Java CI with Gradle
+name: Java CI with Gradle and Deploy to EC2
 
 on:
   pull_request:
@@ -42,25 +35,51 @@ jobs:
         echo "VSPLAY_S3_SECRET=${{secrets.S3_SECRET}}" >> $GITHUB_ENV
         echo "VSPLAY_S3_REGION=${{secrets.S3_REGION}}" >> $GITHUB_ENV
       
-
-    - name: Debug - Check Environment Variables  # 환경 변수 확인
-      run: env | grep VSPLAY_S3_NAME
-     
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
       
-    - name: Debug - List files
-      run: ls -la
-      
     - name: Grant execute permission for Gradle Wrapper
-      run: chmod +x ./gradlew  # 실행 권한 부여
+      run: chmod +x ./gradlew 
       working-directory: ./vsplay
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew clean build --info
+      run: ./gradlew clean build
       working-directory: ./vsplay
 
-    - name: Run Tests with Gradle  # ✅ 추가: 테스트 실행 명확히 구분
-      run: ./gradlew test
+    # Docker 빌드 
+    - name: Build Docker Image
+      run: |
+          docker build -t vsplay-api .
       working-directory: ./vsplay
+
+    - name: Save Docker Image as tar
+      run: |
+          docker save vsplay-api -o vsplay-api.tar
+      working-directory: ./vsplay
+
+    - name: Upload Docker Image to EC2
+      uses: appleboy/scp-action@v0.1.4
+      with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "./vsplay/vsplay-api.tar"
+          target: "/home/ubuntu/vsplay"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into EC2 and Deploy Docker Container
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/vsplay
+            docker load -i /home/ubuntu/vsplay/vsplay-api.tar
+            docker stop vsplay-api || true
+            docker rm vsplay-api || true
+            docker run -d --name vsplay-api -p 8080:8080 vsplay-api
 
