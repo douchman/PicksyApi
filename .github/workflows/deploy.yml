@@ -58,7 +58,7 @@ jobs:
       working-directory: ./vsplay
         
     - name: Upload Docker Image to EC2
-      uses: appleboy/scp-action@v1.0.3
+      uses: appleboy/scp-action@v0.1.4
       with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
