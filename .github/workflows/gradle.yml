@@ -23,7 +23,7 @@ jobs:
     - name : Checkout repository
       uses: actions/checkout@v4
       with:
-        fetch-depth : 0
+        fetch-depth : 1
         
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -31,44 +31,36 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
+    # 환경변수 설정 (SPRING_PROFILE_ACTIVE=test)
+    - name: Set environment variables
+      run: |
+        echo "SPRING_PROFILE_ACTIVE=test" >> $GITHUB_ENV
+        echo "VSPLAY_JWT_KEY=${{secrets.JWT_KEY}}" >> $GITHUB_ENV
+        echo "VSPLAY_ISSUER=${{secrets.JWT_ISSUER}}" >> $GITHUB_ENV
+        echo "VSPLAY_S3_NAME=${{secrets.S3_NAME}}" >> $GITHUB_ENV
+        echo "VSPLAY_S3_ACCESS_KEY=${{secrets.S3_ACCESS_KEY}}" >> $GITHUB_ENV
+        echo "VSPLAY_S3_SECRET=${{secrets.S3_SECRET}}" >> $GITHUB_ENV
+        echo "VSPLAY_S3_REGION=${{secrets.S3_REGION}}" >> $GITHUB_ENV
+      
+
+    - name: Debug - Check Environment Variables  # 환경 변수 확인
+      run: env | grep VSPLAY_S3_NAME
+     
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
       
-    - name: Grant execute permission for Gradle Wrapper
-      run: chmod +x gradlew  # 실행 권한 부여
+    - name: Debug - List files
+      run: ls -la
       
+    - name: Grant execute permission for Gradle Wrapper
+      run: chmod +x ./gradlew  # 실행 권한 부여
+      working-directory: ./vsplay
+
     - name: Build with Gradle Wrapper
-      run: ./gradlew build
-      working-directory: vsplay
+      run: ./gradlew clean build --info
+      working-directory: ./vsplay
 
-    # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
-    # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
-    #
-    # - name: Setup Gradle
-    #   uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-    #   with:
-    #     gradle-version: '8.9'
-    #
-    # - name: Build with Gradle 8.9
-    #   run: gradle build
+    - name: Run Tests with Gradle  # ✅ 추가: 테스트 실행 명확히 구분
+      run: ./gradlew test
+      working-directory: ./vsplay
 
-  dependency-submission:
-
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-
-    # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
-    # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
-    - name: Generate and submit dependency graph
-      uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
