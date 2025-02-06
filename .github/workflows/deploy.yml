@@ -1,8 +1,7 @@
 name: Java CI with Gradle and Deploy to EC2
 
 on:
-  pull_request:
-    types : [ synchronize ]
+  push:
     branches: [ "main" ]
 
 jobs:
@@ -27,7 +26,10 @@ jobs:
     # 환경변수 설정 (SPRING_PROFILE_ACTIVE=test)
     - name: Set environment variables
       run: |
-        echo "SPRING_PROFILE_ACTIVE=test" >> $GITHUB_ENV
+        echo "SPRING_PROFILE_ACTIVE=prod" >> $GITHUB_ENV
+        echo "DB_URL=${{secrets.DB_URL}}" >> $GITHUB_ENV
+        echo "DB_USER=${{secrets.DB_USER}}" >> $GITHUB_ENV
+        echo "DB_PASSWORD=${{secrets.DB_PASSWORD}}" >> $GITHUB_ENV
         echo "VSPLAY_JWT_KEY=${{secrets.JWT_KEY}}" >> $GITHUB_ENV
         echo "VSPLAY_ISSUER=${{secrets.JWT_ISSUER}}" >> $GITHUB_ENV
         echo "VSPLAY_S3_NAME=${{secrets.S3_NAME}}" >> $GITHUB_ENV
@@ -56,7 +58,7 @@ jobs:
       run: |
           docker save vsplay-api -o vsplay-api.tar
       working-directory: ./vsplay
-
+        
     - name: Upload Docker Image to EC2
       uses: appleboy/scp-action@v0.1.4
       with:
@@ -64,8 +66,10 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "./vsplay/vsplay-api.tar"
-          target: "/home/ubuntu/vsplay"
+          target: "/home/ubuntu/app"
 
+
+        
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -77,9 +81,12 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/vsplay
-            docker load -i /home/ubuntu/vsplay/vsplay-api.tar
-            docker stop vsplay-api || true
-            docker rm vsplay-api || true
-            docker run -d --name vsplay-api -p 8080:8080 vsplay-api
+            cd /home/ubuntu/app
+            docker load -i /home/ubuntu/app/vsplay/vsplay-api.tar
+            docker stop vsplay-api || true # 기존 컨테이너 중지
+            docker rm vsplay-api || true # 기존 컨테이너 삭제
+            docker compose down || true  # 기존 컨테이너 중지
+            docker compose up -d --force-recreate  # 새 컨테이너 실행
+
+
 
