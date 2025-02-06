@@ -1,8 +1,7 @@
 name: Java CI with Gradle and Deploy to EC2
 
 on:
-  pull_request:
-    types : [ synchronize ]
+  push:
     branches: [ "main" ]
 
 jobs:
