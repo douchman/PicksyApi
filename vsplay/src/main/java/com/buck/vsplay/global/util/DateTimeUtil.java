@@ -11,6 +11,9 @@ public class DateTimeUtil {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    public static String formatDateToSting(LocalDateTime date) {
+        return date == null ? null : date.format(FORMATTER);
+    }
     public static String formatNow(){
         return LocalDateTime.now().format(FORMATTER);
     }
