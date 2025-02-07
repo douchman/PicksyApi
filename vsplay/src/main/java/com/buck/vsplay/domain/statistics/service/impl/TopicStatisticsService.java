@@ -1,11 +1,16 @@
 package com.buck.vsplay.domain.statistics.service.impl;
 
+import com.buck.vsplay.domain.statistics.dto.TopicStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.TopicStatistics;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
+import com.buck.vsplay.domain.statistics.mapper.TopicStatisticsMapper;
 import com.buck.vsplay.domain.statistics.projection.MostPopularEntry;
 import com.buck.vsplay.domain.statistics.repository.TopicStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.ITopicStatisticsService;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
+import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -19,6 +24,8 @@ import java.util.List;
 public class TopicStatisticsService implements ITopicStatisticsService {
 
     private final TopicStatisticsRepository topicStatisticsRepository;
+    private final VsTopicRepository vsTopicRepository;
+    private final TopicStatisticsMapper topicStatisticsMapper;
 
     @EventListener
     public void handleVsTopicCreated(TopicEvent.CreateEvent topiCreateEvent) {
@@ -66,5 +73,17 @@ public class TopicStatisticsService implements ITopicStatisticsService {
         topicStatistics.setMostPopularEntry(mostPopularEntry.getEntry());
 
         topicStatisticsRepository.save(topicStatistics);
+    }
+
+    @Override
+    public TopicStatisticsDto.TopicStatisticsResponse getTopicStatistics(Long topicId) {
+
+        if(!vsTopicRepository.existsById(topicId)) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        return new TopicStatisticsDto.TopicStatisticsResponse(
+                topicStatisticsMapper.toTopicStatisticsDtoFromEntity(
+                        topicStatisticsRepository.findByVsTopic(topicId)));
     }
 }
