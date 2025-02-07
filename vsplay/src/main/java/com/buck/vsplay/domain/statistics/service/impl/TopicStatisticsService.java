@@ -41,9 +41,7 @@ public class TopicStatisticsService implements ITopicStatisticsService {
         topicStatisticsRepository.save(TopicStatistics.builder()
                 .vsTopic(vsTopic)
                 .totalMatches(0)
-                .totalPlayers(0)
                 .completedMatches(0)
-                .completedPlayers(0)
                 .build());
     }
 
