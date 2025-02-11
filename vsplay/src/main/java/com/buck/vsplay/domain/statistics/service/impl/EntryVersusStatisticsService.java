@@ -74,16 +74,18 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
 
         List<EntryVersusStatistics> entryVersusStatistics = entryVersusStatisticsRepository.findWithOpponentEntryByEntryId(entryId);
 
-        for (EntryVersusStatistics entryVersusStatistic : entryVersusStatistics) {
-            entryVersusStatisticsList.add(
-                    EntryVersusStatisticsDto.EntryVersusStatistics.builder()
-                            .opponentEntry(topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry()))
-                            .totalMatches(entryVersusStatistic.getTotalMatches())
-                            .wins(entryVersusStatistic.getWins())
-                            .losses(entryVersusStatistic.getLosses())
-                            .winRate(entryVersusStatistic.getWinRate())
-                            .build()
-            );
+        if ( entryVersusStatistics != null && !entryVersusStatistics.isEmpty()){
+            for (EntryVersusStatistics entryVersusStatistic : entryVersusStatistics) {
+                entryVersusStatisticsList.add(
+                        EntryVersusStatisticsDto.EntryVersusStatistics.builder()
+                                .opponentEntry(topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry()))
+                                .totalMatches(entryVersusStatistic.getTotalMatches())
+                                .wins(entryVersusStatistic.getWins())
+                                .losses(entryVersusStatistic.getLosses())
+                                .winRate(entryVersusStatistic.getWinRate())
+                                .build()
+                );
+            }
         }
 
         return entryVersusStatisticsList;
