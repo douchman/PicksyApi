@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.*;
 public class VsTopicController {
     private final VsTopicService vsTopicService;
 
+    @GetMapping
+    public ResponseEntity<SingleResponseDto<VsTopicDto.PublicVsTopicList>> getPublicVsTopics() {
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getPublicVsTopicList()), HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<SingleResponseDto<Integer>> createTopic(
             @ModelAttribute @Valid VsTopicDto.VsTopicCreateRequest vsTopicDCreateVsTopicRequest) {
