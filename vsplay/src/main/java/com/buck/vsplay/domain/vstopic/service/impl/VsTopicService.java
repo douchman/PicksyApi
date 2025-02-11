@@ -9,6 +9,7 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
+import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
@@ -67,5 +68,12 @@ public class VsTopicService implements IVsTopicService {
         VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
         return vsTopicMapper.toVsTopicDetailWithTournaments(vsTopic, vsTopic.getTournaments());
+    }
+
+    @Override
+    public VsTopicDto.PublicVsTopicList getPublicVsTopicList() {
+        return VsTopicDto.PublicVsTopicList.builder()
+                .topicList(vsTopicMapper.toVsTopicDtoListFromEntityList(vsTopicRepository.findAllByVisibility(Visibility.PUBLIC)))
+                .build();
     }
 }

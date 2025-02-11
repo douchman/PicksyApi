@@ -7,4 +7,5 @@ public interface IVsTopicService {
     void createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest);
     void updateVsTopic(Long topicId, VsTopicDto.VsTopicUpdateRequest updateVsTopicRequest);
     VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId);
+    VsTopicDto.PublicVsTopicList getPublicVsTopicList();
 }
