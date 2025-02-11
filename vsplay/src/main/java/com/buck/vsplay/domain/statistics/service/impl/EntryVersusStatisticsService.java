@@ -1,11 +1,19 @@
 package com.buck.vsplay.domain.statistics.service.impl;
 
+import com.buck.vsplay.domain.statistics.dto.EntryVersusStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.EntryVersusStatistics;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.repository.EntryVersusStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryVersusStatisticsService;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
+import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
+import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
+import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -21,6 +32,9 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class EntryVersusStatisticsService implements IEntryVersusStatisticsService {
 
     private final EntryVersusStatisticsRepository entryVersusStatisticsRepository;
+    private final VsTopicRepository topicRepository;
+    private final EntryRepository entryRepository;
+    private final TopicEntryMapper topicEntryMapper;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -38,6 +52,41 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
 
         entryVersusStatisticsRepository.save(statsOfWinnerEntry);
         entryVersusStatisticsRepository.save(statsOfLoserEntry);
+    }
+
+    @Override
+    public List<EntryVersusStatisticsDto.EntryVersusStatistics> getEntryVersusStatistics(Long topicId, Long entryId) {
+
+        List<EntryVersusStatisticsDto.EntryVersusStatistics> entryVersusStatisticsList = new ArrayList<>();
+
+        if(!topicRepository.existsById(topicId)) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        TopicEntry topicEntry = entryRepository.findWithTopicByEntryId(topicId);
+
+        if(topicEntry == null) {
+            throw new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND);
+        }
+        if(!topicEntry.getTopic().getId().equals(topicId) ) {
+            throw new EntryException(EntryExceptionCode.ENTRY_NOT_INCLUDED_IN_TOPIC);
+        }
+
+        List<EntryVersusStatistics> entryVersusStatistics = entryVersusStatisticsRepository.findWithOpponentEntryByEntryId(entryId);
+
+        for (EntryVersusStatistics entryVersusStatistic : entryVersusStatistics) {
+            entryVersusStatisticsList.add(
+                    EntryVersusStatisticsDto.EntryVersusStatistics.builder()
+                            .opponentEntry(topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry()))
+                            .totalMatches(entryVersusStatistic.getTotalMatches())
+                            .wins(entryVersusStatistic.getWins())
+                            .losses(entryVersusStatistic.getLosses())
+                            .winRate(entryVersusStatistic.getWinRate())
+                            .build()
+            );
+        }
+
+        return entryVersusStatisticsList;
     }
 
     private EntryVersusStatistics upsertStats(TopicEntry entry, TopicEntry opponentEntry, boolean isWin) {
