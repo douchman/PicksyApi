@@ -16,7 +16,6 @@ import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
@@ -27,7 +26,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional
 public class EntryVersusStatisticsService implements IEntryVersusStatisticsService {
 
@@ -40,7 +38,6 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Override
     public void handleEntryMatchCompletedEventForVersusStats(EntryEvent.VersusStatisticsEvent matchCompleteEvent) {
-        log.info(" ## handleEntryMatchCompletedEventForVersusStats execute ## ");
         upsertEntryVersusStatistics(matchCompleteEvent.getEntryMatch());
     }
 
@@ -63,7 +60,7 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        TopicEntry topicEntry = entryRepository.findWithTopicByEntryId(topicId);
+        TopicEntry topicEntry = entryRepository.findWithTopicByEntryId(entryId);
 
         if(topicEntry == null) {
             throw new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND);
@@ -74,16 +71,18 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
 
         List<EntryVersusStatistics> entryVersusStatistics = entryVersusStatisticsRepository.findWithOpponentEntryByEntryId(entryId);
 
-        for (EntryVersusStatistics entryVersusStatistic : entryVersusStatistics) {
-            entryVersusStatisticsList.add(
-                    EntryVersusStatisticsDto.EntryVersusStatistics.builder()
-                            .opponentEntry(topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry()))
-                            .totalMatches(entryVersusStatistic.getTotalMatches())
-                            .wins(entryVersusStatistic.getWins())
-                            .losses(entryVersusStatistic.getLosses())
-                            .winRate(entryVersusStatistic.getWinRate())
-                            .build()
-            );
+        if ( entryVersusStatistics != null && !entryVersusStatistics.isEmpty()){
+            for (EntryVersusStatistics entryVersusStatistic : entryVersusStatistics) {
+                entryVersusStatisticsList.add(
+                        EntryVersusStatisticsDto.EntryVersusStatistics.builder()
+                                .opponentEntry(topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry()))
+                                .totalMatches(entryVersusStatistic.getTotalMatches())
+                                .wins(entryVersusStatistic.getWins())
+                                .losses(entryVersusStatistic.getLosses())
+                                .winRate(entryVersusStatistic.getWinRate())
+                                .build()
+                );
+            }
         }
 
         return entryVersusStatisticsList;
