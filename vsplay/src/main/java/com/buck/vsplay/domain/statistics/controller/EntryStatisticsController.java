@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("vstopic/statistics")
+@RequestMapping("statistics/vstopic")
 public class EntryStatisticsController {
 
     private final EntryStatisticsService entryStatisticsService;
