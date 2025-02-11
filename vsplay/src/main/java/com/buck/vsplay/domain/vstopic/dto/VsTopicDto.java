@@ -57,4 +57,10 @@ public class VsTopicDto {
         List<Tournament> tournamentList = new ArrayList<>();
     }
 
+    @Setter
+    @Getter
+    @Builder
+    public static class PublicVsTopicList{
+        List<VsTopicDto.VsTopic> topicList;
+    }
 }
