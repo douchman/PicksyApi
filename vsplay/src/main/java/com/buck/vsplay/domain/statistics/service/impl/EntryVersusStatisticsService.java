@@ -63,7 +63,7 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        TopicEntry topicEntry = entryRepository.findWithTopicByEntryId(topicId);
+        TopicEntry topicEntry = entryRepository.findWithTopicByEntryId(entryId);
 
         if(topicEntry == null) {
             throw new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND);
