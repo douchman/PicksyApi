@@ -24,8 +24,10 @@ public class VsTopicController {
     }
 
     @GetMapping
-    public ResponseEntity<SingleResponseDto<VsTopicDto.PublicVsTopicList>> getPublicVsTopics() {
-        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getPublicVsTopicList()), HttpStatus.OK);
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicSearchResponse>> searchPublicVsTopic(
+            VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest
+    ) {
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.searchPublicVsTopic(vsTopicSearchRequest)), HttpStatus.OK);
     }
 
     @PostMapping

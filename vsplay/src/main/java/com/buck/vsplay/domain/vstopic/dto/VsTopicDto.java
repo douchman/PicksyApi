@@ -2,6 +2,7 @@ package com.buck.vsplay.domain.vstopic.dto;
 
 
 import com.buck.vsplay.global.constants.Visibility;
+import com.buck.vsplay.global.dto.Pagination;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -75,10 +76,17 @@ public class VsTopicDto {
         List<Tournament> tournamentList = new ArrayList<>();
     }
 
-    @Setter
     @Getter
     @Builder
-    public static class PublicVsTopicList{
+    public static class VsTopicSearchResponse{
         List<VsTopicDto.VsTopicWithThumbnail> topicList;
+        Pagination pagination;
+    }
+
+    @Data
+    public static class VsTopicSearchRequest{
+        private String keyword;
+        private Integer page;
+        private Integer size = 20;
     }
 }
