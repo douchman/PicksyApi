@@ -45,7 +45,6 @@ public class VsTopicDto {
 
     @Data
     public static class Tournament{
-        Long id;
         Integer tournamentStage;
         String tournamentName;
     }
