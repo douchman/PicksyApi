@@ -12,18 +12,15 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = S3Util.class)
 public interface TopicEntryMapper {
 
-    @Mapping(target = "entryId" , source = "id")
     @Mapping(target = "mediaUrl" , qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toTopicEntryDtoFromEntity(TopicEntry topicEntry);
 
     @Mapping(target = "topic", expression = "java(vsTopic)")
     TopicEntry toTopicEntryWithTopic(EntryDto.CreateEntry topicEntry, @Context VsTopic vsTopic);
 
-    @Mapping(source = "id", target ="entryId")
     @Mapping(target = "mediaUrl" , qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toCreatedEntry(TopicEntry topicEntry);
 
-    @Mapping(source = "id", target ="entryId")
     @Mapping(target = "mediaUrl", qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toEntryDtoFromEntity(TopicEntry topicEntry);
 

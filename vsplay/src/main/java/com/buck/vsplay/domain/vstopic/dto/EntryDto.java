@@ -14,7 +14,7 @@ public class EntryDto {
 
     @Data
     public static class Entry{
-        private Long entryId;
+        private Long id;
         private String entryName;
         private String description;
         private MediaType mediaType;
