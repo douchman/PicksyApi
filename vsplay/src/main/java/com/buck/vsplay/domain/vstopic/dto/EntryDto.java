@@ -5,6 +5,7 @@ import com.buck.vsplay.global.constants.MediaType;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -36,7 +37,7 @@ public class EntryDto {
 
     @Data
     public static class EntryList{
-        List<Entry> entries;
+        List<Entry> entries = new ArrayList<>();
     }
 
     @EqualsAndHashCode(callSuper = true)
