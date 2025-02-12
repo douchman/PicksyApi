@@ -11,7 +11,6 @@ import java.util.List;
 @Repository
 public interface EntryRepository extends JpaRepository<TopicEntry, Long> {
 
-    @Query("SELECT e FROM TopicEntry e WHERE e.topic.id = :topicId")
     List<TopicEntry> findByTopicId(Long topicId);
 
     @Query("SELECT e FROM TopicEntry e JOIN FETCH e.topic WHERE e.id = :entryId")
