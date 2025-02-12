@@ -23,11 +23,6 @@ public interface VsTopicMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateVsTopicFromUpdateRequest(VsTopicDto.VsTopicUpdateRequest vsTopicUpdateRequest, @MappingTarget VsTopic vsTopic);
 
-    @Named("signedMediaUrl")
-    default String signedMediaUrl(String mediaUrl, @Context S3Util s3Util) {
-        return s3Util.getUploadedObjectUrl(mediaUrl);
-    }
-
     default List<VsTopicDto.VsTopicWithThumbnail> toVsTopicDtoWithThumbnailListFromEntityList(List<VsTopic> vsTopics) {
         return vsTopics.stream()
                 .map(this::toVsTopicDtoFromEntityWithThumbnail)
