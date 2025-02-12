@@ -16,18 +16,16 @@ public interface VsTopicMapper {
 
     VsTopicDto.VsTopic toVsTopicDtoFromEntity(VsTopic vsTopic);
 
+    @Mapping(target = "thumbnail", qualifiedByName = "signedMediaUrl")
+    VsTopicDto.VsTopicWithThumbnail toVsTopicDtoFromEntityWithThumbnail(VsTopic vsTopic);
+
     @Mapping(target = "thumbnail", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateVsTopicFromUpdateRequest(VsTopicDto.VsTopicUpdateRequest vsTopicUpdateRequest, @MappingTarget VsTopic vsTopic);
 
-    @Named("signedMediaUrl")
-    default String signedMediaUrl(String mediaUrl, @Context S3Util s3Util) {
-        return s3Util.getUploadedObjectUrl(mediaUrl);
-    }
-
-    default List<VsTopicDto.VsTopic> toVsTopicDtoListFromEntityList(List<VsTopic> vsTopics) {
+    default List<VsTopicDto.VsTopicWithThumbnail> toVsTopicDtoWithThumbnailListFromEntityList(List<VsTopic> vsTopics) {
         return vsTopics.stream()
-                .map(this::toVsTopicDtoFromEntity)
+                .map(this::toVsTopicDtoFromEntityWithThumbnail)
                 .toList();
     }
 }
