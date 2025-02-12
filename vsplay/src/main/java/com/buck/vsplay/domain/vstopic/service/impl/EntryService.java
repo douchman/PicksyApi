@@ -48,16 +48,22 @@ public class EntryService implements IEntryService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
-    public EntryDto.CreatedEntryList getEntriesByTopicId(Long topicId) {
-        EntryDto.CreatedEntryList createdEntryList = new EntryDto.CreatedEntryList();
+    public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
+        EntryDto.EntryList entryList = new EntryDto.EntryList();
 
         if(!topicRepository.existsById(topicId)) {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        createdEntryList.setEntries(topicEntryMapper.toCreatedEntryList(entryRepository.findByTopicId(topicId)));
+        List<TopicEntry> createdEntries = entryRepository.findByTopicId(topicId);
 
-        return createdEntryList;
+        if( createdEntries != null && !createdEntries.isEmpty()){
+            for (TopicEntry createdEntry : createdEntries) {
+                entryList.getEntries().add(topicEntryMapper.toEntryDtoFromEntity(createdEntry));
+            }
+        }
+
+        return entryList;
     }
 
     @Override
@@ -73,7 +79,8 @@ public class EntryService implements IEntryService {
 
         for (EntryDto.CreateEntry entry : entries) {
             S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(entry.getFile(), objectPath);
-            TopicEntry topicEntry = topicEntryMapper.toTopicEntryWithTopic(entry, vsTopic);
+            TopicEntry topicEntry = topicEntryMapper.toEntityFromCreatedEntryDto(entry);
+            topicEntry.setTopic(vsTopic);
             topicEntry.setMediaUrl(s3UploadResult.getObjectKey());
             topicEntry.setMediaType(s3UploadResult.getMediaType());
             topicEntries.add(topicEntry); // DTO -> Entity 매핑
