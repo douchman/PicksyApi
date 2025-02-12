@@ -12,6 +12,7 @@ import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
 import com.buck.vsplay.global.constants.Visibility;
+import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
@@ -19,6 +20,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -93,9 +97,22 @@ public class VsTopicService implements IVsTopicService {
     }
 
     @Override
-    public VsTopicDto.PublicVsTopicList getPublicVsTopicList() {
-        return VsTopicDto.PublicVsTopicList.builder()
-                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(vsTopicRepository.findAllByVisibility(Visibility.PUBLIC)))
+    public VsTopicDto.VsTopicSearchResponse getPublicVsTopicList( VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
+        int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
+
+        Page<VsTopic> topicPage = vsTopicRepository.findByTitleContainingAndSubjectContaining(
+                vsTopicSearchRequest.getKeyword(), // 제목 : title
+                vsTopicSearchRequest.getKeyword(), // 주제 : subject
+                PageRequest.of(page, vsTopicSearchRequest.getSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
+
+        return VsTopicDto.VsTopicSearchResponse.builder()
+                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicPage.getContent()))
+                .pagination(Pagination.builder()
+                        .totalPages(topicPage.getTotalPages())
+                        .totalItems(topicPage.getTotalElements())
+                        .currentPage(topicPage.getNumber() + 1) // index 조정
+                        .pageSize(topicPage.getSize())
+                        .build())
                 .build();
     }
 
