@@ -34,10 +34,15 @@ public class VsTopicDto {
     public static class VsTopicCreateRequest{
         @NotNull(message = "대결 제목은 필수 입력 항목입니다.")
         private String title;
+
         @NotNull(message = "대결 주제는 필수 입력 항목입니다.")
+
         private String subject;
         private String description;
         private MultipartFile thumbnail;
+
+        @NotNull(message = "공개 범위는 필수 입력 항목입니다.")
+        private Visibility visibility;
     }
 
     @Data
