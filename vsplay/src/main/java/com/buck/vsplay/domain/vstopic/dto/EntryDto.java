@@ -35,7 +35,7 @@ public class EntryDto {
     }
 
     @Data
-    public static class CreatedEntryList{
+    public static class EntryList{
         List<Entry> entries;
     }
 

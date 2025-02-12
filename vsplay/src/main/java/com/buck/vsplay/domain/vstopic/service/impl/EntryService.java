@@ -48,8 +48,8 @@ public class EntryService implements IEntryService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
-    public EntryDto.CreatedEntryList getEntriesByTopicId(Long topicId) {
-        EntryDto.CreatedEntryList createdEntryList = new EntryDto.CreatedEntryList();
+    public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
+        EntryDto.EntryList createdEntryList = new EntryDto.EntryList();
 
         if(!topicRepository.existsById(topicId)) {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
