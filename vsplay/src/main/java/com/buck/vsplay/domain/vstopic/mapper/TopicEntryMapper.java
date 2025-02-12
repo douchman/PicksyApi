@@ -6,8 +6,6 @@ import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import org.mapstruct.*;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring", uses = S3Util.class)
 public interface TopicEntryMapper {
 
@@ -16,18 +14,8 @@ public interface TopicEntryMapper {
 
     TopicEntry toEntityFromCreatedEntryDto(EntryDto.CreateEntry topicEntry);
 
-    @Mapping(target = "mediaUrl" , qualifiedByName = "signedMediaUrl")
-    EntryDto.Entry toCreatedEntry(TopicEntry topicEntry);
-
     @Mapping(target = "mediaUrl", qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toEntryDtoFromEntity(TopicEntry topicEntry);
-
-
-    default List<EntryDto.Entry> toCreatedEntryList(List<TopicEntry> entries){
-        return entries.stream()
-                .map(this::toCreatedEntry)
-                .toList();
-    }
 
     /**
      * 엔티티 업데이트를 위해 DTO 의 값을 기존 Entry 엔티티에 적용
