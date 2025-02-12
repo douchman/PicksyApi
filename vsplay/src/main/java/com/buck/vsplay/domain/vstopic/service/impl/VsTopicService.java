@@ -22,6 +22,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -94,5 +97,21 @@ public class VsTopicService implements IVsTopicService {
         return VsTopicDto.PublicVsTopicList.builder()
                 .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(vsTopicRepository.findAllByVisibility(Visibility.PUBLIC)))
                 .build();
+    }
+
+    @Override
+    public List<VsTopicDto.TopicVisibility> getTopicVisibilities() {
+
+        List<VsTopicDto.TopicVisibility> topicVisibilityList = new ArrayList<>();
+
+        for (Visibility visibility : Visibility.values()) {
+            topicVisibilityList.add(
+                    VsTopicDto.TopicVisibility.builder()
+                            .visibility(visibility.getCode())
+                            .description(visibility.getDescription())
+                            .build());
+        }
+
+        return topicVisibilityList;
     }
 }
