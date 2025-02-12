@@ -3,7 +3,6 @@ package com.buck.vsplay.domain.vstopic.mapper;
 
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
-import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import org.mapstruct.*;
 
@@ -15,8 +14,7 @@ public interface TopicEntryMapper {
     @Mapping(target = "mediaUrl" , qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toTopicEntryDtoFromEntity(TopicEntry topicEntry);
 
-    @Mapping(target = "topic", expression = "java(vsTopic)")
-    TopicEntry toTopicEntryWithTopic(EntryDto.CreateEntry topicEntry, @Context VsTopic vsTopic);
+    TopicEntry toEntityFromCreatedEntryDto(EntryDto.CreateEntry topicEntry);
 
     @Mapping(target = "mediaUrl" , qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toCreatedEntry(TopicEntry topicEntry);
