@@ -15,6 +15,14 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class VsTopicDto {
 
+    @Getter
+    @Setter
+    @Builder
+    public static class TopicVisibility {
+        String visibility;
+        String description;
+    }
+
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class VsTopic{

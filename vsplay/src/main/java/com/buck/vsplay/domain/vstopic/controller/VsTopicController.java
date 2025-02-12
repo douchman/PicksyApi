@@ -10,11 +10,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("vstopic")
 public class VsTopicController {
     private final VsTopicService vsTopicService;
+
+    @GetMapping("visibilities")
+    public ResponseEntity<SingleResponseDto<List<VsTopicDto.TopicVisibility>>> getTopicVisibilities(){
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getTopicVisibilities()), HttpStatus.OK);
+    }
 
     @GetMapping
     public ResponseEntity<SingleResponseDto<VsTopicDto.PublicVsTopicList>> getPublicVsTopics() {
