@@ -9,6 +9,6 @@ public interface IVsTopicService {
     void createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest);
     void updateVsTopic(Long topicId, VsTopicDto.VsTopicUpdateRequest updateVsTopicRequest);
     VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId);
-    VsTopicDto.VsTopicSearchResponse getPublicVsTopicList( VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest);
+    VsTopicDto.VsTopicSearchResponse searchPublicVsTopic( VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest);
     List<VsTopicDto.TopicVisibility> getTopicVisibilities();
 }

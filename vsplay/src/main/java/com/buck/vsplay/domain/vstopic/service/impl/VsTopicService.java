@@ -97,7 +97,7 @@ public class VsTopicService implements IVsTopicService {
     }
 
     @Override
-    public VsTopicDto.VsTopicSearchResponse getPublicVsTopicList( VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
+    public VsTopicDto.VsTopicSearchResponse searchPublicVsTopic( VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
         int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
 
         Page<VsTopic> topicPage = vsTopicRepository.findByTitleContainingAndSubjectContaining(
