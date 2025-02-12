@@ -36,7 +36,7 @@ public class VsTopicService implements IVsTopicService {
         Member existMember = authUserService.getAuthUser();
         S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(createVsTopicRequest.getThumbnail() , existMember.getId().toString());
 
-        VsTopic vsTopic = vsTopicMapper.toEntity(createVsTopicRequest);
+        VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
         vsTopic.setThumbnail(s3UploadResult.getObjectKey());
 

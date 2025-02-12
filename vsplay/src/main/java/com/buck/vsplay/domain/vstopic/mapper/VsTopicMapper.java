@@ -11,8 +11,9 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", uses = S3Util.class)
 public interface VsTopicMapper {
+
     @Mapping(target = "thumbnail", ignore = true)
-    VsTopic toEntity(VsTopicDto.VsTopicCreateRequest vsTopicCreateRequest);
+    VsTopic toEntityFromVstopicCreateRequestDtoWithoutThumbnail(VsTopicDto.VsTopicCreateRequest vsTopicCreateRequest);
 
     VsTopicDto.VsTopic toVsTopicDtoFromEntity(VsTopic vsTopic);
 
