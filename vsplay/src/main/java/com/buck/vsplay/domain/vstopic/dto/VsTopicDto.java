@@ -24,6 +24,12 @@ public class VsTopicDto {
         private String description;
     }
 
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public static class VsTopicWithThumbnail extends VsTopic{
+        String thumbnail;
+    }
+
     @Data
     public static class VsTopicCreateRequest{
         @NotNull(message = "대결 제목은 필수 입력 항목입니다.")
@@ -60,6 +66,6 @@ public class VsTopicDto {
     @Getter
     @Builder
     public static class PublicVsTopicList{
-        List<VsTopicDto.VsTopic> topicList;
+        List<VsTopicDto.VsTopicWithThumbnail> topicList;
     }
 }
