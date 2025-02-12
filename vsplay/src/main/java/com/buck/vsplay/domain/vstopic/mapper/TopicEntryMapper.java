@@ -27,11 +27,6 @@ public interface TopicEntryMapper {
     @Mapping(target = "mediaUrl", qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toEntryDtoFromEntity(TopicEntry topicEntry);
 
-    @Named("signedMediaUrl")
-    default String signedMediaUrl(String mediaUrl, @Context S3Util s3Util) {
-        return s3Util.getUploadedObjectUrl(mediaUrl);
-    }
-
 
     default List<EntryDto.Entry> toCreatedEntryList(List<TopicEntry> entries){
         return entries.stream()
