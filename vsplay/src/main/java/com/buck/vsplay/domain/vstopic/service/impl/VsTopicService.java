@@ -3,9 +3,11 @@ package com.buck.vsplay.domain.vstopic.service.impl;
 import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
+import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
+import com.buck.vsplay.domain.vstopic.mapper.TournamentMapper;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
@@ -29,6 +31,7 @@ public class VsTopicService implements IVsTopicService {
     private final S3Util s3Util;
     private final VsTopicRepository vsTopicRepository;
     private final VsTopicMapper vsTopicMapper;
+    private final TournamentMapper tournamentMapper;
     private final AuthUserService authUserService;
 
     @Override
@@ -36,7 +39,7 @@ public class VsTopicService implements IVsTopicService {
         Member existMember = authUserService.getAuthUser();
         S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(createVsTopicRequest.getThumbnail() , existMember.getId().toString());
 
-        VsTopic vsTopic = vsTopicMapper.toEntity(createVsTopicRequest);
+        VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
         vsTopic.setThumbnail(s3UploadResult.getObjectKey());
 
@@ -65,9 +68,25 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
-        VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
-                () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
-        return vsTopicMapper.toVsTopicDetailWithTournaments(vsTopic, vsTopic.getTournaments());
+
+        VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
+
+        VsTopic vsTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
+
+        if ( vsTopic == null ) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntity(vsTopic));
+
+        if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
+            for (TopicTournament tournament : vsTopic.getTournaments()) {
+                topicDetailWithTournamentsResponse.getTournamentList()
+                        .add(tournamentMapper.toTournamentDtoFromEntityWithoutId(tournament));
+            }
+        }
+
+        return topicDetailWithTournamentsResponse;
     }
 
     @Override
