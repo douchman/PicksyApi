@@ -77,7 +77,7 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDto(vsTopic));
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntity(vsTopic));
 
         if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
             for (TopicTournament tournament : vsTopic.getTournaments()) {
