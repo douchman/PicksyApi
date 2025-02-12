@@ -92,7 +92,7 @@ public class VsTopicService implements IVsTopicService {
     @Override
     public VsTopicDto.PublicVsTopicList getPublicVsTopicList() {
         return VsTopicDto.PublicVsTopicList.builder()
-                .topicList(vsTopicMapper.toVsTopicDtoListFromEntityList(vsTopicRepository.findAllByVisibility(Visibility.PUBLIC)))
+                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(vsTopicRepository.findAllByVisibility(Visibility.PUBLIC)))
                 .build();
     }
 }
