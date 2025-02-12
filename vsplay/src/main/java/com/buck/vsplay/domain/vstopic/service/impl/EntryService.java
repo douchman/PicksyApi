@@ -49,15 +49,21 @@ public class EntryService implements IEntryService {
 
     @Override
     public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
-        EntryDto.EntryList createdEntryList = new EntryDto.EntryList();
+        EntryDto.EntryList entryList = new EntryDto.EntryList();
 
         if(!topicRepository.existsById(topicId)) {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        createdEntryList.setEntries(topicEntryMapper.toCreatedEntryList(entryRepository.findByTopicId(topicId)));
+        List<TopicEntry> createdEntries = entryRepository.findByTopicId(topicId);
 
-        return createdEntryList;
+        if( createdEntries != null && !createdEntries.isEmpty()){
+            for (TopicEntry createdEntry : createdEntries) {
+                entryList.getEntries().add(topicEntryMapper.toEntryDtoFromEntity(createdEntry));
+            }
+        }
+
+        return entryList;
     }
 
     @Override
