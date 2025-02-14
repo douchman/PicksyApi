@@ -131,4 +131,28 @@ public class VsTopicService implements IVsTopicService {
 
         return topicVisibilityList;
     }
+
+    @Override
+    public VsTopicDto.VsTopicSearchResponse getMyVsTopics(VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
+        Member member = authUserService.getAuthUser();
+        int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
+
+        log.info("memberID -> {}" , member.getId());
+
+        Page<VsTopic> topicPage = vsTopicRepository.findByMemberIdTitleContainingAndSubjectContaining(
+                member.getId(),
+                vsTopicSearchRequest.getKeyword(), // 제목 : title
+                vsTopicSearchRequest.getKeyword(), // 주제 : subject
+                PageRequest.of(page, vsTopicSearchRequest.getSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
+
+        return VsTopicDto.VsTopicSearchResponse.builder()
+                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicPage.getContent()))
+                .pagination(Pagination.builder()
+                        .totalPages(topicPage.getTotalPages())
+                        .totalItems(topicPage.getTotalElements())
+                        .currentPage(topicPage.getNumber() + 1) // index 조정
+                        .pageSize(topicPage.getSize())
+                        .build())
+                .build();
+    }
 }

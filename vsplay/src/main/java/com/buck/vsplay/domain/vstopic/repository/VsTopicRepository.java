@@ -20,4 +20,10 @@ public interface VsTopicRepository extends JpaRepository<VsTopic, Long> {
 
     @Query("SELECT vt FROM VsTopic vt JOIN FETCH vt.tournaments WHERE vt.id = :topicId")
     VsTopic findWithTournamentsByTopicId(@Param("topicId") Long topicId);
+
+    @Query("SELECT vt FROM VsTopic vt WHERE vt.member.id = :memberId AND (vt.title LIKE %:title% OR vt.subject LIKE %:subject%)")
+    Page<VsTopic> findByMemberIdTitleContainingAndSubjectContaining(
+            @Param("memberId") Long memberId,
+            @Param("title") String title,
+            @Param("subject") String subject, Pageable pageable);
 }

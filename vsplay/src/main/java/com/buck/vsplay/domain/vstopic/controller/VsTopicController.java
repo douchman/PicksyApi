@@ -54,4 +54,11 @@ public class VsTopicController {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailWithTournaments(topicId)),HttpStatus.OK );
     }
 
+    @GetMapping("mine")
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicSearchResponse>> myVsTopics(
+            VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest
+    ) {
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getMyVsTopics(vsTopicSearchRequest)), HttpStatus.OK);
+    }
+
 }
