@@ -86,7 +86,7 @@ public class VsTopicDto {
     @Data
     public static class VsTopicSearchRequest{
         private String keyword;
-        private Integer page;
+        private Integer page = 1 ;
         private Integer size = 20;
     }
 }
