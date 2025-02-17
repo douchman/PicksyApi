@@ -147,10 +147,9 @@ public class VsTopicService implements IVsTopicService {
 
         Specification<VsTopic> vsTopicSpecification = VsTopicSpecification.withAllFilters(
                 member.getId(),
-                vsTopicSearchRequest.getKeyword()
+                vsTopicSearchRequest.getKeyword(),
+                false
         );
-
-        vsTopicSpecification = vsTopicSpecification.and(VsTopicSpecification.deleteFilter(false));
 
         Page<VsTopic> topicPage = vsTopicRepository.findAll(
                 vsTopicSpecification,

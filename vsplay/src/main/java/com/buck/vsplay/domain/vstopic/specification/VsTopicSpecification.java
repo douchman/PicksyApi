@@ -33,7 +33,7 @@ public class VsTopicSpecification {
             criteriaBuilder.equal(root.get("deleted"), delete);
     }
 
-    public static Specification<VsTopic> withAllFilters(Long memberId, String keyword) {
-        return Specification.where(memberIdFilter(memberId).and(keywordFilter(keyword)));
+    public static Specification<VsTopic> withAllFilters(Long memberId, String keyword, boolean delete) {
+        return Specification.where(memberIdFilter(memberId).and(keywordFilter(keyword))).and(deleteFilter(delete));
     }
 }
