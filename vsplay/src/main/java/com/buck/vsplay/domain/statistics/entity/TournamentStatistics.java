@@ -27,7 +27,7 @@ public class TournamentStatistics extends Timestamp {
     @JoinColumn(name ="tournament_id")
     private TopicTournament topicTournament;
 
-    @Column(name = "tournament_stage", unique = true)
+    @Column(name = "tournament_stage")
     @Comment("토너먼트 단계 (ex. 8강 16강")
     private Integer tournamentStage;
 

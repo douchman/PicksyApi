@@ -2,6 +2,7 @@ package com.buck.vsplay.domain.vstopic.dto;
 
 
 import com.buck.vsplay.global.constants.Visibility;
+import com.buck.vsplay.global.dto.Pagination;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -15,6 +16,14 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class VsTopicDto {
 
+    @Getter
+    @Setter
+    @Builder
+    public static class TopicVisibility {
+        String visibility;
+        String description;
+    }
+
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class VsTopic{
@@ -24,14 +33,25 @@ public class VsTopicDto {
         private String description;
     }
 
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public static class VsTopicWithThumbnail extends VsTopic{
+        String thumbnail;
+    }
+
     @Data
     public static class VsTopicCreateRequest{
         @NotNull(message = "대결 제목은 필수 입력 항목입니다.")
         private String title;
+
         @NotNull(message = "대결 주제는 필수 입력 항목입니다.")
+
         private String subject;
         private String description;
         private MultipartFile thumbnail;
+
+        @NotNull(message = "공개 범위는 필수 입력 항목입니다.")
+        private Visibility visibility;
     }
 
     @Data
@@ -45,7 +65,6 @@ public class VsTopicDto {
 
     @Data
     public static class Tournament{
-        Long id;
         Integer tournamentStage;
         String tournamentName;
     }
@@ -57,4 +76,17 @@ public class VsTopicDto {
         List<Tournament> tournamentList = new ArrayList<>();
     }
 
+    @Getter
+    @Builder
+    public static class VsTopicSearchResponse{
+        List<VsTopicDto.VsTopicWithThumbnail> topicList;
+        Pagination pagination;
+    }
+
+    @Data
+    public static class VsTopicSearchRequest{
+        private String keyword;
+        private Integer page = 1 ;
+        private Integer size = 20;
+    }
 }

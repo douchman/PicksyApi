@@ -1,11 +1,17 @@
 package com.buck.vsplay.domain.statistics.service.impl;
 
+import com.buck.vsplay.domain.statistics.dto.EntryStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.EntryStatistics;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
+import com.buck.vsplay.domain.statistics.mapper.EntryStatisticsMapper;
 import com.buck.vsplay.domain.statistics.repository.EntryStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryStatisticsService;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
+import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
+import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -21,7 +27,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class EntryStatisticsService implements IEntryStatisticsService {
+
     private final EntryStatisticsRepository entryStatisticsRepository;
+    private final VsTopicRepository vsTopicRepository;
+    private final EntryStatisticsMapper entryStatisticsMapper;
+    private final TopicEntryMapper topicEntryMapper;
 
     @EventListener
     public void handleEntryCrateEvent(EntryEvent.CreateEvent entryCreateEvent){
@@ -73,5 +83,27 @@ public class EntryStatisticsService implements IEntryStatisticsService {
 
         entryStatisticsRepository.save(winnerEntry);
         entryStatisticsRepository.save(loserEntry);
+    }
+
+    @Override
+    public EntryStatisticsDto.EntryStatWithEntryInfoList getEntryStatisticsWithEntryInfo(Long topicId) {
+
+        List<EntryStatisticsDto.EntryStatWithEntryInfo> entriesStatistics = new ArrayList<>();
+
+        if(!vsTopicRepository.existsById(topicId)){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        List<EntryStatistics> entryStatistics = entryStatisticsRepository.findWithTopicEntryByTopicId(topicId);
+
+        for (EntryStatistics entryStatistic : entryStatistics) {
+            entriesStatistics.add(
+                    EntryStatisticsDto.EntryStatWithEntryInfo.builder()
+                            .entry(topicEntryMapper.toTopicEntryDtoFromEntity(entryStatistic.getTopicEntry()))
+                            .statistics(entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistic))
+                            .build()
+            );
+        }
+        return new EntryStatisticsDto.EntryStatWithEntryInfoList(entriesStatistics);
     }
 }

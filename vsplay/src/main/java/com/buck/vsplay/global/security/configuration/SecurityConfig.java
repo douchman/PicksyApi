@@ -37,9 +37,12 @@ public class SecurityConfig {
                 .sessionManagement( session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/vstopic").hasRole("GENERAL")
-                        .requestMatchers(SecurityPaths.getPublicPostPaths()).permitAll()
-                        .anyRequest().authenticated())
+                                .requestMatchers(HttpMethod.POST,"/vstopic").hasRole("GENERAL")
+                                .requestMatchers(HttpMethod.PATCH,"/vstopic").hasRole("GENERAL")
+                                .requestMatchers(HttpMethod.GET,"/vstopic/mine").hasRole("GENERAL")
+                                .requestMatchers("/vstopic/*/entries").hasRole("GENERAL")
+                                .requestMatchers("/**").permitAll()
+                )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
 

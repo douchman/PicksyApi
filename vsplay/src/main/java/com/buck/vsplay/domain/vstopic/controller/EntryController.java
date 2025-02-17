@@ -11,19 +11,20 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("vstopic")
 public class EntryController {
 
     private final EntryService entryService;
 
-    @GetMapping("vstopic/{id}/entries")
-    public ResponseEntity<SingleResponseDto<EntryDto.CreatedEntryList>> getAllEntries(
+    @GetMapping("{id}/entries")
+    public ResponseEntity<SingleResponseDto<EntryDto.EntryList>> getAllEntries(
             @PathVariable("id") Long topicId
     ) {
 
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), entryService.getEntriesByTopicId(topicId)) ,HttpStatus.OK);
     }
 
-    @PostMapping("vstopic/{id}/entries")
+    @PostMapping("{id}/entries")
     public ResponseEntity<SingleResponseDto<Integer>> createEntries(
             @PathVariable("id") Long topicId,
             @ModelAttribute EntryDto.CreateEntriesRequest request
@@ -33,7 +34,7 @@ public class EntryController {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
     }
 
-    @PatchMapping("vstopic/{topicId}/entries/{entryId}")
+    @PatchMapping("{topicId}/entries/{entryId}")
     public ResponseEntity<SingleResponseDto<Integer>> updateEntry(
             @PathVariable("topicId") Long topicId,
             @PathVariable("entryId") Long entryId,

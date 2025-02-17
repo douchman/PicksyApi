@@ -5,6 +5,7 @@ import com.buck.vsplay.global.constants.MediaType;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -14,7 +15,7 @@ public class EntryDto {
 
     @Data
     public static class Entry{
-        private Long entryId;
+        private Long id;
         private String entryName;
         private String description;
         private MediaType mediaType;
@@ -35,8 +36,8 @@ public class EntryDto {
     }
 
     @Data
-    public static class CreatedEntryList{
-        List<Entry> entries;
+    public static class EntryList{
+        List<Entry> entries = new ArrayList<>();
     }
 
     @EqualsAndHashCode(callSuper = true)

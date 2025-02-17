@@ -1,21 +1,26 @@
 package com.buck.vsplay.domain.statistics.service.impl;
 
+import com.buck.vsplay.domain.statistics.dto.TournamentStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.TournamentStatistics;
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
+import com.buck.vsplay.domain.statistics.mapper.TournamentStatisticsMapper;
 import com.buck.vsplay.domain.statistics.repository.TournamentStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.ITournamentStatisticsService;
 import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
+import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class TournamentStatisticsService implements ITournamentStatisticsService {
 
     private final TournamentStatisticsRepository tournamentStatisticsRepository;
+    private final VsTopicRepository vsTopicRepository;
+    private final TournamentStatisticsMapper tournamentStatisticsMapper;
 
     @EventListener // 생성된 토너먼트 엔티티에 대한 이벤트 구독
     public void handleTopicTournamentUpdated(TournamentEvent.CreateEvent topicCreateEvent) {
@@ -45,5 +50,17 @@ public class TournamentStatisticsService implements ITournamentStatisticsService
         tournamentStatistics.increaseStageMatches();
 
         tournamentStatisticsRepository.save(tournamentStatistics);
+    }
+
+    @Override
+    public TournamentStatisticsDto.TournamentStatisticsResponse getTournamentStatistics(Long topicId) {
+
+        if(!vsTopicRepository.existsById(topicId)) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        return new TournamentStatisticsDto.TournamentStatisticsResponse(
+                tournamentStatisticsMapper.toTournamentStatisticsDtoList(
+                        tournamentStatisticsRepository.findByTopicId(topicId)));
     }
 }

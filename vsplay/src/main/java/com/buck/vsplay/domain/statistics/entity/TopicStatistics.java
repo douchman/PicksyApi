@@ -34,17 +34,9 @@ public class TopicStatistics extends Timestamp {
     @Comment("진행한 총 대결 횟수(중복포함")
     private Integer totalMatches;
 
-    @Column(name = "total_players")
-    @Comment("진행한 총 사용자 수(중복제외)")
-    private Integer totalPlayers;
-
     @Column(name = "completed_matches")
     @Comment("완전히 완료된 대결 횟수")
     private Integer completedMatches;
-
-    @Column(name = "completed_players")
-    @Comment("완전히 완료한 고유 사용자 수")
-    private Integer completedPlayers;
 
     @OneToOne
     @JoinColumn(name = "most_popular_entry_id")

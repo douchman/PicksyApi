@@ -10,11 +10,25 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("vstopic")
 public class VsTopicController {
     private final VsTopicService vsTopicService;
+
+    @GetMapping("visibilities")
+    public ResponseEntity<SingleResponseDto<List<VsTopicDto.TopicVisibility>>> getTopicVisibilities(){
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getTopicVisibilities()), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicSearchResponse>> searchPublicVsTopic(
+            VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest
+    ) {
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.searchPublicVsTopic(vsTopicSearchRequest)), HttpStatus.OK);
+    }
 
     @PostMapping
     public ResponseEntity<SingleResponseDto<Integer>> createTopic(
@@ -38,6 +52,13 @@ public class VsTopicController {
             @PathVariable("id") Long topicId
     ) {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailWithTournaments(topicId)),HttpStatus.OK );
+    }
+
+    @GetMapping("mine")
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicSearchResponse>> myVsTopics(
+            VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest
+    ) {
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getMyVsTopics(vsTopicSearchRequest)), HttpStatus.OK);
     }
 
 }
