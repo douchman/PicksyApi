@@ -44,6 +44,7 @@ public class TopicCommentService implements ITopicCommentService {
         topicCommentRepository.save(TopicComment.builder()
                 .topic(vsTopic)
                 .member(authUser.orElse(null))
+                .author(commentCreateRequest.getAuthor())
                 .content(commentCreateRequest.getContent())
                 .build());
 
