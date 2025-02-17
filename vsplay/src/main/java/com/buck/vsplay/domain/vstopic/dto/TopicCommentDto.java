@@ -21,8 +21,8 @@ public class TopicCommentDto {
     @Setter
     public static class CommentSearchRequest{
         String keyword;
-        Integer page;
-        Integer size;
+        Integer page = 1;
+        Integer size = 20;
     }
 
     @Getter
