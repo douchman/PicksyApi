@@ -39,6 +39,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(HttpMethod.POST,"/vstopic").hasRole("GENERAL")
                                 .requestMatchers(HttpMethod.PATCH,"/vstopic").hasRole("GENERAL")
+                                .requestMatchers(HttpMethod.GET,"/vstopic/mine").hasRole("GENERAL")
                                 .requestMatchers("/vstopic/*/entries").hasRole("GENERAL")
                                 .requestMatchers("/**").permitAll()
                 )
