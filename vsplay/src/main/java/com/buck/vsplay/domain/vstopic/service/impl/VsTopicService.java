@@ -102,9 +102,11 @@ public class VsTopicService implements IVsTopicService {
     public VsTopicDto.VsTopicSearchResponse searchPublicVsTopic( VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
         int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
 
-        Specification<VsTopic> vsTopicSpecification = VsTopicSpecification.keywordFilter(
+       Specification<VsTopic> vsTopicSpecification = VsTopicSpecification.keywordFilter(
                 vsTopicSearchRequest.getKeyword()
         );
+
+        vsTopicSpecification = vsTopicSpecification.and(VsTopicSpecification.deleteFilter(false));
 
 
         Page<VsTopic> topicPage = vsTopicRepository.findAll(
@@ -147,6 +149,8 @@ public class VsTopicService implements IVsTopicService {
                 member.getId(),
                 vsTopicSearchRequest.getKeyword()
         );
+
+        vsTopicSpecification = vsTopicSpecification.and(VsTopicSpecification.deleteFilter(false));
 
         Page<VsTopic> topicPage = vsTopicRepository.findAll(
                 vsTopicSpecification,
