@@ -31,6 +31,9 @@ public class TopicComment extends Timestamp {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Column(name = "author")
+    String author = "익명";
+
     @Column(name = "content", columnDefinition = "TEXT", nullable = false)
     private String content;
 
