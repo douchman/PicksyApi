@@ -67,6 +67,8 @@ public class VsTopicService implements IVsTopicService {
         MultipartFile thumbnail = updateVsTopicRequest.getThumbnail();
         boolean isFileExist = (thumbnail != null && !thumbnail.isEmpty());
 
+        Visibility updateVisibility = updateVsTopicRequest.getVisibility();
+
         VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
@@ -75,6 +77,9 @@ public class VsTopicService implements IVsTopicService {
             S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(thumbnail, objectKey);
             vsTopic.setThumbnail(s3UploadResult.getObjectKey());
         }
+
+        vsTopic.setShortCode(Visibility.UNLISTED.equals(updateVisibility) ? generateShortCode(vsTopic.getId()) : null);
+
         vsTopicMapper.updateVsTopicFromUpdateRequest(updateVsTopicRequest, vsTopic);
         vsTopicRepository.save(vsTopic);
 
