@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("vstopic")
+@RequestMapping("topics")
 public class VsTopicController {
     private final VsTopicService vsTopicService;
 
