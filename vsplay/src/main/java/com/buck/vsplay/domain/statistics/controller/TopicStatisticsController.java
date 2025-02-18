@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("statistics/vstopic")
+@RequestMapping("statistics/topics")
 public class TopicStatisticsController {
 
     private final TopicStatisticsService topicStatisticsService;
