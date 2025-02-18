@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("statistics/versus/vstopic/")
+@RequestMapping("statistics/versus/topics/")
 public class EntryVersusStatisticsController {
 
     private final EntryVersusStatisticsService entryVersusStatisticsService;
