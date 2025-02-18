@@ -14,4 +14,5 @@ public interface VsTopicRepository extends JpaRepository<VsTopic, Long>, JpaSpec
     @Query("SELECT vt FROM VsTopic vt JOIN FETCH vt.tournaments WHERE vt.id = :topicId")
     VsTopic findWithTournamentsByTopicId(@Param("topicId") Long topicId);
 
+    VsTopic findWithTournamentsByShortCode(String shortCode);
 }
