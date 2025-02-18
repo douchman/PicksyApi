@@ -45,6 +45,9 @@ public class VsTopic extends Timestamp{
     @Comment("대표이미지")
     private String thumbnail;
 
+    @Column(name = "is_delete")
+    private boolean deleted = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility")
     @ColumnDefault("'PUBLIC'")
