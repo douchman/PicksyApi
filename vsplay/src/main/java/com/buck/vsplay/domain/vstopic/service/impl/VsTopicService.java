@@ -109,6 +109,28 @@ public class VsTopicService implements IVsTopicService {
     }
 
     @Override
+    public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournamentsByShortCode(String shortCode) {
+
+        VsTopic vsTopic = vsTopicRepository.findWithTournamentsByShortCode(shortCode);
+
+        if(vsTopic == null) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
+
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntity(vsTopic));
+
+        if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
+            for (TopicTournament tournament : vsTopic.getTournaments()) {
+                topicDetailWithTournamentsResponse.getTournamentList()
+                        .add(tournamentMapper.toTournamentDtoFromEntityWithoutId(tournament));
+            }
+        }
+        return topicDetailWithTournamentsResponse;
+    }
+
+    @Override
     public VsTopicDto.VsTopicSearchResponse searchPublicVsTopic( VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
         int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
 
