@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("vstopic")
+@RequestMapping("topics")
 public class MatchController {
 
     private final MatchService matchService;
 
-    @PostMapping("{topicId}/play-record")
+    @PostMapping("{topicId}/play-records")
     public ResponseEntity<SingleResponseDto<TopicPlayRecordDto.PlayRecordResponse>> recordTopicPlay(
             @PathVariable("topicId") Long topicId,
             @RequestBody TopicPlayRecordDto.PlayRecordRequest playRecordRequest
@@ -25,14 +25,14 @@ public class MatchController {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), matchService.createTopicPlayRecord(topicId, playRecordRequest)), HttpStatus.OK);
     }
 
-    @GetMapping("play-record/{playRecordId}/match")
+    @GetMapping("play-records/{playRecordId}/matches")
     public ResponseEntity<SingleResponseDto<EntryMatchDto.EntryMatchResponse>> getEntryMatch(
             @PathVariable("playRecordId") Long playRecordId
     ){
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(),matchService.getEntryMatch(playRecordId)), HttpStatus.OK);
     }
 
-    @PatchMapping("play-record/{playRecordId}/match/{matchId}")
+    @PatchMapping("play-records/{playRecordId}/matches/{matchId}")
     public ResponseEntity<SingleResponseDto<EntryMatchDto.UpdateEntryMatchResultResponse>> updateEntryMatch(
             @PathVariable("playRecordId") Long playRecordId,
             @PathVariable("matchId") Long matchId,
