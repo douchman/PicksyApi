@@ -54,6 +54,13 @@ public class VsTopicController {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailWithTournaments(topicId)),HttpStatus.OK );
     }
 
+    @GetMapping("link/{shortCode}")
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicDetailWithTournamentsResponse>> getTopicDetailWithTournamentsByShortCode (
+            @PathVariable("shortCode") String shortCode
+    ) {
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailWithTournamentsByShortCode(shortCode)),HttpStatus.OK );
+    }
+
     @GetMapping("mine")
     public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicSearchResponse>> myVsTopics(
             VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest
