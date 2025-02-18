@@ -13,4 +13,5 @@ public interface IVsTopicService {
     VsTopicDto.VsTopicSearchResponse searchPublicVsTopic(VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest);
     List<VsTopicDto.TopicVisibility> getTopicVisibilities();
     VsTopicDto.VsTopicSearchResponse getMyVsTopics(VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest);
+    VsTopicDto.VsTopicUnlistedLinkResponse getVsTopicUnlistedLink(Long topicId);
 }
