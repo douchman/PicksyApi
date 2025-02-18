@@ -28,8 +28,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -165,4 +167,10 @@ public class VsTopicService implements IVsTopicService {
                         .build())
                 .build();
     }
+
+    private String generateShortCode(Long topicId) {
+        UUID uuid = UUID.nameUUIDFromBytes(String.valueOf(topicId).getBytes(StandardCharsets.UTF_8));
+        return uuid.toString().replace("-", "").substring(0, 32);
+    }
+
 }
