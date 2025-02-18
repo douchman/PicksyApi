@@ -50,9 +50,12 @@ public class VsTopicService implements IVsTopicService {
         Member existMember = authUserService.getAuthUser();
         S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(createVsTopicRequest.getThumbnail() , existMember.getId().toString());
 
+        Visibility requestVisibility = createVsTopicRequest.getVisibility();
+
         VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
         vsTopic.setThumbnail(s3UploadResult.getObjectKey());
+        vsTopic.setShortCode(Visibility.UNLISTED.equals(requestVisibility) ? generateShortCode(vsTopic.getId()) : null);
 
         vsTopicRepository.save(vsTopic);
         applicationEventPublisher.publishEvent(new TopicEvent.CreateEvent(vsTopic));
