@@ -5,7 +5,8 @@ import lombok.Getter;
 
 @Getter
 public enum VsTopicExceptionCode implements BaseExceptionCode {
-    TOPIC_NOT_FOUND(404, "존재하지 않는 대결주제 입니다.", "TOPIC_001");
+    TOPIC_NOT_FOUND(404, "존재하지 않는 대결주제 입니다.", "TOPIC_001"),
+    TOPIC_NOT_PUBLIC(403, "비공개 또는 접근이 제한된 대결 주제입니다.", "TOPIC_002");
 
 
     private final Integer status;
