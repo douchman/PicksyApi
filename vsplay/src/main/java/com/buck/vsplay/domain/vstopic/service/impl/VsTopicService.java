@@ -20,6 +20,7 @@ import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +39,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class VsTopicService implements IVsTopicService {
+
+    @Value("${app.base-domain}")
+    private String appBaseDomain;
+
     private final ApplicationEventPublisher applicationEventPublisher;
     private final S3Util s3Util;
     private final VsTopicRepository vsTopicRepository;
@@ -202,6 +207,20 @@ public class VsTopicService implements IVsTopicService {
                 .build();
     }
 
+    @Override
+    public VsTopicDto.VsTopicUnlistedLinkResponse getVsTopicUnlistedLink(Long topicId) {
+        VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
+                () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+
+        if(!isUnlistedTopic(vsTopic.getVisibility())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_UNLISTED);
+        }
+
+        return VsTopicDto.VsTopicUnlistedLinkResponse.builder()
+                .link(generateFullUrlOfUnlistedVstopic(vsTopic.getShortCode()))
+                .build();
+    }
+
     private String generateShortCode(Long topicId) {
         UUID uuid = UUID.nameUUIDFromBytes(String.valueOf(topicId).getBytes(StandardCharsets.UTF_8));
         return uuid.toString().replace("-", "").substring(0, 32);
@@ -209,6 +228,14 @@ public class VsTopicService implements IVsTopicService {
 
     private boolean isPublicTopic(Visibility visibility) {
         return Visibility.PUBLIC.equals(visibility);
+    }
+
+    private boolean isUnlistedTopic(Visibility visibility) {
+        return Visibility.UNLISTED.equals(visibility);
+    }
+
+    private String generateFullUrlOfUnlistedVstopic(String shortCode){
+        return appBaseDomain + "vstopic/link/" + shortCode;
     }
 
 }

@@ -61,6 +61,13 @@ public class VsTopicController {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailWithTournamentsByShortCode(shortCode)),HttpStatus.OK );
     }
 
+    @GetMapping("{topicId}/link")
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicUnlistedLinkResponse>> getUnlistedTopicLink (
+            @PathVariable("topicId") Long topicId
+    ){
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicUnlistedLink(topicId)), HttpStatus.OK );
+    }
+
     @GetMapping("mine")
     public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicSearchResponse>> myVsTopics(
             VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest

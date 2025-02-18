@@ -89,4 +89,10 @@ public class VsTopicDto {
         private Integer page = 1 ;
         private Integer size = 20;
     }
+
+    @Data
+    @Builder
+    public static class VsTopicUnlistedLinkResponse{
+        private String link;
+    }
 }
