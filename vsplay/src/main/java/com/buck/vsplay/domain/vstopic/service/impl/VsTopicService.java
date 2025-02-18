@@ -96,6 +96,10 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
+        if ( !isPublicTopic(vsTopic.getVisibility())) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
+        }
+
         topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntity(vsTopic));
 
         if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
@@ -201,6 +205,10 @@ public class VsTopicService implements IVsTopicService {
     private String generateShortCode(Long topicId) {
         UUID uuid = UUID.nameUUIDFromBytes(String.valueOf(topicId).getBytes(StandardCharsets.UTF_8));
         return uuid.toString().replace("-", "").substring(0, 32);
+    }
+
+    private boolean isPublicTopic(Visibility visibility) {
+        return Visibility.PUBLIC.equals(visibility);
     }
 
 }
