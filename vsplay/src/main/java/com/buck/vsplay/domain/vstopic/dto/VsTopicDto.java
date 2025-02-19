@@ -55,6 +55,14 @@ public class VsTopicDto {
     }
 
     @Data
+    @Builder
+    public static class VsTopicCreateResponse{
+        private Long topicId;
+        private String subject;
+        private String description;
+    }
+
+    @Data
     public static class VsTopicUpdateRequest{
         private String title;
         private String subject;
