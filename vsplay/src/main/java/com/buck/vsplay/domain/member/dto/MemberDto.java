@@ -7,16 +7,11 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MemberDto {
 
     @Data
-    public static class MemberInfo{
-
-        private Long id;
-
+    public static class CreateMemberRequest{
         @NotNull(message = "아이디는 필수 입력 항목 입니다.")
         private String loginId;
 
@@ -26,20 +21,17 @@ public class MemberDto {
 
         @NotNull(message = "비밀번호가 비었습니다.")
         private String password;
-
-        private AddressInfo addressInfo;
     }
 
     @Data
-    public static class AddressInfo{
-        private String street;
-        private String city;
-        private String state;
-    }
+    public static class UpdateMemberRequest{
 
-    @Data
-    public static class MemberListResponse{
-        private List<MemberInfo> memberList;
-    }
+        @NotNull(message = "이름이 비었습니다.")
+        @Size(min = 3, max = 50, message = "이름은 2자이상 50자 이하여야 합니다.")
+        private String memberName;
 
+        @NotNull(message = "비밀번호가 비었습니다.")
+        private String password;
+
+    }
 }
