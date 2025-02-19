@@ -2,7 +2,6 @@ package com.buck.vsplay.domain.member.controller;
 
 
 import com.buck.vsplay.domain.member.dto.MemberDto;
-import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.member.service.IMemberService;
 import com.buck.vsplay.global.dto.SingleResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -11,21 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("member")
 @RequiredArgsConstructor
 public class MemberController {
 
     private final IMemberService memberService;
-
-
-    @GetMapping
-    public ResponseEntity<SingleResponseDto<List<Member>>> getMemberList() {
-        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), memberService.getMemberList()), HttpStatus.OK);
-    }
-
 
     @PostMapping
     public ResponseEntity<SingleResponseDto<Integer>> createMember(@RequestBody @Validated MemberDto.CreateMemberRequest member) {

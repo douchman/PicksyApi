@@ -14,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -25,11 +23,6 @@ public class MemberService implements IMemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;
-
-    @Override
-    public List<Member> getMemberList() {
-        return memberRepository.findAll();
-    }
 
     @Override
     public void createMember(MemberDto.CreateMemberRequest createMemberRequest) {
