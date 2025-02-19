@@ -2,9 +2,6 @@ package com.buck.vsplay.global.constants;
 
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 @Getter
 public enum TournamentStage {
 
@@ -25,10 +22,12 @@ public enum TournamentStage {
         this.stageName = stageName;
     }
 
-    public static Optional<String> findStageNameByStage(int stage) {
-        return Arrays.stream(values())
-                .filter(tournamentStage -> tournamentStage.stage == stage)
-                .map(TournamentStage::getStageName)
-                .findFirst();
+    public static String findStageNameByStage(int stage) {
+        for (TournamentStage ts : values()) {
+            if (ts.stage == stage) {
+                return ts.stageName;
+            }
+        }
+        return null;
     }
 }

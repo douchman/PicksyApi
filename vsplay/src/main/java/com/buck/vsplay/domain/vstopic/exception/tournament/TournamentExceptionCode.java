@@ -6,7 +6,6 @@ import lombok.Getter;
 @Getter
 public enum TournamentExceptionCode implements BaseExceptionCode {
 
-    SERVER_ERROR(500, "토너먼트 처리 중 서버 오류가 발생했습니다.", "SERVER_ERROR"),
     TOURNAMENT_INVALID(400, "진행할 수 없는 토너먼트 입니다.", "TOURNAMENT_INVALID"),
     ;
 
