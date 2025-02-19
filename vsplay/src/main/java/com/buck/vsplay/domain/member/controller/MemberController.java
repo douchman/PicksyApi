@@ -35,9 +35,11 @@ public class MemberController {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
     }
 
-    @PatchMapping
-    public ResponseEntity<SingleResponseDto<Integer>> updateMember(@RequestBody @Validated MemberDto.MemberInfo member) {
-        memberService.updateMember(member);
+    @PatchMapping("{memberId}")
+    public ResponseEntity<SingleResponseDto<Integer>> updateMember(
+            @PathVariable("memberId") Long memberId,
+            @RequestBody @Validated MemberDto.UpdateMemberRequest updateMemberRequest) {
+        memberService.updateMember(memberId, updateMemberRequest);
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
     }
 
