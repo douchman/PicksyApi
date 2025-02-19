@@ -28,8 +28,8 @@ public class MemberController {
 
 
     @PostMapping
-    public ResponseEntity<SingleResponseDto<Integer>> registerMember(@RequestBody @Validated MemberDto.MemberInfo member) {
-        memberService.registerMember(member);
+    public ResponseEntity<SingleResponseDto<Integer>> createMember(@RequestBody @Validated MemberDto.MemberInfo member) {
+        memberService.createMember(member);
 
 
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);

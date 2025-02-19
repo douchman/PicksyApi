@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface IMemberService {
     List<Member> getMemberList();
-    void registerMember(MemberDto.MemberInfo member);
+    void createMember(MemberDto.MemberInfo member);
     void updateMember(MemberDto.MemberInfo member);
     void deleteMember(Long id);
 }
