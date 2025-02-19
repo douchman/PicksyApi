@@ -1,6 +1,5 @@
 package com.buck.vsplay.global.security.filter;
 
-import com.buck.vsplay.global.security.configuration.SecurityPaths;
 import com.buck.vsplay.global.security.jwt.JwtService;
 import com.buck.vsplay.global.security.jwt.exception.JwtException;
 import com.buck.vsplay.global.security.jwt.exception.JwtExceptionHandler;
@@ -17,7 +16,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -25,13 +23,6 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final JwtExceptionHandler jwtExceptionHandler;
-
-    @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request){
-        // 검증필터 제외 경로 설정
-        return Arrays.stream(SecurityPaths.getPublicPostPaths())
-                .anyMatch(path -> path.matches(request.getRequestURI()));
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
