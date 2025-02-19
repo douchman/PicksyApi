@@ -8,6 +8,6 @@ import java.util.List;
 public interface IMemberService {
     List<Member> getMemberList();
     void createMember(MemberDto.CreateMemberRequest createMemberRequest);
-    void updateMember(MemberDto.MemberInfo member);
+    void updateMember(Long memberId, MemberDto.UpdateMemberRequest updateMemberRequest);
     void deleteMember(Long id);
 }

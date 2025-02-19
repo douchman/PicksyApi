@@ -45,10 +45,11 @@ public class MemberService implements IMemberService {
     }
 
     @Override
-    public void updateMember(MemberDto.MemberInfo member) {
-        Member existingMember = memberRepository.findById(member.getId()).orElseThrow(() -> new RuntimeException("일치하는 회원을 찾을 수 없습니다."));
+    public void updateMember(Long memberId, MemberDto.UpdateMemberRequest updateMemberRequest) {
+        Member existingMember = memberRepository.findById(memberId).orElseThrow(
+                () -> new RuntimeException("일치하는 회원을 찾을 수 없습니다."));
 
-        existingMember.setMemberName(member.getMemberName());
+        existingMember.setMemberName(updateMemberRequest.getMemberName());
         log.info("member info update success");
     }
 
