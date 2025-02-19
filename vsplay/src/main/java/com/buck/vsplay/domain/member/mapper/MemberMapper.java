@@ -6,5 +6,6 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface MemberMapper {
+    MemberDto.MemberInfo toMemberInfoDtoFromEntity(Member member);
     Member toEntityFromCreateMemberDto(MemberDto.CreateMemberRequest createMemberRequest);
 }
