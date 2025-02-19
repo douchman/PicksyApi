@@ -17,6 +17,7 @@ import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,7 @@ public class VsTopicService implements IVsTopicService {
     private final VsTopicMapper vsTopicMapper;
     private final TournamentMapper tournamentMapper;
     private final AuthUserService authUserService;
+    private final EntityManager entityManager;
 
     @Override
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
@@ -60,9 +62,12 @@ public class VsTopicService implements IVsTopicService {
         VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
         vsTopic.setThumbnail(s3UploadResult.getObjectKey());
+
+        entityManager.persist(vsTopic);
+        entityManager.flush();
+
         vsTopic.setShortCode(Visibility.UNLISTED.equals(requestVisibility) ? generateShortCode(vsTopic.getId()) : null);
 
-        vsTopicRepository.save(vsTopic);
         applicationEventPublisher.publishEvent(new TopicEvent.CreateEvent(vsTopic));
 
         return VsTopicDto.VsTopicCreateResponse.builder()
