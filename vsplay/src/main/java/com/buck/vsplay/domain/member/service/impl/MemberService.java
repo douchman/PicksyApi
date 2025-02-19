@@ -32,13 +32,13 @@ public class MemberService implements IMemberService {
     }
 
     @Override
-    public void createMember(MemberDto.MemberInfo member) {
-        if (memberRepository.findByLoginId(member.getLoginId()).isPresent()) {
+    public void createMember(MemberDto.CreateMemberRequest createMemberRequest) {
+        if (memberRepository.findByLoginId(createMemberRequest.getLoginId()).isPresent()) {
             throw new MemberException(MemberExceptionCode.MEMBER_DUPLICATE_ID);
         }
 
-        Member registerMember = memberMapper.toEntityFromMemberInfoDto(member);
-        registerMember.setPassword(passwordEncoder.encode(member.getPassword()));
+        Member registerMember = memberMapper.toEntityFromCreateMemberDto(createMemberRequest);
+        registerMember.setPassword(passwordEncoder.encode(createMemberRequest.getPassword()));
         registerMember.setRole(Role.GENERAL);
 
         memberRepository.save(registerMember);

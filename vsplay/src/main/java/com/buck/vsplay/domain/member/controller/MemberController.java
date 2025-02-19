@@ -28,7 +28,7 @@ public class MemberController {
 
 
     @PostMapping
-    public ResponseEntity<SingleResponseDto<Integer>> createMember(@RequestBody @Validated MemberDto.MemberInfo member) {
+    public ResponseEntity<SingleResponseDto<Integer>> createMember(@RequestBody @Validated MemberDto.CreateMemberRequest member) {
         memberService.createMember(member);
 
 
