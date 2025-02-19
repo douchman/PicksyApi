@@ -52,11 +52,4 @@ public class MemberService implements IMemberService {
         existingMember.setMemberName(updateMemberRequest.getMemberName());
         log.info("member info update success");
     }
-
-    @Override
-    public void deleteMember(Long id) {
-        Member existingMember = memberRepository.findById(id).orElseThrow( () -> new RuntimeException("일치하는 회원을 찾을 수 없습니다."));
-        memberRepository.delete(existingMember);
-        log.info("member delete success");
-    }
 }

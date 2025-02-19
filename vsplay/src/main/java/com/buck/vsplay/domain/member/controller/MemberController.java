@@ -42,11 +42,4 @@ public class MemberController {
         memberService.updateMember(memberId, updateMemberRequest);
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
     }
-
-    @DeleteMapping("{id}")
-    public ResponseEntity<SingleResponseDto<Integer>> deleteMember(@PathVariable("id") Long id) {
-
-        memberService.deleteMember(id);
-        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
-    }
 }
