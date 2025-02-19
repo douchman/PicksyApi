@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.member.dto;
 
 
+import com.buck.vsplay.domain.member.role.Role;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
@@ -33,5 +34,13 @@ public class MemberDto {
         @NotNull(message = "비밀번호가 비었습니다.")
         private String password;
 
+    }
+
+    @Data
+    public static class MemberInfo{
+        private Integer id;
+        private String loginId;
+        private String memberName;
+        private Role role;
     }
 }
