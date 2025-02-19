@@ -8,6 +8,7 @@ import com.buck.vsplay.domain.member.mapper.MemberMapper;
 import com.buck.vsplay.domain.member.repository.MemberRepository;
 import com.buck.vsplay.domain.member.role.Role;
 import com.buck.vsplay.domain.member.service.IMemberService;
+import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +21,21 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class MemberService implements IMemberService {
 
+    private final AuthUserService authUserService;
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;
+
+    @Override
+    public MemberDto.MemberInfo getMemberInfo() {
+        Member authMember = authUserService.getAuthUser();
+
+        Member member = memberRepository.findById(authMember.getId()).orElseThrow(
+                () -> new MemberException(MemberExceptionCode.MEMBER_NOT_FOUND)
+        );
+
+        return memberMapper.toMemberInfoDtoFromEntity(member);
+    }
 
     @Override
     public void createMember(MemberDto.CreateMemberRequest createMemberRequest) {
