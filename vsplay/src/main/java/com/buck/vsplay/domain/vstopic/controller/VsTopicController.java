@@ -31,11 +31,10 @@ public class VsTopicController {
     }
 
     @PostMapping
-    public ResponseEntity<SingleResponseDto<Integer>> createTopic(
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicCreateResponse>> createTopic(
             @ModelAttribute @Valid VsTopicDto.VsTopicCreateRequest vsTopicDCreateVsTopicRequest) {
 
-        vsTopicService.createVsTopic(vsTopicDCreateVsTopicRequest);
-        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()),HttpStatus.OK );
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.createVsTopic(vsTopicDCreateVsTopicRequest)),HttpStatus.OK );
     }
 
     @PatchMapping("{id}")

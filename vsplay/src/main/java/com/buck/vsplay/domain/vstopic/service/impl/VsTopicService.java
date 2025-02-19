@@ -51,7 +51,7 @@ public class VsTopicService implements IVsTopicService {
     private final AuthUserService authUserService;
 
     @Override
-    public void createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
+    public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
         S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(createVsTopicRequest.getThumbnail() , existMember.getId().toString());
 
@@ -64,6 +64,12 @@ public class VsTopicService implements IVsTopicService {
 
         vsTopicRepository.save(vsTopic);
         applicationEventPublisher.publishEvent(new TopicEvent.CreateEvent(vsTopic));
+
+        return VsTopicDto.VsTopicCreateResponse.builder()
+                .topicId(vsTopic.getId())
+                .subject(vsTopic.getSubject())
+                .description(vsTopic.getDescription())
+                .build();
     }
 
     @Override
