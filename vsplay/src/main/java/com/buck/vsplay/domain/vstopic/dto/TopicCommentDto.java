@@ -13,6 +13,7 @@ public class TopicCommentDto {
     @Getter
     @Setter
     public static class CommentCreateRequest{
+        String author = "익명";
         @NotNull(message = "작성할 코멘트가 비었습니다.")
         String content;
     }
@@ -29,6 +30,7 @@ public class TopicCommentDto {
     @Setter
     @Builder
     public static class Comment{
+        String author;
         String content;
         String createdAt;
     }

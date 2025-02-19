@@ -55,6 +55,14 @@ public class VsTopicDto {
     }
 
     @Data
+    @Builder
+    public static class VsTopicCreateResponse{
+        private Long topicId;
+        private String subject;
+        private String description;
+    }
+
+    @Data
     public static class VsTopicUpdateRequest{
         private String title;
         private String subject;
@@ -88,5 +96,11 @@ public class VsTopicDto {
         private String keyword;
         private Integer page = 1 ;
         private Integer size = 20;
+    }
+
+    @Data
+    @Builder
+    public static class VsTopicUnlistedLinkResponse{
+        private String link;
     }
 }

@@ -44,6 +44,7 @@ public class TopicCommentService implements ITopicCommentService {
         topicCommentRepository.save(TopicComment.builder()
                 .topic(vsTopic)
                 .member(authUser.orElse(null))
+                .author(commentCreateRequest.getAuthor())
                 .content(commentCreateRequest.getContent())
                 .build());
 
@@ -58,7 +59,7 @@ public class TopicCommentService implements ITopicCommentService {
         }
 
         Page<TopicComment> topicCommentPage = topicCommentRepository.findAll(
-                TopicCommentSpecification.keywordFilter(commentSearchRequest.getKeyword()),
+                TopicCommentSpecification.withAllFilters(commentSearchRequest.getKeyword(), false),
                 PageRequest.of(page, commentSearchRequest.getSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
 
         List<TopicCommentDto.Comment> topicCommentList = new ArrayList<>();

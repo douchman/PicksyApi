@@ -25,11 +25,11 @@ public class TopicTournament extends Timestamp {
     @JoinColumn(name = "topic_id")
     private VsTopic vsTopic;
 
-    @Column(name = "tournament_name")
+    @Column(name = "tournament_name", nullable = false)
     @Comment("토너먼트 이름")
     private String tournamentName;
 
-    @Column(name = "tournament_stage")
+    @Column(name = "tournament_stage", nullable = false)
     @Comment("토너먼트 ( ex. 4강 8강 16강")
     private Integer tournamentStage;
 

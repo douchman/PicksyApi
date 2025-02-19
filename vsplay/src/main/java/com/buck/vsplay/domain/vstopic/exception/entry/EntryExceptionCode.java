@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 public enum EntryExceptionCode implements BaseExceptionCode {
-    ENTRY_NOT_FOUND(404, "존재하지 않는 엔트리 입니다.", "ENTRY_001"),
-    ENTRY_NOT_INCLUDED_IN_TOPIC(400, "대결주제에 포함되지 않는 엔트리 입니다.", "ENTRY_002");
+    ENTRY_NOT_FOUND(404, "존재하지 않는 엔트리 입니다.", "ENTRY_NOT_FOUND"),
+    ENTRY_NOT_INCLUDED_IN_TOPIC(400, "대결주제에 포함되지 않는 엔트리 입니다.", "ENTRY_NOT_INCLUDED_IN_TOPIC");
 
 
     private final Integer status;

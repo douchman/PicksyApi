@@ -27,7 +27,13 @@ public class VsTopicSpecification {
         };
     }
 
-    public static Specification<VsTopic> withAllFilters(Long memberId, String keyword) {
-        return Specification.where(memberIdFilter(memberId).and(keywordFilter(keyword)));
+    // 삭제 여부 필터
+    public static Specification<VsTopic> deleteFilter(boolean delete){
+        return (root, query, criteriaBuilder) ->
+            criteriaBuilder.equal(root.get("deleted"), delete);
+    }
+
+    public static Specification<VsTopic> withAllFilters(Long memberId, String keyword, boolean delete) {
+        return Specification.where(memberIdFilter(memberId).and(keywordFilter(keyword))).and(deleteFilter(delete));
     }
 }

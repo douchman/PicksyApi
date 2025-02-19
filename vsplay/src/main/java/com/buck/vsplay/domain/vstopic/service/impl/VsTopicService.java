@@ -17,9 +17,11 @@ import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,32 +30,51 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class VsTopicService implements IVsTopicService {
+
+    @Value("${app.base-domain}")
+    private String appBaseDomain;
+
     private final ApplicationEventPublisher applicationEventPublisher;
     private final S3Util s3Util;
     private final VsTopicRepository vsTopicRepository;
     private final VsTopicMapper vsTopicMapper;
     private final TournamentMapper tournamentMapper;
     private final AuthUserService authUserService;
+    private final EntityManager entityManager;
 
     @Override
-    public void createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
+    public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
         S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(createVsTopicRequest.getThumbnail() , existMember.getId().toString());
+
+        Visibility requestVisibility = createVsTopicRequest.getVisibility();
 
         VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
         vsTopic.setThumbnail(s3UploadResult.getObjectKey());
 
-        vsTopicRepository.save(vsTopic);
+        entityManager.persist(vsTopic);
+        entityManager.flush();
+
+        vsTopic.setShortCode(Visibility.UNLISTED.equals(requestVisibility) ? generateShortCode(vsTopic.getId()) : null);
+
         applicationEventPublisher.publishEvent(new TopicEvent.CreateEvent(vsTopic));
+
+        return VsTopicDto.VsTopicCreateResponse.builder()
+                .topicId(vsTopic.getId())
+                .subject(vsTopic.getSubject())
+                .description(vsTopic.getDescription())
+                .build();
     }
 
     @Override
@@ -61,6 +82,8 @@ public class VsTopicService implements IVsTopicService {
         Member existMember = authUserService.getAuthUser();
         MultipartFile thumbnail = updateVsTopicRequest.getThumbnail();
         boolean isFileExist = (thumbnail != null && !thumbnail.isEmpty());
+
+        Visibility updateVisibility = updateVsTopicRequest.getVisibility();
 
         VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
@@ -70,6 +93,9 @@ public class VsTopicService implements IVsTopicService {
             S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(thumbnail, objectKey);
             vsTopic.setThumbnail(s3UploadResult.getObjectKey());
         }
+
+        vsTopic.setShortCode(Visibility.UNLISTED.equals(updateVisibility) ? generateShortCode(vsTopic.getId()) : null);
+
         vsTopicMapper.updateVsTopicFromUpdateRequest(updateVsTopicRequest, vsTopic);
         vsTopicRepository.save(vsTopic);
 
@@ -86,6 +112,10 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
+        if ( !isPublicTopic(vsTopic.getVisibility())) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
+        }
+
         topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntity(vsTopic));
 
         if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
@@ -99,12 +129,36 @@ public class VsTopicService implements IVsTopicService {
     }
 
     @Override
+    public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournamentsByShortCode(String shortCode) {
+
+        VsTopic vsTopic = vsTopicRepository.findWithTournamentsByShortCode(shortCode);
+
+        if(vsTopic == null) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
+
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntity(vsTopic));
+
+        if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
+            for (TopicTournament tournament : vsTopic.getTournaments()) {
+                topicDetailWithTournamentsResponse.getTournamentList()
+                        .add(tournamentMapper.toTournamentDtoFromEntityWithoutId(tournament));
+            }
+        }
+        return topicDetailWithTournamentsResponse;
+    }
+
+    @Override
     public VsTopicDto.VsTopicSearchResponse searchPublicVsTopic( VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
         int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
 
-        Specification<VsTopic> vsTopicSpecification = VsTopicSpecification.keywordFilter(
+       Specification<VsTopic> vsTopicSpecification = VsTopicSpecification.keywordFilter(
                 vsTopicSearchRequest.getKeyword()
         );
+
+        vsTopicSpecification = vsTopicSpecification.and(VsTopicSpecification.deleteFilter(false));
 
 
         Page<VsTopic> topicPage = vsTopicRepository.findAll(
@@ -145,7 +199,8 @@ public class VsTopicService implements IVsTopicService {
 
         Specification<VsTopic> vsTopicSpecification = VsTopicSpecification.withAllFilters(
                 member.getId(),
-                vsTopicSearchRequest.getKeyword()
+                vsTopicSearchRequest.getKeyword(),
+                false
         );
 
         Page<VsTopic> topicPage = vsTopicRepository.findAll(
@@ -162,4 +217,36 @@ public class VsTopicService implements IVsTopicService {
                         .build())
                 .build();
     }
+
+    @Override
+    public VsTopicDto.VsTopicUnlistedLinkResponse getVsTopicUnlistedLink(Long topicId) {
+        VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
+                () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+
+        if(!isUnlistedTopic(vsTopic.getVisibility())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_UNLISTED);
+        }
+
+        return VsTopicDto.VsTopicUnlistedLinkResponse.builder()
+                .link(generateFullUrlOfUnlistedVstopic(vsTopic.getShortCode()))
+                .build();
+    }
+
+    private String generateShortCode(Long topicId) {
+        UUID uuid = UUID.nameUUIDFromBytes(String.valueOf(topicId).getBytes(StandardCharsets.UTF_8));
+        return uuid.toString().replace("-", "").substring(0, 32);
+    }
+
+    private boolean isPublicTopic(Visibility visibility) {
+        return Visibility.PUBLIC.equals(visibility);
+    }
+
+    private boolean isUnlistedTopic(Visibility visibility) {
+        return Visibility.UNLISTED.equals(visibility);
+    }
+
+    private String generateFullUrlOfUnlistedVstopic(String shortCode){
+        return appBaseDomain + "vstopic/link/" + shortCode;
+    }
+
 }

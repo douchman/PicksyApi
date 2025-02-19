@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("vstopic")
+@RequestMapping("topics")
 public class VsTopicController {
     private final VsTopicService vsTopicService;
 
@@ -31,11 +31,10 @@ public class VsTopicController {
     }
 
     @PostMapping
-    public ResponseEntity<SingleResponseDto<Integer>> createTopic(
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicCreateResponse>> createTopic(
             @ModelAttribute @Valid VsTopicDto.VsTopicCreateRequest vsTopicDCreateVsTopicRequest) {
 
-        vsTopicService.createVsTopic(vsTopicDCreateVsTopicRequest);
-        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()),HttpStatus.OK );
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.createVsTopic(vsTopicDCreateVsTopicRequest)),HttpStatus.OK );
     }
 
     @PatchMapping("{id}")
@@ -52,6 +51,20 @@ public class VsTopicController {
             @PathVariable("id") Long topicId
     ) {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailWithTournaments(topicId)),HttpStatus.OK );
+    }
+
+    @GetMapping("link/{shortCode}")
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicDetailWithTournamentsResponse>> getTopicDetailWithTournamentsByShortCode (
+            @PathVariable("shortCode") String shortCode
+    ) {
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailWithTournamentsByShortCode(shortCode)),HttpStatus.OK );
+    }
+
+    @GetMapping("{topicId}/link")
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicUnlistedLinkResponse>> getUnlistedTopicLink (
+            @PathVariable("topicId") Long topicId
+    ){
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicUnlistedLink(topicId)), HttpStatus.OK );
     }
 
     @GetMapping("mine")

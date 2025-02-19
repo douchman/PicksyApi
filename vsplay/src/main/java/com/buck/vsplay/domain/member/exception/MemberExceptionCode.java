@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 public enum MemberExceptionCode implements BaseExceptionCode {
 
-    MEMBER_NOT_FOUND(401, "일치하는 회원을 찾을 수 없습니다.", "MEMBER_001"),
-    MEMBER_DUPLICATE_ID (409, "이미 존재하는 아이디 입니다.", "MEMBER_002");
+    MEMBER_NOT_FOUND(401, "일치하는 회원을 찾을 수 없습니다.", "MEMBER_NOT_FOUND"),
+    MEMBER_DUPLICATE_ID (409, "이미 존재하는 아이디 입니다.", "MEMBER_DUPLICATE_ID");
 
 
     private final int status;

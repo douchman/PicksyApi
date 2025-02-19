@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("vstopic")
+@RequestMapping("topics")
 public class EntryController {
 
     private final EntryService entryService;

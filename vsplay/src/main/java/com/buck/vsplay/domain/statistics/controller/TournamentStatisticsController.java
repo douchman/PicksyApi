@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("statistics/vstopic")
+@RequestMapping("statistics/topics")
 public class TournamentStatisticsController {
 
     private final TournamentStatisticsService tournamentStatisticsService;
 
-    @GetMapping("{topicId}/tournament")
+    @GetMapping("{topicId}/tournaments")
     public ResponseEntity<SingleResponseDto<TournamentStatisticsDto.TournamentStatisticsResponse>> getTournamentStatistics(@PathVariable("topicId") Long topicId) {
 
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), tournamentStatisticsService.getTournamentStatistics(topicId)), HttpStatus.OK);

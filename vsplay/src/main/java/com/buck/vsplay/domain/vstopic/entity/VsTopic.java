@@ -45,11 +45,18 @@ public class VsTopic extends Timestamp{
     @Comment("대표이미지")
     private String thumbnail;
 
+    @Column(name = "is_delete")
+    private boolean deleted = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility")
     @ColumnDefault("'PUBLIC'")
     @Comment("대결 공개 범위")
     private Visibility visibility = Visibility.PUBLIC;
+
+    @Column(name = "short_code", unique = true, length = 100)
+    @Comment("비공개 링크")
+    private String shortCode;
 
     @OneToMany(mappedBy = "vsTopic", fetch = FetchType.LAZY)
     private List<TopicTournament> tournaments;
