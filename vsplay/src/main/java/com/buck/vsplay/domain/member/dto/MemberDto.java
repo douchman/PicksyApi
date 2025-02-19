@@ -7,8 +7,6 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MemberDto {
 
@@ -36,17 +34,4 @@ public class MemberDto {
         private String password;
 
     }
-
-    @Data
-    public static class AddressInfo{
-        private String street;
-        private String city;
-        private String state;
-    }
-
-    @Data
-    public static class MemberListResponse{
-        private List<MemberInfo> memberList;
-    }
-
 }
