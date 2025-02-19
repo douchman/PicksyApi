@@ -15,4 +15,6 @@ public interface MemberMapper {
 
     Address toEntity(MemberDto.AddressInfo addressInfo);
     MemberDto.AddressInfo toDto(Address address);
+
+    Member toEntityFromCreateMemberDto(MemberDto.CreateMemberRequest createMemberRequest);
 }
