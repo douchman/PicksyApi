@@ -9,8 +9,6 @@ import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
-import com.buck.vsplay.domain.vstopic.exception.tournament.TournamentException;
-import com.buck.vsplay.domain.vstopic.exception.tournament.TournamentExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
@@ -156,8 +154,7 @@ public class EntryService implements IEntryService {
 
         TopicTournament topicTournament = new TopicTournament();
         topicTournament.setVsTopic(vsTopic);
-        topicTournament.setTournamentName(TournamentStage.findStageNameByStage(tournamentStage).orElseThrow( () ->
-                new TournamentException(TournamentExceptionCode.SERVER_ERROR)));
+        topicTournament.setTournamentName(TournamentStage.findStageNameByStage(tournamentStage));
         topicTournament.setTournamentStage(tournamentStage);
         return tournamentRepository.save(topicTournament);
     }
