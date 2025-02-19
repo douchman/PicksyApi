@@ -17,6 +17,11 @@ public class MemberController {
 
     private final IMemberService memberService;
 
+    @GetMapping
+    public ResponseEntity<SingleResponseDto<MemberDto.MemberInfo>> getMemberInfo(){
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), memberService.getMemberInfo()), HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<SingleResponseDto<Integer>> createMember(@RequestBody @Validated MemberDto.CreateMemberRequest member) {
         memberService.createMember(member);
