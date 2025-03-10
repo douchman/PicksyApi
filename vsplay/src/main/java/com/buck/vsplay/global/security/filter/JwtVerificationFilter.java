@@ -1,6 +1,8 @@
 package com.buck.vsplay.global.security.filter;
 
 import com.buck.vsplay.global.security.jwt.JwtService;
+import com.buck.vsplay.global.security.jwt.exception.JwtException;
+import com.buck.vsplay.global.security.jwt.exception.JwtExceptionHandler;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -20,6 +22,7 @@ import java.io.IOException;
 public class JwtVerificationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final JwtExceptionHandler jwtExceptionHandler;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -31,12 +34,16 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
-        if (jwtService.validateToken(token)) {
-            Authentication authentication = jwtService.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            filterChain.doFilter(request, response);
+        try {
+            if (jwtService.validateToken(token)) {
+                Authentication authentication = jwtService.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                filterChain.doFilter(request, response);
+            }
+        } catch (JwtException e){
+            jwtExceptionHandler.handleJwtException(response, e);
         }
+
     }
 
     private String getJwtFromCookie(HttpServletRequest request) {
