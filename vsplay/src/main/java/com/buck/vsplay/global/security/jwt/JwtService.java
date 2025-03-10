@@ -8,6 +8,8 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -106,4 +108,10 @@ public class JwtService{
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public Authentication getAuthentication(String token) {
+        Long userId = extractUserId(token); // JWT에서 사용자 ID 추출
+        List<GrantedAuthority> authorities = extractAuthorities(token); // JWT에서 권한 추출
+
+        return new UsernamePasswordAuthenticationToken(userId, null, authorities);
+    }
 }
