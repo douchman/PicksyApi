@@ -28,7 +28,7 @@ public class VsPlayAuthenticationFailureHandler implements AuthenticationFailure
         String failMessage = exception.getMessage();
 
         if( exception instanceof BadCredentialsException){
-            failMessage = "아이디 또는 비밀번호가 일치하지 않습니다.";
+            failMessage = "아이디 또는 비밀번호를 확인해주세요.";
         }
         response.getWriter().write(objectMapper.writeValueAsString(new AuthenticationDto.FailureResponse(failMessage)));
     }
