@@ -27,7 +27,12 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         // get jwt from cookie
         String token = getJwtFromCookie(request);
 
-        if (token != null && jwtService.validateToken(token)) {
+        if( token == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (jwtService.validateToken(token)) {
             Authentication authentication = jwtService.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);
