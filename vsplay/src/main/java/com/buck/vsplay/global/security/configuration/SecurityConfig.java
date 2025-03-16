@@ -9,7 +9,6 @@ import com.buck.vsplay.global.security.jwt.exception.JwtExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,14 +35,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement( session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(HttpMethod.POST,"/topics").hasRole("GENERAL")
-                                .requestMatchers(HttpMethod.PATCH,"/topics").hasRole("GENERAL")
-                                .requestMatchers(HttpMethod.GET,"/topics/mine").hasRole("GENERAL")
-                                .requestMatchers("/topics/*/entries").hasRole("GENERAL")
-                                .requestMatchers(HttpMethod.GET, "/member").authenticated()
-                                .requestMatchers("/**").permitAll()
-                )
+                .authorizeHttpRequests(auth -> {
+                    // 🔹 인증이 필요 없는 경로 적용 (PUBLIC_ENDPOINTS)
+                    PublicPaths.PUBLIC_ENDPOINTS.forEach((url, methods) ->
+                            methods.forEach(method -> auth.requestMatchers(method, url).permitAll()));
+
+                    auth.anyRequest().authenticated(); // 나머지 경로 인증
+                })
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
 
@@ -75,7 +73,7 @@ public class SecurityConfig {
 
         httpSecurity
                 .addFilter(jwtAuthenticationFilter)
-                .addFilterAfter(jwtVerificationFilter, JwtAuthenticationFilter.class);
+                .addFilterBefore(jwtVerificationFilter, JwtAuthenticationFilter.class);
     }
 
 

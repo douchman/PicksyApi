@@ -1,5 +1,6 @@
 package com.buck.vsplay.global.security.filter;
 
+import com.buck.vsplay.global.security.configuration.PublicPaths;
 import com.buck.vsplay.global.security.jwt.JwtService;
 import com.buck.vsplay.global.security.jwt.exception.JwtException;
 import com.buck.vsplay.global.security.jwt.exception.JwtExceptionHandler;
@@ -25,25 +26,29 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     private final JwtExceptionHandler jwtExceptionHandler;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String requestUri = request.getRequestURI();
+        String method = request.getMethod();
+        return PublicPaths.isPublicEndPoint(requestUri, method);
+    }
 
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         // get jwt from cookie
         String token = getJwtFromCookie(request);
 
-        if( token == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        try {
-            if (jwtService.validateToken(token)) {
-                Authentication authentication = jwtService.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                filterChain.doFilter(request, response);
+        if ( token != null){
+            try {
+                if (jwtService.validateToken(token)) {
+                    Authentication authentication = jwtService.getAuthentication(token);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (JwtException e){
+                jwtExceptionHandler.handleJwtException(response, e);
+                return ; // 예외 시 다음 필터 실행 방지
             }
-        } catch (JwtException e){
-            jwtExceptionHandler.handleJwtException(response, e);
         }
-
+        filterChain.doFilter(request, response);
     }
 
     private String getJwtFromCookie(HttpServletRequest request) {
