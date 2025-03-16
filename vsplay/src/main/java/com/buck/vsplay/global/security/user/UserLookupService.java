@@ -2,8 +2,6 @@ package com.buck.vsplay.global.security.user;
 
 
 import com.buck.vsplay.domain.member.entity.Member;
-import com.buck.vsplay.domain.member.exception.MemberException;
-import com.buck.vsplay.domain.member.exception.MemberExceptionCode;
 import com.buck.vsplay.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +18,7 @@ public class UserLookupService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Member findMember = memberRepository.findByLoginId(username)
-                .orElseThrow(() -> new MemberException(MemberExceptionCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new UsernameNotFoundException(username));
         return new CustomUserDetail(findMember);
     }
 }
