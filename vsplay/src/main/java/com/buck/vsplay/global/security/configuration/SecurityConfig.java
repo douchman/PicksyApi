@@ -4,6 +4,7 @@ import com.buck.vsplay.global.security.filter.JwtVerificationFilter;
 import com.buck.vsplay.global.security.filter.JwtAuthenticationFilter;
 import com.buck.vsplay.global.security.handler.VsPlayAuthenticationFailureHandler;
 import com.buck.vsplay.global.security.handler.VsPlayAuthenticationSuccessHandler;
+import com.buck.vsplay.global.security.jwt.JwtAuthenticationEntryPoint;
 import com.buck.vsplay.global.security.jwt.JwtService;
 import com.buck.vsplay.global.security.jwt.exception.JwtExceptionHandler;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import java.util.List;
 public class SecurityConfig {
     private final JwtService jwtService;
     private final JwtExceptionHandler jwtExceptionHandler;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     SecurityFilterChain securityFilterChain(final HttpSecurity httpSecurity) throws Exception {
@@ -42,6 +44,9 @@ public class SecurityConfig {
 
                     auth.anyRequest().authenticated(); // 나머지 경로 인증
                 })
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint) // ✅ 인증 실패 시 401 반환
+                )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
 
