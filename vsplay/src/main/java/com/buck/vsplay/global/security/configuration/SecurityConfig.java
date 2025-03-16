@@ -80,9 +80,9 @@ public class SecurityConfig {
 
 
     private JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationManager authenticationManager) {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService, authenticationManager);
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager);
         jwtAuthenticationFilter.setFilterProcessesUrl("/member/login");
-        jwtAuthenticationFilter.setAuthenticationSuccessHandler(new VsPlayAuthenticationSuccessHandler());
+        jwtAuthenticationFilter.setAuthenticationSuccessHandler(new VsPlayAuthenticationSuccessHandler(jwtService));
         jwtAuthenticationFilter.setAuthenticationFailureHandler(new VsPlayAuthenticationFailureHandler());
 
         return jwtAuthenticationFilter;
