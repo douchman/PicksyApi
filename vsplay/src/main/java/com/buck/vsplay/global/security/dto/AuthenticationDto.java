@@ -33,4 +33,11 @@ public class AuthenticationDto {
             super("fail", message, null, DateTimeUtil.formatNow());
         }
     }
+
+    @Getter
+    @Setter
+    public static class LoginRequest{
+        private String id;
+        private String password;
+    }
 }
