@@ -25,11 +25,10 @@ public class VsPlayAuthenticationFailureHandler implements AuthenticationFailure
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        String failMessage = exception.getMessage();
+        AuthenticationDto.FailureResponse failureResponse = (exception instanceof BadCredentialsException)
+                ? AuthenticationDto.FailureResponse.invalidCredentials()
+                : AuthenticationDto.FailureResponse.unauthorized();
 
-        if( exception instanceof BadCredentialsException){
-            failMessage = "아이디 또는 비밀번호를 확인해주세요.";
-        }
-        response.getWriter().write(objectMapper.writeValueAsString(new AuthenticationDto.FailureResponse(failMessage)));
+        response.getWriter().write(objectMapper.writeValueAsString(failureResponse));
     }
 }
