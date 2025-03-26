@@ -4,6 +4,8 @@ import com.buck.vsplay.global.security.filter.JwtVerificationFilter;
 import com.buck.vsplay.global.security.filter.JwtAuthenticationFilter;
 import com.buck.vsplay.global.security.handler.VsPlayAuthenticationFailureHandler;
 import com.buck.vsplay.global.security.handler.VsPlayAuthenticationSuccessHandler;
+import com.buck.vsplay.global.security.handler.VsPlayLogoutHandler;
+import com.buck.vsplay.global.security.handler.VsPlayLogoutSuccessHandler;
 import com.buck.vsplay.global.security.jwt.JwtAuthenticationEntryPoint;
 import com.buck.vsplay.global.security.jwt.JwtService;
 import com.buck.vsplay.global.security.jwt.exception.JwtExceptionHandler;
@@ -29,6 +31,8 @@ public class SecurityConfig {
     private final JwtService jwtService;
     private final JwtExceptionHandler jwtExceptionHandler;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final VsPlayLogoutHandler vsPlayLogoutHandler;
+    private final VsPlayLogoutSuccessHandler vsPlayLogoutSuccessHandler;
 
     @Bean
     SecurityFilterChain securityFilterChain(final HttpSecurity httpSecurity) throws Exception {
@@ -48,8 +52,12 @@ public class SecurityConfig {
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint) // ✅ 인증 실패 시 401 반환
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable);
-
+                .httpBasic(AbstractHttpConfigurer::disable)
+                        .logout( logout -> logout
+                                .logoutUrl("/member/logout")
+                                .addLogoutHandler(vsPlayLogoutHandler)
+                                .logoutSuccessHandler(vsPlayLogoutSuccessHandler)
+                        );
         addCustomFilters(httpSecurity);
         return httpSecurity.build();
     }
