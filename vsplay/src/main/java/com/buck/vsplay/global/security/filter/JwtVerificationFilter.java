@@ -29,6 +29,12 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String requestUri = request.getRequestURI();
         String method = request.getMethod();
+         
+        // 🔹 로그인 상태 확인 API는 필터 실행 (JWT 검증 필요)
+        if ("/member/auth".equals(requestUri) && "GET".equalsIgnoreCase(method)) {
+            return false; // ✅ JWT 필터 실행
+        }
+
         return PublicPaths.isPublicEndPoint(requestUri, method);
     }
 
