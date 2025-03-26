@@ -26,6 +26,7 @@ public class EntryDto {
     public static class CreateEntry{
         private String entryName;
         private String description;
+        private String mediaUrl;
         private MultipartFile file;
     }
 
