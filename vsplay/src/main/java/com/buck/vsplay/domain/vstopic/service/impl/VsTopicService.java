@@ -159,6 +159,7 @@ public class VsTopicService implements IVsTopicService {
         );
 
         vsTopicSpecification = vsTopicSpecification.and(VsTopicSpecification.deleteFilter(false));
+        vsTopicSpecification = vsTopicSpecification.and(VsTopicSpecification.visibilityFilter(Visibility.PUBLIC));
 
 
         Page<VsTopic> topicPage = vsTopicRepository.findAll(
