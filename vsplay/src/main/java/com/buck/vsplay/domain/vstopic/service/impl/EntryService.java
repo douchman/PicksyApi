@@ -16,6 +16,7 @@ import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.TournamentRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IEntryService;
+import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.TournamentStage;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
@@ -76,11 +77,15 @@ public class EntryService implements IEntryService {
         String objectPath = s3Util.buildS3Path(String.valueOf(authUser.getId()), String.valueOf(vsTopic.getId()));
 
         for (EntryDto.CreateEntry entry : entries) {
-            S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(entry.getFile(), objectPath);
             TopicEntry topicEntry = topicEntryMapper.toEntityFromCreatedEntryDto(entry);
             topicEntry.setTopic(vsTopic);
-            topicEntry.setMediaUrl(s3UploadResult.getObjectKey());
-            topicEntry.setMediaType(s3UploadResult.getMediaType());
+            if ( entry.getFile() != null && !entry.getFile().isEmpty()) {
+                S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(entry.getFile(), objectPath);
+                topicEntry.setMediaUrl(s3UploadResult.getObjectKey());
+                topicEntry.setMediaType(s3UploadResult.getMediaType());
+            }else{
+                topicEntry.setMediaType(MediaType.YOUTUBE);
+            }
             topicEntries.add(topicEntry); // DTO -> Entity 매핑
         }
 
@@ -117,26 +122,30 @@ public class EntryService implements IEntryService {
     }
 
     private void updateTopicTournament(VsTopic vsTopic) {
+        log.info(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@ 토픽 토너먼트 @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         final int INITIAL_TOURNAMENT_STAGE = 2;
         List<TopicEntry> topicEntries = entryRepository.findByTopicId(vsTopic.getId());
 
         boolean isEntryExist = (topicEntries != null && !topicEntries.isEmpty());
 
         if(!isEntryExist) { // 엔트리가 존재하지 않으면 처리하지 않음
+            log.info(" 엔트리가 없어서 토너먼트를 추가하지 않습니다");
             return;
         }
 
         int power = 1;
         int entryCount = topicEntries.size();
-
+        log.info("entryCount  ->>> {} ", entryCount );
         while ( true ) { // 사용가능 토너먼트 계산 및 저장
             int tournamentStage = (int)Math.pow(INITIAL_TOURNAMENT_STAGE, power);
 
+            log.info("tournamentStage ! ->>> {} ", tournamentStage );
             if( tournamentStage > entryCount){
                 break;
             }
 
             if( !isTournamentExist(vsTopic, tournamentStage) ) {
+                log.info("토너먼트가 없네요? 추가해볼게요");
                 TopicTournament saveTournament = saveTournament(vsTopic, tournamentStage); // 토너먼트 엔티티 커밋
                 applicationEventPublisher.publishEvent(new TournamentEvent.CreateEvent(saveTournament)); // 커밋된 엔티티로 이벤트 발행
             }
