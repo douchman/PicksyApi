@@ -16,6 +16,7 @@ public class PublicPaths {
     public static final Map<String, Set<HttpMethod>> PUBLIC_ENDPOINTS = Map.ofEntries(
             Map.entry("/member/login", Set.of(HttpMethod.POST)),
             Map.entry("/member", Set.of(HttpMethod.POST)),
+            Map.entry("/member/auth", Set.of(HttpMethod.GET)),
             Map.entry("/topics/visibilities", Set.of(HttpMethod.GET)),
             Map.entry("/topics", Set.of(HttpMethod.GET)),
             Map.entry("/topics/*", Set.of(HttpMethod.GET)),
