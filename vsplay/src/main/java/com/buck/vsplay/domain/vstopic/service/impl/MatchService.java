@@ -3,6 +3,7 @@ package com.buck.vsplay.domain.vstopic.service.impl;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
+import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.dto.EntryMatchDto;
 import com.buck.vsplay.domain.vstopic.dto.TopicPlayRecordDto;
 import com.buck.vsplay.domain.vstopic.entity.*;
@@ -17,6 +18,7 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.*;
 import com.buck.vsplay.domain.vstopic.service.IMatchService;
+import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.PlayStatus;
 import com.buck.vsplay.global.constants.TournamentStage;
 import jakarta.transaction.Transactional;
@@ -91,15 +93,9 @@ import java.util.*;
         entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
         entryMatchResponse.setCurrentTournament(TournamentStage.findStageNameByStage(topicPlayRecord.getCurrentTournamentStage()));
         entryMatchResponse.getEntryMatch()
-                .setEntryA(
-                        topicEntryMapper.toEntryDtoFromEntity(
-                                entryMatchWithEntries.getEntryA()
-                        ));
+                .setEntryA(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryA()));
         entryMatchResponse.getEntryMatch()
-                .setEntryB(
-                        topicEntryMapper.toEntryDtoFromEntity(
-                                entryMatchWithEntries.getEntryB()
-                        ));
+                .setEntryB(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryB()));
 
         return entryMatchResponse;
     }
@@ -250,5 +246,13 @@ import java.util.*;
         EntryMatch entryMatch = entryMatchRepository.findByPlayRecordIdAndTournamentRoundOrderBySeqAsc(topicPlayRecord.getId(),currentTournamentStage);
 
         return entryMatch.getStatus().equals(PlayStatus.COMPLETED);
+    }
+
+    private EntryDto.Entry mappingTopicEntryToEntryDto(TopicEntry topicEntry){
+        if(MediaType.YOUTUBE == topicEntry.getMediaType()){
+            return topicEntryMapper.toEntryDtoFromEntityWithoutSignedUrl(topicEntry);
+        } else {
+            return topicEntryMapper.toEntryDtoFromEntity(topicEntry);
+        }
     }
 }
