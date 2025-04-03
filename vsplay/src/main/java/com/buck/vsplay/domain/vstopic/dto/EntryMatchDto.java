@@ -16,6 +16,7 @@ public class EntryMatchDto {
     @Data
     public static class EntryMatchResponse{
         Long matchId;
+        String currentTournament;
         EntryMatch entryMatch = new EntryMatch();
     }
 
