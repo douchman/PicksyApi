@@ -18,6 +18,7 @@ import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.*;
 import com.buck.vsplay.domain.vstopic.service.IMatchService;
 import com.buck.vsplay.global.constants.PlayStatus;
+import com.buck.vsplay.global.constants.TournamentStage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,6 +89,7 @@ import java.util.*;
         EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
 
         entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
+        entryMatchResponse.setCurrentTournament(TournamentStage.findStageNameByStage(topicPlayRecord.getCurrentTournamentStage()));
         entryMatchResponse.getEntryMatch()
                 .setEntryA(
                         topicEntryMapper.toEntryDtoFromEntity(
