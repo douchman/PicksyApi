@@ -10,15 +10,10 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", uses = S3Util.class)
 public interface TopicEntryMapper {
 
-    @Mapping(target = "mediaUrl" , qualifiedByName = "signedMediaUrl")
-    EntryDto.Entry toTopicEntryDtoFromEntity(TopicEntry topicEntry);
-
     TopicEntry toEntityFromCreatedEntryDto(EntryDto.CreateEntry topicEntry);
 
     @Mapping(target = "mediaUrl", expression = "java(resolveMediaUrl(topicEntry, s3Util))")
     EntryDto.Entry toEntryDtoFromEntity(TopicEntry topicEntry);
-
-    EntryDto.Entry toEntryDtoFromEntityWithoutSignedUrl(TopicEntry topicEntry);
 
     @Named("resolveMediaUrl")
     default String resolveMediaUrl(TopicEntry topicEntry, @Context S3Util s3Util) {
