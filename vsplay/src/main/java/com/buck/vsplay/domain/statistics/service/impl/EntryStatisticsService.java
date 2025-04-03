@@ -99,7 +99,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
         for (EntryStatistics entryStatistic : entryStatistics) {
             entriesStatistics.add(
                     EntryStatisticsDto.EntryStatWithEntryInfo.builder()
-                            .entry(topicEntryMapper.toTopicEntryDtoFromEntity(entryStatistic.getTopicEntry()))
+                            .entry(topicEntryMapper.toEntryDtoFromEntity(entryStatistic.getTopicEntry()))
                             .statistics(entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistic))
                             .build()
             );
