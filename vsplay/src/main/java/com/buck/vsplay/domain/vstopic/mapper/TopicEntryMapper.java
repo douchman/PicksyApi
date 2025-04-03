@@ -3,7 +3,6 @@ package com.buck.vsplay.domain.vstopic.mapper;
 
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
-import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import org.mapstruct.*;
 
@@ -12,17 +11,10 @@ public interface TopicEntryMapper {
 
     TopicEntry toEntityFromCreatedEntryDto(EntryDto.CreateEntry topicEntry);
 
-    @Mapping(target = "mediaUrl", expression = "java(resolveMediaUrl(topicEntry, s3Util))")
+    @Mapping(target = "mediaUrl", qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toEntryDtoFromEntity(TopicEntry topicEntry);
 
-    @Named("resolveMediaUrl")
-    default String resolveMediaUrl(TopicEntry topicEntry, @Context S3Util s3Util) {
-        if(MediaType.YOUTUBE == topicEntry.getMediaType()) {
-            return topicEntry.getMediaUrl();
-        }
-
-        return s3Util.getUploadedObjectUrl(topicEntry.getMediaUrl());
-    }
+    EntryDto.Entry toEntryDtoFromEntityWithoutSignedUrl(TopicEntry topicEntry);
 
     /**
      * 엔티티 업데이트를 위해 DTO 의 값을 기존 Entry 엔티티에 적용
