@@ -6,6 +6,7 @@ import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.mapper.EntryStatisticsMapper;
 import com.buck.vsplay.domain.statistics.repository.EntryStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryStatisticsService;
+import com.buck.vsplay.domain.statistics.specification.EntryStatsSpecification;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
@@ -13,9 +14,14 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.constants.MediaType;
+import com.buck.vsplay.global.dto.Pagination;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
@@ -87,15 +93,26 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     }
 
     @Override
-    public EntryStatisticsDto.EntryStatWithEntryInfoList getEntryStatisticsWithEntryInfo(Long topicId) {
-
+    public EntryStatisticsDto.EntryStatSearchResponse getEntryStatisticsWithEntryInfo(Long topicId, EntryStatisticsDto.EntryStatSearchRequest entryStatSearchRequest) {
         List<EntryStatisticsDto.EntryStatWithEntryInfo> entriesStatistics = new ArrayList<>();
+        int page = Math.max(entryStatSearchRequest.getPage() - 1 , 0); // index 조정
+
+        // 정렬 필터
+        // totalMatches desc -> 총 대결 수가 많을수록 우선순위
+        // totalWins desc -> 총 승리 횟수가 많을수록 우선순위
+        // winRate desc -> 승률이 가장 높을수록 우선순위
+        Specification<EntryStatistics> entryStatsSpecification =
+                EntryStatsSpecification.idFilter(topicId)
+                        .and(EntryStatsSpecification.entryNameFilter(entryStatSearchRequest.getKeyword()))
+                        .and(EntryStatsSpecification.orderFilter(entryStatSearchRequest.getTotalMatchesOrderType(), entryStatSearchRequest.getTotalWinsOrderType(), entryStatSearchRequest.getWinRateOrderType()));
 
         if(!vsTopicRepository.existsById(topicId)){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        List<EntryStatistics> entryStatistics = entryStatisticsRepository.findWithTopicEntryByTopicId(topicId);
+        Page<EntryStatistics> entryStatistics = entryStatisticsRepository.findAll(
+                entryStatsSpecification,
+                PageRequest.of(page, entryStatSearchRequest.getPageSize(), Sort.unsorted()));
 
         for (EntryStatistics entryStatistic : entryStatistics) {
             boolean isYouTube = MediaType.YOUTUBE == entryStatistic.getTopicEntry().getMediaType();
@@ -110,6 +127,15 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                             .build()
             );
         }
-        return new EntryStatisticsDto.EntryStatWithEntryInfoList(entriesStatistics);
+
+        return EntryStatisticsDto.EntryStatSearchResponse.builder()
+                .entriesStatistics(entriesStatistics)
+                .pagination(Pagination.builder()
+                        .totalPages(entryStatistics.getTotalPages())
+                        .totalItems(entryStatistics.getTotalElements())
+                        .currentPage(entryStatistics.getNumber() + 1) // index 조정
+                        .pageSize(entryStatistics.getSize())
+                        .build())
+                .build();
     }
 }
