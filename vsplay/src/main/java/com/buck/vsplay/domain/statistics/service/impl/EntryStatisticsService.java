@@ -103,7 +103,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
         // winRate desc -> 승률이 가장 높을수록 우선순위
         Specification<EntryStatistics> entryStatsSpecification =
                 EntryStatsSpecification.idFilter(topicId)
-                        .and(EntryStatsSpecification.orderFilter(true, true, true));
+                        .and(EntryStatsSpecification.orderFilter(entryStatSearchRequest.getTotalMatchesOrderType(), entryStatSearchRequest.getTotalWinsOrderType(), entryStatSearchRequest.getWinRateOrderType()));
 
         if(!vsTopicRepository.existsById(topicId)){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
