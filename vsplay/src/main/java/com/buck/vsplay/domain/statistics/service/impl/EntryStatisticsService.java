@@ -6,6 +6,7 @@ import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.mapper.EntryStatisticsMapper;
 import com.buck.vsplay.domain.statistics.repository.EntryStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryStatisticsService;
+import com.buck.vsplay.domain.statistics.specification.EntryStatsSpecification;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
@@ -16,6 +17,7 @@ import com.buck.vsplay.global.constants.MediaType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
@@ -91,11 +93,18 @@ public class EntryStatisticsService implements IEntryStatisticsService {
 
         List<EntryStatisticsDto.EntryStatWithEntryInfo> entriesStatistics = new ArrayList<>();
 
+        Specification<EntryStatistics> entryStatsSpecification = EntryStatsSpecification.idFilter(topicId); // 식별자 Specification
+        // 정렬 필터
+        // totalMatches desc -> 총 대결 수가 많을수록 우선순위
+        // totalWins desc -> 총 승리 횟수가 많을수록 우선순위
+        // winRate desc -> 승률이 가장 높을수록 우선순위
+        entryStatsSpecification = entryStatsSpecification.and(EntryStatsSpecification.orderFilter(true, true, true));
+
         if(!vsTopicRepository.existsById(topicId)){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        List<EntryStatistics> entryStatistics = entryStatisticsRepository.findWithTopicEntryByTopicId(topicId);
+        List<EntryStatistics> entryStatistics = entryStatisticsRepository.findAll(entryStatsSpecification);
 
         for (EntryStatistics entryStatistic : entryStatistics) {
             boolean isYouTube = MediaType.YOUTUBE == entryStatistic.getTopicEntry().getMediaType();
