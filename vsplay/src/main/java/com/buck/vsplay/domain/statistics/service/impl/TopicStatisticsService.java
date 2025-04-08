@@ -7,10 +7,13 @@ import com.buck.vsplay.domain.statistics.mapper.TopicStatisticsMapper;
 import com.buck.vsplay.domain.statistics.projection.MostPopularEntry;
 import com.buck.vsplay.domain.statistics.repository.TopicStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.ITopicStatisticsService;
+import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
+import com.buck.vsplay.global.constants.MediaType;
+import com.buck.vsplay.global.util.aws.s3.S3Util;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -26,6 +29,7 @@ public class TopicStatisticsService implements ITopicStatisticsService {
     private final TopicStatisticsRepository topicStatisticsRepository;
     private final VsTopicRepository vsTopicRepository;
     private final TopicStatisticsMapper topicStatisticsMapper;
+    private final S3Util s3Util;
 
     @EventListener
     public void handleVsTopicCreated(TopicEvent.CreateEvent topiCreateEvent) {
@@ -82,8 +86,16 @@ public class TopicStatisticsService implements ITopicStatisticsService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        return new TopicStatisticsDto.TopicStatisticsResponse(
-                topicStatisticsMapper.toTopicStatisticsDtoFromEntity(
-                        topicStatisticsRepository.findByVsTopic(topicId)));
+        TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(
+                topicStatisticsRepository.findByVsTopic(topicId));
+
+        EntryDto.Entry mostPopularEntry = topicStatistics.getMostPopularEntry();
+        boolean isMediaTypeYoutube = MediaType.YOUTUBE == mostPopularEntry.getMediaType();
+
+        if( !isMediaTypeYoutube ){ // 유튜브인 경우 signedUrl 변환 없음
+            mostPopularEntry.setMediaUrl(s3Util.getUploadedObjectUrl(mostPopularEntry.getMediaUrl()));
+        }
+
+        return new TopicStatisticsDto.TopicStatisticsResponse(topicStatistics);
     }
 }
