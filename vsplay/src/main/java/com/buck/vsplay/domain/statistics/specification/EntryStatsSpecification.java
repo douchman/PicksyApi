@@ -19,6 +19,15 @@ public class EntryStatsSpecification {
                 criteriaBuilder.equal(root.get("topicEntry").get("topic").get("id"), id);
     }
 
+    public static Specification<EntryStatistics> entryNameFilter(String keyword) {
+        return (root, query, criteriaBuilder) -> {
+                if(keyword != null && !keyword.isEmpty()) {
+                    criteriaBuilder.like(root.get("topicEntry").get("entryName"), "%" + keyword + "%");
+                }
+                return null;
+        };
+    }
+
 
     public static Specification<EntryStatistics> orderFilter(OrderType totalMatchesOrderType, OrderType totalWinsOrderType, OrderType winRateOrderType){
         return (root, query, criteriaBuilder) ->{
