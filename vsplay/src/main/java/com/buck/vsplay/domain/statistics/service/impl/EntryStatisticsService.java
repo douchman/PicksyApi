@@ -12,6 +12,7 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
+import com.buck.vsplay.global.constants.MediaType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -97,9 +98,14 @@ public class EntryStatisticsService implements IEntryStatisticsService {
         List<EntryStatistics> entryStatistics = entryStatisticsRepository.findWithTopicEntryByTopicId(topicId);
 
         for (EntryStatistics entryStatistic : entryStatistics) {
+            boolean isYouTube = MediaType.YOUTUBE == entryStatistic.getTopicEntry().getMediaType();
             entriesStatistics.add(
                     EntryStatisticsDto.EntryStatWithEntryInfo.builder()
-                            .entry(topicEntryMapper.toEntryDtoFromEntity(entryStatistic.getTopicEntry()))
+                            .entry(
+                                    isYouTube ?
+                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedUrl(entryStatistic.getTopicEntry())
+                                            :topicEntryMapper.toEntryDtoFromEntity(entryStatistic.getTopicEntry())
+                            )
                             .statistics(entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistic))
                             .build()
             );
