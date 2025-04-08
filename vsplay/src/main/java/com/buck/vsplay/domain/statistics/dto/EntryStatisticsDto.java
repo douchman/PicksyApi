@@ -2,6 +2,7 @@ package com.buck.vsplay.domain.statistics.dto;
 
 
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
+import com.buck.vsplay.global.constants.OrderType;
 import com.buck.vsplay.global.dto.Pagination;
 import lombok.*;
 
@@ -32,6 +33,9 @@ public class EntryStatisticsDto {
     @Setter
     public static class EntryStatSearchRequest{
         private String keyword;
+        private OrderType totalMatchesOrderType = OrderType.NONE;
+        private OrderType totalWinsOrderType = OrderType.NONE;
+        private OrderType winRateOrderType = OrderType.NONE;
         private Integer page = 1;
         private Integer pageSize = 20;
     }
