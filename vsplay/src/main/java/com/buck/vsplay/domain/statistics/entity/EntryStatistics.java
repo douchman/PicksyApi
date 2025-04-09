@@ -27,6 +27,9 @@ public class EntryStatistics extends Timestamp {
     @JoinColumn(name = "entry_id")
     private TopicEntry topicEntry;
 
+    @Column(name = "rank")
+    private Integer rank;
+
     @Column(name = "total_matches")
     private Integer totalMatches;
 
