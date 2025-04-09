@@ -46,6 +46,8 @@ public class EntryStatistics extends Timestamp {
     @Comment("가장 높이 올라간 토너먼트")
     private Integer highestTournament;
 
+    private Double rankScore; // 메타데이터로 사용할 랭크점수 저장용 임시 인스턴스
+
     public void increaseTotalMatches() {
         this.totalMatches += 1;
     }
