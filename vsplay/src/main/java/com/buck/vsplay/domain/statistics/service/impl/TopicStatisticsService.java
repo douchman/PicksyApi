@@ -8,9 +8,11 @@ import com.buck.vsplay.domain.statistics.projection.MostPopularEntry;
 import com.buck.vsplay.domain.statistics.repository.TopicStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.ITopicStatisticsService;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
+import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
+import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
@@ -29,6 +31,7 @@ public class TopicStatisticsService implements ITopicStatisticsService {
     private final TopicStatisticsRepository topicStatisticsRepository;
     private final VsTopicRepository vsTopicRepository;
     private final TopicStatisticsMapper topicStatisticsMapper;
+    private final VsTopicMapper vsTopicMapper;
     private final S3Util s3Util;
 
     @EventListener
@@ -86,8 +89,9 @@ public class TopicStatisticsService implements ITopicStatisticsService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(
-                topicStatisticsRepository.findByVsTopic(topicId));
+        TopicStatistics topicStatisticsEntity = topicStatisticsRepository.findByVsTopic(topicId);
+        TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(topicStatisticsEntity);
+        VsTopicDto.VsTopic vsTopic = vsTopicMapper.toVsTopicDtoFromEntity(topicStatisticsEntity.getVsTopic());
 
         EntryDto.Entry mostPopularEntry = topicStatistics.getMostPopularEntry();
         boolean isMediaTypeYoutube = MediaType.YOUTUBE == mostPopularEntry.getMediaType();
@@ -96,6 +100,9 @@ public class TopicStatisticsService implements ITopicStatisticsService {
             mostPopularEntry.setMediaUrl(s3Util.getUploadedObjectUrl(mostPopularEntry.getMediaUrl()));
         }
 
-        return new TopicStatisticsDto.TopicStatisticsResponse(topicStatistics);
+        return TopicStatisticsDto.TopicStatisticsResponse.builder()
+                .topic(vsTopic)
+                .topicStatistics(topicStatistics)
+                .build();
     }
 }

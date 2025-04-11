@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface TopicStatisticsRepository extends JpaRepository<TopicStatistics, Long> {
 
-    @Query("SELECT ts FROM TopicStatistics ts WHERE ts.vsTopic.id = :topicId")
+    @Query("SELECT ts FROM TopicStatistics ts JOIN FETCH ts.vsTopic WHERE ts.vsTopic.id = :topicId")
     TopicStatistics findByVsTopic(@Param("topicId") Long topicId);
 
 
