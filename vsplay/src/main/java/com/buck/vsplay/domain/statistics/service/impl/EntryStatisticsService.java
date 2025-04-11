@@ -104,7 +104,11 @@ public class EntryStatisticsService implements IEntryStatisticsService {
         Specification<EntryStatistics> entryStatsSpecification =
                 EntryStatsSpecification.idFilter(topicId)
                         .and(EntryStatsSpecification.entryNameFilter(entryStatSearchRequest.getKeyword()))
-                        .and(EntryStatsSpecification.orderFilter(entryStatSearchRequest.getTotalMatchesOrderType(), entryStatSearchRequest.getTotalWinsOrderType(), entryStatSearchRequest.getWinRateOrderType()));
+                        .and(EntryStatsSpecification.orderFilter(
+                                entryStatSearchRequest.getRankOrderType(),
+                                entryStatSearchRequest.getTotalMatchesOrderType(),
+                                entryStatSearchRequest.getTotalWinsOrderType(),
+                                entryStatSearchRequest.getWinRateOrderType()));
 
         if(!vsTopicRepository.existsById(topicId)){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
