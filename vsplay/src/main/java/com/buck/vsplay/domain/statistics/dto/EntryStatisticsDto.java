@@ -34,6 +34,7 @@ public class EntryStatisticsDto {
     @Setter
     public static class EntryStatSearchRequest{
         private String keyword;
+        private OrderType rankOrderType = OrderType.ASC;
         private OrderType totalMatchesOrderType = OrderType.NONE;
         private OrderType totalWinsOrderType = OrderType.NONE;
         private OrderType winRateOrderType = OrderType.NONE;
