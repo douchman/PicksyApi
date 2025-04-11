@@ -118,6 +118,13 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                 entryStatsSpecification,
                 PageRequest.of(page, entryStatSearchRequest.getPageSize(), Sort.unsorted()));
 
+        if (page >= entryStatistics.getTotalPages() && entryStatistics.getTotalPages() > 0) {
+            entryStatistics = entryStatisticsRepository.findAll(
+                    entryStatsSpecification,
+                    PageRequest.of(entryStatistics.getTotalPages() - 1, entryStatSearchRequest.getPageSize(), Sort.unsorted())
+            );
+        }
+
         for (EntryStatistics entryStatistic : entryStatistics) {
             boolean isYouTube = MediaType.YOUTUBE == entryStatistic.getTopicEntry().getMediaType();
             entriesStatistics.add(
