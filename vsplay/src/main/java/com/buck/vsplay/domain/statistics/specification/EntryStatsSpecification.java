@@ -24,7 +24,7 @@ public class EntryStatsSpecification {
                 if(keyword != null && !keyword.isEmpty()) {
                     return criteriaBuilder.like(root.get("topicEntry").get("entryName"), "%" + keyword + "%");
                 }
-                return null;
+                return criteriaBuilder.conjunction();
         };
     }
 
