@@ -31,21 +31,15 @@ public class EntryStatsSpecification {
 
     public static Specification<EntryStatistics> orderFilter(
             OrderType rankOrderType,
-            OrderType totalMatchesOrderType,
-            OrderType totalWinsOrderType,
             OrderType winRateOrderType){
         return (root, query, criteriaBuilder) ->{
             if( query != null){
                 List<Order> orders = new ArrayList<>();
 
                 Order rankOrder = rankOrderType.convertOrderTypeToJpaOrder(criteriaBuilder, root.get("rank"));
-                Order totalMatchesOrder = totalMatchesOrderType.convertOrderTypeToJpaOrder(criteriaBuilder, root.get("totalMatches"));
-                Order totalWinsOrder = totalWinsOrderType.convertOrderTypeToJpaOrder(criteriaBuilder, root.get("totalWins"));
                 Order winRateOrder = winRateOrderType.convertOrderTypeToJpaOrder(criteriaBuilder, root.get("winRate"));
 
                 Optional.ofNullable(rankOrder).ifPresent(orders::add);
-                Optional.ofNullable(totalMatchesOrder).ifPresent(orders::add);
-                Optional.ofNullable(totalWinsOrder).ifPresent(orders::add);
                 Optional.ofNullable(winRateOrder).ifPresent(orders::add);
 
                 query.orderBy(orders);

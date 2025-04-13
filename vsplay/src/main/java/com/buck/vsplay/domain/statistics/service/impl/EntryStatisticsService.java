@@ -106,8 +106,6 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                         .and(EntryStatsSpecification.entryNameFilter(entryStatSearchRequest.getKeyword()))
                         .and(EntryStatsSpecification.orderFilter(
                                 entryStatSearchRequest.getRankOrderType(),
-                                entryStatSearchRequest.getTotalMatchesOrderType(),
-                                entryStatSearchRequest.getTotalWinsOrderType(),
                                 entryStatSearchRequest.getWinRateOrderType()));
 
         if(!vsTopicRepository.existsById(topicId)){
