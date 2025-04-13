@@ -22,9 +22,9 @@ public class EntryStatsSpecification {
     public static Specification<EntryStatistics> entryNameFilter(String keyword) {
         return (root, query, criteriaBuilder) -> {
                 if(keyword != null && !keyword.isEmpty()) {
-                    criteriaBuilder.like(root.get("topicEntry").get("entryName"), "%" + keyword + "%");
+                    return criteriaBuilder.like(root.get("topicEntry").get("entryName"), "%" + keyword + "%");
                 }
-                return null;
+                return criteriaBuilder.conjunction();
         };
     }
 
