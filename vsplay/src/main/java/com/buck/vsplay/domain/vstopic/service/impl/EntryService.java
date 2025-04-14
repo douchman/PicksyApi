@@ -79,13 +79,21 @@ public class EntryService implements IEntryService {
         for (EntryDto.CreateEntry entry : entries) {
             TopicEntry topicEntry = topicEntryMapper.toEntityFromCreatedEntryDto(entry);
             topicEntry.setTopic(vsTopic);
-            if ( entry.getFile() != null && !entry.getFile().isEmpty()) {
-                S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(entry.getFile(), objectPath);
-                topicEntry.setMediaUrl(s3UploadResult.getObjectKey());
-                topicEntry.setMediaType(s3UploadResult.getMediaType());
+            // 미디어 파일 & 썸네일 업로드
+            if ( entry.getMediaFile() != null && !entry.getMediaFile().isEmpty()) {
+                S3Dto.S3UploadResult mediaFileUploadResult = s3Util.putObject(entry.getMediaFile(), objectPath);
+                topicEntry.setMediaUrl(mediaFileUploadResult.getObjectKey());
+                topicEntry.setMediaType(mediaFileUploadResult.getMediaType());
             }else{
                 topicEntry.setMediaType(MediaType.YOUTUBE);
             }
+
+            // 썸네일 존재 시 썸네일도 업로드
+            if( entry.getThumbnailFile() != null && !entry.getThumbnailFile().isEmpty()) {
+                S3Dto.S3UploadResult thumbFileUploadResult = s3Util.putObject(entry.getThumbnailFile(), objectPath);
+                topicEntry.setThumbNail(thumbFileUploadResult.getObjectKey());
+            }
+
             topicEntries.add(topicEntry); // DTO -> Entity 매핑
         }
 
@@ -107,7 +115,7 @@ public class EntryService implements IEntryService {
 
         topicEntryMapper.applyChangesToTopicEntry(updatedRequest, topicEntry);
 
-        MultipartFile uploadFile = updatedRequest.getFile();
+        MultipartFile uploadFile = updatedRequest.getMediaFile();
         boolean isFileExist = (uploadFile != null && !uploadFile.isEmpty());
 
         if(isFileExist){
