@@ -44,4 +44,8 @@ public class TopicEntry extends Timestamp {
     @Comment("엔트리 미디어 주소")
     private String mediaUrl;
 
+    @Column(name = "thumbnail")
+    @Comment("엔트리 썸네일")
+    private String thumbNail;
+
 }
