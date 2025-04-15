@@ -91,7 +91,7 @@ public class EntryService implements IEntryService {
             // 썸네일 존재 시 썸네일도 업로드
             if( entry.getThumbnailFile() != null && !entry.getThumbnailFile().isEmpty()) {
                 S3Dto.S3UploadResult thumbFileUploadResult = s3Util.putObject(entry.getThumbnailFile(), objectPath);
-                topicEntry.setThumbNail(thumbFileUploadResult.getObjectKey());
+                topicEntry.setThumbnail(thumbFileUploadResult.getObjectKey());
             }
 
             topicEntries.add(topicEntry); // DTO -> Entity 매핑
