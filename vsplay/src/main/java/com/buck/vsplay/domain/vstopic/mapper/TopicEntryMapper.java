@@ -15,6 +15,7 @@ public interface TopicEntryMapper {
     @Mapping(target = "thumbnail", qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toEntryDtoFromEntity(TopicEntry topicEntry);
 
+    @Mapping(target = "thumbnail", qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toEntryDtoFromEntityWithoutSignedUrl(TopicEntry topicEntry);
 
     /**
