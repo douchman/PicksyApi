@@ -250,7 +250,7 @@ import java.util.*;
 
     private EntryDto.Entry mappingTopicEntryToEntryDto(TopicEntry topicEntry){
         if(MediaType.YOUTUBE == topicEntry.getMediaType()){
-            return topicEntryMapper.toEntryDtoFromEntityWithoutSignedUrl(topicEntry);
+            return topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(topicEntry);
         } else {
             return topicEntryMapper.toEntryDtoFromEntity(topicEntry);
         }

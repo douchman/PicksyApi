@@ -129,7 +129,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                     EntryStatisticsDto.EntryStatWithEntryInfo.builder()
                             .entry(
                                     isYouTube ?
-                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedUrl(entryStatistic.getTopicEntry())
+                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryStatistic.getTopicEntry())
                                             :topicEntryMapper.toEntryDtoFromEntity(entryStatistic.getTopicEntry())
                             )
                             .statistics(entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistic))
