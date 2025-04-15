@@ -20,7 +20,7 @@ public class EntryDto {
         private String description;
         private MediaType mediaType;
         private String mediaUrl;
-        private String thumbNail;
+        private String thumbnail;
     }
 
     @Data
