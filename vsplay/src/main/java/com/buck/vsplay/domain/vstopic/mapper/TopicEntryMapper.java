@@ -15,7 +15,8 @@ public interface TopicEntryMapper {
     @Mapping(target = "thumbnail", qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toEntryDtoFromEntity(TopicEntry topicEntry);
 
-    EntryDto.Entry toEntryDtoFromEntityWithoutSignedUrl(TopicEntry topicEntry);
+    @Mapping(target = "thumbnail", qualifiedByName = "signedMediaUrl")
+    EntryDto.Entry toEntryDtoFromEntityWithoutSignedMediaUrl(TopicEntry topicEntry);
 
     /**
      * 엔티티 업데이트를 위해 DTO 의 값을 기존 Entry 엔티티에 적용
