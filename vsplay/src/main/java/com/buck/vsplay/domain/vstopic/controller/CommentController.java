@@ -29,7 +29,7 @@ public class CommentController {
     @PostMapping("{topicId}/comments")
     public ResponseEntity<SingleResponseDto<TopicCommentDto.CommentCreateResponse>> createTopicComment(
         @PathVariable("topicId") Long topicId,
-        @Valid TopicCommentDto.CommentCreateRequest commentCreateRequest
+        @RequestBody @Valid TopicCommentDto.CommentCreateRequest commentCreateRequest
     ){
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), topicCommentService.createTopicComment(topicId, commentCreateRequest)), HttpStatus.OK);
     }
