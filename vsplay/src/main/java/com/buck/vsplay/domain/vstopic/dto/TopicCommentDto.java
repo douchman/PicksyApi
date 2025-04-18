@@ -49,5 +49,6 @@ public class TopicCommentDto {
     public static class CommentCreateResponse{
         String author;
         String content;
+        String createdAt;
     }
 }
