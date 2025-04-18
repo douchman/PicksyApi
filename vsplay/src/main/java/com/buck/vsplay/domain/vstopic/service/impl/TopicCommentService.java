@@ -59,7 +59,7 @@ public class TopicCommentService implements ITopicCommentService {
         }
 
         Page<TopicComment> topicCommentPage = topicCommentRepository.findAll(
-                TopicCommentSpecification.withAllFilters(commentSearchRequest.getKeyword(), false),
+                TopicCommentSpecification.withAllFilters(topicId, commentSearchRequest.getKeyword(), false),
                 PageRequest.of(page, commentSearchRequest.getSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
 
         List<TopicCommentDto.Comment> topicCommentList = new ArrayList<>();
