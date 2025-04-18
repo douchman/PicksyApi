@@ -68,6 +68,7 @@ public class TopicCommentService implements ITopicCommentService {
         for (TopicComment topicComment : topicCommentPage.getContent()) {
             topicCommentList.add(
                     TopicCommentDto.Comment.builder()
+                            .author(topicComment.getAuthor())
                             .content(topicComment.getContent())
                             .createdAt(DateTimeUtil.formatDateToSting(topicComment.getCreatedAt())).build()
             );
