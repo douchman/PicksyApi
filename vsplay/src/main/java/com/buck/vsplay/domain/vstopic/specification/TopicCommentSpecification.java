@@ -8,6 +8,12 @@ import org.springframework.data.jpa.domain.Specification;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TopicCommentSpecification {
 
+    // 식별자 필터
+    public static Specification<TopicComment> idTopicIdFilter(Long topicId) {
+        return (root, query, criteriaBuilder) ->
+            criteriaBuilder.equal(root.get("topic").get("id"), topicId);
+    }
+
     // 키워드 검색
     public static Specification<TopicComment> keywordFilter(String keyword){
         return (root, query, criteriaBuilder) -> {
@@ -25,7 +31,7 @@ public class TopicCommentSpecification {
     }
 
     // 모든 필터 적용
-    public static Specification<TopicComment> withAllFilters(String keyword, boolean delete){
-        return Specification.where(keywordFilter(keyword)).and(deleteFilter(delete));
+    public static Specification<TopicComment> withAllFilters(Long topicId, String keyword, boolean delete){
+        return Specification.where(idTopicIdFilter(topicId).and(keywordFilter(keyword)).and(deleteFilter(delete)));
     }
 }
