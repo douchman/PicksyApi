@@ -94,10 +94,12 @@ public class TopicStatisticsService implements ITopicStatisticsService {
         VsTopicDto.VsTopic vsTopic = vsTopicMapper.toVsTopicDtoFromEntity(topicStatisticsEntity.getVsTopic());
 
         EntryDto.Entry mostPopularEntry = topicStatistics.getMostPopularEntry();
-        boolean isMediaTypeYoutube = MediaType.YOUTUBE == mostPopularEntry.getMediaType();
+        if( mostPopularEntry != null ) {
+            boolean isMediaTypeYoutube = MediaType.YOUTUBE == mostPopularEntry.getMediaType();
 
-        if( !isMediaTypeYoutube ){ // 유튜브인 경우 signedUrl 변환 없음
-            mostPopularEntry.setMediaUrl(s3Util.getUploadedObjectUrl(mostPopularEntry.getMediaUrl()));
+            if( !isMediaTypeYoutube ){ // 유튜브인 경우 signedUrl 변환 없음
+                mostPopularEntry.setMediaUrl(s3Util.getUploadedObjectUrl(mostPopularEntry.getMediaUrl()));
+            }
         }
 
         return TopicStatisticsDto.TopicStatisticsResponse.builder()
