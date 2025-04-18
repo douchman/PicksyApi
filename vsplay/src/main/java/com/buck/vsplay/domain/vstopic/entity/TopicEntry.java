@@ -46,6 +46,6 @@ public class TopicEntry extends Timestamp {
 
     @Column(name = "thumbnail")
     @Comment("엔트리 썸네일")
-    private String thumbNail;
+    private String thumbnail;
 
 }
