@@ -20,6 +20,7 @@ public class EntryDto {
         private String description;
         private MediaType mediaType;
         private String mediaUrl;
+        private String thumbNail;
     }
 
     @Data
@@ -27,7 +28,8 @@ public class EntryDto {
         private String entryName;
         private String description;
         private String mediaUrl;
-        private MultipartFile file;
+        private MultipartFile mediaFile;
+        private MultipartFile thumbnailFile;
     }
 
     @Data
