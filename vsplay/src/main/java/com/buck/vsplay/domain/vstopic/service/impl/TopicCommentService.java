@@ -1,6 +1,5 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
-import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.vstopic.dto.TopicCommentDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicComment;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,19 +33,22 @@ public class TopicCommentService implements ITopicCommentService {
 
 
     @Override
-    public void createTopicComment(Long topicId, TopicCommentDto.CommentCreateRequest commentCreateRequest) {
+    public TopicCommentDto.CommentCreateResponse createTopicComment(Long topicId, TopicCommentDto.CommentCreateRequest commentCreateRequest) {
 
-        Optional<Member> authUser = authUserService.getAuthUserOptional();
         VsTopic vsTopic = topicRepository.findById(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
         topicCommentRepository.save(TopicComment.builder()
                 .topic(vsTopic)
-                .member(authUser.orElse(null))
+                .member(authUserService.getAuthUserOptional().orElse(null))
                 .author(commentCreateRequest.getAuthor())
                 .content(commentCreateRequest.getContent())
                 .build());
 
+        return TopicCommentDto.CommentCreateResponse.builder()
+                .author(commentCreateRequest.getAuthor())
+                .content(commentCreateRequest.getContent())
+                .build();
     }
 
     @Override
