@@ -17,6 +17,9 @@ public interface EntryStatisticsRepository extends JpaRepository<EntryStatistics
     @Query("SELECT es FROM EntryStatistics es WHERE es.topicEntry.id = :entryId")
     EntryStatistics findByEntryId(@Param("entryId") Long entryId);
 
+    @Query("SELECT es FROM EntryStatistics  es JOIN FETCH es.topicEntry WHERE es.topicEntry.id = :topicId")
+    EntryStatistics findByTopicEntryIdWithTopicEntry(Long topicId);
+
     @EntityGraph(attributePaths = {"topicEntry"}) // for join fetch
     Page<EntryStatistics> findAll(Specification<EntryStatistics> specification, Pageable pageable);
 
