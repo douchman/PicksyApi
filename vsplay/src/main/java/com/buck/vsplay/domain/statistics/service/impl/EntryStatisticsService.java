@@ -7,8 +7,11 @@ import com.buck.vsplay.domain.statistics.mapper.EntryStatisticsMapper;
 import com.buck.vsplay.domain.statistics.repository.EntryStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryStatisticsService;
 import com.buck.vsplay.domain.statistics.specification.EntryStatsSpecification;
+import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
@@ -145,6 +148,31 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                         .currentPage(entryStatistics.getNumber() + 1) // index 조정
                         .pageSize(entryStatistics.getSize())
                         .build())
+                .build();
+    }
+
+    @Override
+    public EntryStatisticsDto.SingleEntryStatsResponse getSingleEntryStatistics(Long topicId, Long entryId) {
+
+        if(!vsTopicRepository.existsById(topicId)){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        if(!entryStatisticsRepository.existsById(entryId)){
+            throw new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND);
+        }
+
+        EntryStatistics entryStatistics = entryStatisticsRepository.findByTopicEntryIdWithTopicEntry(entryId);
+
+        boolean isYoutubeMediaType = MediaType.YOUTUBE == entryStatistics.getTopicEntry().getMediaType();
+        EntryDto.Entry entry = isYoutubeMediaType?
+                        topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryStatistics.getTopicEntry())
+                        : topicEntryMapper.toEntryDtoFromEntity(entryStatistics.getTopicEntry());
+        EntryStatisticsDto.EntryStatistics statistics = entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistics);
+
+        return EntryStatisticsDto.SingleEntryStatsResponse.builder()
+                .entry(entry)
+                .statistics(statistics)
                 .build();
     }
 }
