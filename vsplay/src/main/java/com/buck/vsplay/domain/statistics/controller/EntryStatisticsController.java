@@ -27,4 +27,15 @@ public class EntryStatisticsController {
 
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), entryStatisticsService.getEntryStatisticsWithEntryInfo(topicId, entryStatSearchRequest)), HttpStatus.OK);
     }
+
+
+    @GetMapping("{topicId}/entries/{entryId}")
+    public ResponseEntity<SingleResponseDto<EntryStatisticsDto.SingleEntryStatsResponse>> getSingleEntryStatistics(
+            @PathVariable("topicId") Long topicId,
+            @PathVariable("entryId") Long entryId
+
+    ){
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), entryStatisticsService.getSingleEntryStatistics(topicId, entryId)), HttpStatus.OK);
+    }
+
 }
