@@ -10,4 +10,5 @@ public interface IEntryStatisticsService {
     void createEntryStatistics(List<TopicEntry> topicEntryList);
     void recordEntryMatchStats(EntryMatch entryMatch);
     EntryStatisticsDto.EntryStatSearchResponse getEntryStatisticsWithEntryInfo(Long topicId, EntryStatisticsDto.EntryStatSearchRequest entryStatSearchRequest);
+    EntryStatisticsDto.SingleEntryStatsResponse getSingleEntryStatistics(Long topicId, Long entryId);
 }
