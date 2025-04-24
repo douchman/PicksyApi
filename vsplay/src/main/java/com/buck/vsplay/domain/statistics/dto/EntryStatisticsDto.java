@@ -50,4 +50,12 @@ public class EntryStatisticsDto {
         List<EntryStatWithEntryInfo> entriesStatistics;
         Pagination pagination;
     }
+
+    @Getter
+    @Setter
+    @Builder
+    public static class SingleEntryStatsResponse{
+        EntryDto.Entry entry;
+        EntryStatistics statistics;
+    }
 }
