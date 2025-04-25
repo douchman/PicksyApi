@@ -52,9 +52,9 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
     }
 
     @Override
-    public List<EntryVersusStatisticsDto.EntryVersusStatistics> getEntryVersusStatistics(Long topicId, Long entryId) {
+    public EntryVersusStatisticsDto.EntryVersusStatisticsResponse getEntryVersusStatistics(Long topicId, Long entryId) {
 
-        List<EntryVersusStatisticsDto.EntryVersusStatistics> entryVersusStatisticsList = new ArrayList<>();
+        List<EntryVersusStatisticsDto.OpponentEntryInfoWithMatchRecord> opponentEntryInfoWithMatchRecords = new ArrayList<>();
 
         if(!topicRepository.existsById(topicId)) {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
@@ -73,19 +73,23 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
 
         if ( entryVersusStatistics != null && !entryVersusStatistics.isEmpty()){
             for (EntryVersusStatistics entryVersusStatistic : entryVersusStatistics) {
-                entryVersusStatisticsList.add(
-                        EntryVersusStatisticsDto.EntryVersusStatistics.builder()
+                opponentEntryInfoWithMatchRecords.add(
+                        EntryVersusStatisticsDto.OpponentEntryInfoWithMatchRecord.builder()
                                 .opponentEntry(topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry()))
-                                .totalMatches(entryVersusStatistic.getTotalMatches())
-                                .wins(entryVersusStatistic.getWins())
-                                .losses(entryVersusStatistic.getLosses())
-                                .winRate(entryVersusStatistic.getWinRate())
+                                .matchRecord(EntryVersusStatisticsDto.MatchRecord.builder()
+                                        .totalMatches(entryVersusStatistic.getTotalMatches())
+                                        .wins(entryVersusStatistic.getWins())
+                                        .losses(entryVersusStatistic.getLosses())
+                                        .winRate(entryVersusStatistic.getWinRate())
+                                        .build())
                                 .build()
                 );
             }
         }
 
-        return entryVersusStatisticsList;
+        return EntryVersusStatisticsDto.EntryVersusStatisticsResponse.builder()
+                .matchUpRecords(opponentEntryInfoWithMatchRecords)
+                .build();
     }
 
     private EntryVersusStatistics upsertStats(TopicEntry entry, TopicEntry opponentEntry, boolean isWin) {
