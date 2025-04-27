@@ -14,6 +14,7 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
+import com.buck.vsplay.global.constants.MediaType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -73,9 +74,13 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
 
         if ( entryVersusStatistics != null && !entryVersusStatistics.isEmpty()){
             for (EntryVersusStatistics entryVersusStatistic : entryVersusStatistics) {
+                boolean isYoutubeMediaType = MediaType.YOUTUBE == entryVersusStatistic.getOpponentEntry().getMediaType();
                 opponentEntryInfoWithMatchRecords.add(
                         EntryVersusStatisticsDto.OpponentEntryInfoWithMatchRecord.builder()
-                                .opponentEntry(topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry()))
+                                .opponentEntry(
+                                        isYoutubeMediaType ?
+                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryVersusStatistic.getOpponentEntry())
+                                            : topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry()))
                                 .matchRecord(EntryVersusStatisticsDto.MatchRecord.builder()
                                         .totalMatches(entryVersusStatistic.getTotalMatches())
                                         .wins(entryVersusStatistic.getWins())
