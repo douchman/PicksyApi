@@ -1,15 +1,9 @@
 package com.buck.vsplay.domain.statistics.specification;
 
 import com.buck.vsplay.domain.statistics.entity.EntryStatistics;
-import com.buck.vsplay.global.constants.OrderType;
-import jakarta.persistence.criteria.Order;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EntryStatsSpecification {
@@ -25,26 +19,6 @@ public class EntryStatsSpecification {
                     return criteriaBuilder.like(root.get("topicEntry").get("entryName"), "%" + keyword + "%");
                 }
                 return criteriaBuilder.conjunction();
-        };
-    }
-
-
-    public static Specification<EntryStatistics> orderFilter(
-            OrderType rankOrderType,
-            OrderType winRateOrderType){
-        return (root, query, criteriaBuilder) ->{
-            if( query != null){
-                List<Order> orders = new ArrayList<>();
-
-                Order rankOrder = rankOrderType.convertOrderTypeToJpaOrder(criteriaBuilder, root.get("rank"));
-                Order winRateOrder = winRateOrderType.convertOrderTypeToJpaOrder(criteriaBuilder, root.get("winRate"));
-
-                Optional.ofNullable(rankOrder).ifPresent(orders::add);
-                Optional.ofNullable(winRateOrder).ifPresent(orders::add);
-
-                query.orderBy(orders);
-            }
-            return criteriaBuilder.conjunction();
         };
     }
 }
