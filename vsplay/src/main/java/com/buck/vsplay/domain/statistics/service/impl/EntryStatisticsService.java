@@ -18,6 +18,7 @@ import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.dto.Pagination;
+import com.buck.vsplay.global.util.SortUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -32,6 +33,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -100,16 +102,15 @@ public class EntryStatisticsService implements IEntryStatisticsService {
         List<EntryStatisticsDto.EntryStatWithEntryInfo> entriesStatistics = new ArrayList<>();
         int page = Math.max(entryStatSearchRequest.getPage() - 1 , 0); // index 조정
 
-        // 정렬 필터
-        // totalMatches desc -> 총 대결 수가 많을수록 우선순위
-        // totalWins desc -> 총 승리 횟수가 많을수록 우선순위
-        // winRate desc -> 승률이 가장 높을수록 우선순위
+        // 아이디 및 엔트리 명 필터
         Specification<EntryStatistics> entryStatsSpecification =
                 EntryStatsSpecification.idFilter(topicId)
-                        .and(EntryStatsSpecification.entryNameFilter(entryStatSearchRequest.getKeyword()))
-                        .and(EntryStatsSpecification.orderFilter(
-                                entryStatSearchRequest.getRankOrderType(),
-                                entryStatSearchRequest.getWinRateOrderType()));
+                        .and(EntryStatsSpecification.entryNameFilter(entryStatSearchRequest.getKeyword()));
+
+        // 정렬 기준 설정
+        Sort sort = SortUtil.buildSort(Map.of(
+                EntryStatistics.OrderColumn.RANK, entryStatSearchRequest.getRankOrderType()
+        ), EntryStatistics.OrderColumn::getProperty);
 
         if(!vsTopicRepository.existsById(topicId)){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
@@ -117,7 +118,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
 
         Page<EntryStatistics> entryStatistics = entryStatisticsRepository.findAll(
                 entryStatsSpecification,
-                PageRequest.of(page, entryStatSearchRequest.getPageSize(), Sort.unsorted()));
+                PageRequest.of(page, entryStatSearchRequest.getPageSize(), sort));
 
         if (page >= entryStatistics.getTotalPages() && entryStatistics.getTotalPages() > 0) {
             entryStatistics = entryStatisticsRepository.findAll(
@@ -175,4 +176,5 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                 .statistics(statistics)
                 .build();
     }
+
 }
