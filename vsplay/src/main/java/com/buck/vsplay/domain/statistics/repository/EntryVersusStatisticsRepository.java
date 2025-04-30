@@ -17,6 +17,14 @@ public interface EntryVersusStatisticsRepository extends JpaRepository<EntryVers
     @Query("SELECT evs FROM EntryVersusStatistics evs WHERE evs.topicEntry.id = :entryId AND evs.opponentEntry.id = :opponentEntryId")
     EntryVersusStatistics findByEntryIdAndOpponentEntryId(@Param("entryId") Long entryId, @Param("opponentEntryId") Long opponentEntryId);
 
+    @Query("""
+    SELECT evs FROM EntryVersusStatistics evs
+    JOIN FETCH evs.opponentEntry oe 
+    WHERE evs.topicEntry.id = :entryId 
+    ORDER BY evs.wins DESC, evs.winRate DESC
+    """)
+    List<EntryVersusStatistics> findByTopicEntryIdWithOpponentEntryFetch(@Param("entryId") Long entryId);
+
     @EntityGraph(attributePaths = {"opponentEntry"})
     default List<EntryVersusStatistics> findWithOpponentEntryBySpecification(Specification<EntryVersusStatistics> specification){
         return findAll(specification);
