@@ -6,7 +6,6 @@ import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.mapper.EntryStatisticsMapper;
 import com.buck.vsplay.domain.statistics.repository.EntryStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryStatisticsService;
-import com.buck.vsplay.domain.statistics.specification.EntryStatsSpecification;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
@@ -25,7 +24,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
@@ -101,11 +99,6 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     public EntryStatisticsDto.EntryStatSearchResponse getEntryStatisticsWithEntryInfo(Long topicId, EntryStatisticsDto.EntryStatSearchRequest entryStatSearchRequest) {
         List<EntryStatisticsDto.EntryStatWithEntryInfo> entriesStatistics = new ArrayList<>();
         int page = Math.max(entryStatSearchRequest.getPage() - 1 , 0); // index 조정
-
-        // 아이디 및 엔트리 명 필터
-        Specification<EntryStatistics> entryStatsSpecification =
-                EntryStatsSpecification.idFilter(topicId)
-                        .and(EntryStatsSpecification.entryNameFilter(entryStatSearchRequest.getKeyword()));
 
         // 정렬 기준 설정
         Sort sort = SortUtil.buildSort(Map.of(
