@@ -116,13 +116,15 @@ public class EntryStatisticsService implements IEntryStatisticsService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        Page<EntryStatistics> entryStatistics = entryStatisticsRepository.findAll(
-                entryStatsSpecification,
+        Page<EntryStatistics> entryStatistics = entryStatisticsRepository.findByTopicIdAndEntryNameWithTopicEntryFetch(
+                topicId,
+                entryStatSearchRequest.getKeyword(),
                 PageRequest.of(page, entryStatSearchRequest.getPageSize(), sort));
 
         if (page >= entryStatistics.getTotalPages() && entryStatistics.getTotalPages() > 0) {
-            entryStatistics = entryStatisticsRepository.findAll(
-                    entryStatsSpecification,
+            entryStatistics = entryStatisticsRepository.findByTopicIdAndEntryNameWithTopicEntryFetch(
+                    topicId,
+                    entryStatSearchRequest.getKeyword(),
                     PageRequest.of(entryStatistics.getTotalPages() - 1, entryStatSearchRequest.getPageSize(), Sort.unsorted())
             );
         }
