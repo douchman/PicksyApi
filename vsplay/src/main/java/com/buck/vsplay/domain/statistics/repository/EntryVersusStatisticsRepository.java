@@ -1,8 +1,6 @@
 package com.buck.vsplay.domain.statistics.repository;
 
 import com.buck.vsplay.domain.statistics.entity.EntryVersusStatistics;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -24,9 +22,4 @@ public interface EntryVersusStatisticsRepository extends JpaRepository<EntryVers
     ORDER BY evs.wins DESC, evs.winRate DESC
     """)
     List<EntryVersusStatistics> findByTopicEntryIdWithOpponentEntryFetch(@Param("entryId") Long entryId);
-
-    @EntityGraph(attributePaths = {"opponentEntry"})
-    default List<EntryVersusStatistics> findWithOpponentEntryBySpecification(Specification<EntryVersusStatistics> specification){
-        return findAll(specification);
-    }
 }
