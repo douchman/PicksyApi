@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("statistics/versus/topics/")
@@ -22,7 +20,7 @@ public class EntryVersusStatisticsController {
     private final EntryVersusStatisticsService entryVersusStatisticsService;
 
     @GetMapping("{topicId}/entries/{entryId}")
-    public ResponseEntity<SingleResponseDto<List<EntryVersusStatisticsDto.EntryVersusStatistics>>> getEntryVersusStatistics(
+    public ResponseEntity<SingleResponseDto<EntryVersusStatisticsDto.EntryVersusStatisticsResponse>> getEntryVersusStatistics(
             @PathVariable("topicId") Long topicId,
             @PathVariable("entryId") Long entryId){
 
