@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.dto;
 
 
+import com.buck.vsplay.global.constants.SortBy;
 import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -96,6 +97,7 @@ public class VsTopicDto {
         private String keyword;
         private Integer page = 1 ;
         private Integer size = 20;
+        private SortBy searchSortBy = SortBy.LATEST;
     }
 
     @Data
