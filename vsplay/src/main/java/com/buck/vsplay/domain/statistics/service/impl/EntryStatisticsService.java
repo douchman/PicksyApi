@@ -15,8 +15,11 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
+import com.buck.vsplay.global.batch.entity.BatchJobExecution;
+import com.buck.vsplay.global.batch.repository.BatchJobExecutionRepository;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.dto.Pagination;
+import com.buck.vsplay.global.util.DateTimeUtil;
 import com.buck.vsplay.global.util.SortUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +45,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     private final VsTopicRepository vsTopicRepository;
     private final EntryStatisticsMapper entryStatisticsMapper;
     private final TopicEntryMapper topicEntryMapper;
+    private final BatchJobExecutionRepository batchJobExecutionRepository;
 
     @EventListener
     public void handleEntryCrateEvent(EntryEvent.CreateEvent entryCreateEvent){
@@ -136,8 +140,20 @@ public class EntryStatisticsService implements IEntryStatisticsService {
             );
         }
 
+        // 가장 최근 랭킹 갱신 날짜 조회
+        BatchJobExecution lastEntryStatsExecution =
+                batchJobExecutionRepository.findCompletedEntryStatsRankingJobsOrderByEndTimeDesc()
+                        .stream()
+                        .findFirst()
+                        .orElse(null);
+
+        String lastUpdatedAt = (lastEntryStatsExecution != null && lastEntryStatsExecution.getEndTime() != null)
+                ? DateTimeUtil.formatDateToSting(lastEntryStatsExecution.getEndTime())
+                : null;
+
         return EntryStatisticsDto.EntryStatSearchResponse.builder()
                 .entriesStatistics(entriesStatistics)
+                .lastUpdatedAt(lastUpdatedAt)
                 .pagination(Pagination.builder()
                         .totalPages(entryStatistics.getTotalPages())
                         .totalItems(entryStatistics.getTotalElements())
