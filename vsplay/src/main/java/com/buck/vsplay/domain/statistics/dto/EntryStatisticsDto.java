@@ -48,6 +48,7 @@ public class EntryStatisticsDto {
     @Builder
     public static class EntryStatSearchResponse {
         List<EntryStatWithEntryInfo> entriesStatistics;
+        String lastUpdatedAt;
         Pagination pagination;
     }
 
