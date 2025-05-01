@@ -5,7 +5,6 @@ import com.buck.vsplay.domain.statistics.entity.EntryVersusStatistics;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.repository.EntryVersusStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryVersusStatisticsService;
-import com.buck.vsplay.domain.statistics.specification.EntryVersusSpecification;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
@@ -18,7 +17,6 @@ import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.constants.MediaType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
@@ -72,13 +70,7 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
             throw new EntryException(EntryExceptionCode.ENTRY_NOT_INCLUDED_IN_TOPIC);
         }
 
-        // entryId filter
-        // order filter
-        Specification<EntryVersusStatistics> entryVersusStatisticsSpecification =
-                EntryVersusSpecification.entryIdFilter(entryId)
-                        .and(EntryVersusSpecification.orderFilter());
-
-        List<EntryVersusStatistics> entryVersusStatistics = entryVersusStatisticsRepository.findWithOpponentEntryBySpecification(entryVersusStatisticsSpecification);
+        List<EntryVersusStatistics> entryVersusStatistics = entryVersusStatisticsRepository.findByTopicEntryIdWithOpponentEntryFetch(entryId);
 
         if ( entryVersusStatistics != null && !entryVersusStatistics.isEmpty()){
             for (EntryVersusStatistics entryVersusStatistic : entryVersusStatistics) {

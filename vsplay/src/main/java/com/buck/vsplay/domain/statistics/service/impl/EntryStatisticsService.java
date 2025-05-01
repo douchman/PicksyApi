@@ -6,7 +6,6 @@ import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.mapper.EntryStatisticsMapper;
 import com.buck.vsplay.domain.statistics.repository.EntryStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryStatisticsService;
-import com.buck.vsplay.domain.statistics.specification.EntryStatsSpecification;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
@@ -18,13 +17,13 @@ import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.dto.Pagination;
+import com.buck.vsplay.global.util.SortUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
@@ -32,6 +31,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -100,28 +100,24 @@ public class EntryStatisticsService implements IEntryStatisticsService {
         List<EntryStatisticsDto.EntryStatWithEntryInfo> entriesStatistics = new ArrayList<>();
         int page = Math.max(entryStatSearchRequest.getPage() - 1 , 0); // index 조정
 
-        // 정렬 필터
-        // totalMatches desc -> 총 대결 수가 많을수록 우선순위
-        // totalWins desc -> 총 승리 횟수가 많을수록 우선순위
-        // winRate desc -> 승률이 가장 높을수록 우선순위
-        Specification<EntryStatistics> entryStatsSpecification =
-                EntryStatsSpecification.idFilter(topicId)
-                        .and(EntryStatsSpecification.entryNameFilter(entryStatSearchRequest.getKeyword()))
-                        .and(EntryStatsSpecification.orderFilter(
-                                entryStatSearchRequest.getRankOrderType(),
-                                entryStatSearchRequest.getWinRateOrderType()));
+        // 정렬 기준 설정
+        Sort sort = SortUtil.buildSort(Map.of(
+                EntryStatistics.OrderColumn.RANK, entryStatSearchRequest.getRankOrderType()
+        ), EntryStatistics.OrderColumn::getProperty);
 
         if(!vsTopicRepository.existsById(topicId)){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        Page<EntryStatistics> entryStatistics = entryStatisticsRepository.findAll(
-                entryStatsSpecification,
-                PageRequest.of(page, entryStatSearchRequest.getPageSize(), Sort.unsorted()));
+        Page<EntryStatistics> entryStatistics = entryStatisticsRepository.findByTopicIdAndEntryNameWithTopicEntryFetch(
+                topicId,
+                entryStatSearchRequest.getKeyword(),
+                PageRequest.of(page, entryStatSearchRequest.getPageSize(), sort));
 
         if (page >= entryStatistics.getTotalPages() && entryStatistics.getTotalPages() > 0) {
-            entryStatistics = entryStatisticsRepository.findAll(
-                    entryStatsSpecification,
+            entryStatistics = entryStatisticsRepository.findByTopicIdAndEntryNameWithTopicEntryFetch(
+                    topicId,
+                    entryStatSearchRequest.getKeyword(),
                     PageRequest.of(entryStatistics.getTotalPages() - 1, entryStatSearchRequest.getPageSize(), Sort.unsorted())
             );
         }
@@ -175,4 +171,5 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                 .statistics(statistics)
                 .build();
     }
+
 }

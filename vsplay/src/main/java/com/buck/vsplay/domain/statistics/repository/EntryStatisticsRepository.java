@@ -3,8 +3,6 @@ package com.buck.vsplay.domain.statistics.repository;
 import com.buck.vsplay.domain.statistics.entity.EntryStatistics;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -20,8 +18,13 @@ public interface EntryStatisticsRepository extends JpaRepository<EntryStatistics
     @Query("SELECT es FROM EntryStatistics  es JOIN FETCH es.topicEntry WHERE es.topicEntry.id = :topicId")
     EntryStatistics findByTopicEntryIdWithTopicEntry(Long topicId);
 
-    @EntityGraph(attributePaths = {"topicEntry"}) // for join fetch
-    Page<EntryStatistics> findAll(Specification<EntryStatistics> specification, Pageable pageable);
+    @Query("""
+    SELECT es FROM EntryStatistics es
+    JOIN FETCH es.topicEntry te
+    WHERE te.topic.id = :topicId
+    AND (:entryName IS NULL OR :entryName = '' OR te.entryName LIKE CONCAT('%', :entryName, '%'))
+    """)
+    Page<EntryStatistics> findByTopicIdAndEntryNameWithTopicEntryFetch(@Param("topicId") Long topicId, @Param("entryName") String entryName, Pageable pageable);
 
     @Query("SELECT es FROM EntryStatistics es JOIN FETCH es.topicEntry te JOIN FETCH te.topic t")
     List<EntryStatistics> finalAllWithTopicEntryAndTopic();

@@ -70,4 +70,17 @@ public class EntryStatistics extends Timestamp {
             this.highestTournament = currentTournament;
         }
     }
+
+    @Getter
+    public enum OrderColumn {
+        RANK("rank"),
+        WIN_RATE("winRate");
+
+        private final String property;
+
+        OrderColumn(String property) {
+            this.property = property;
+        }
+
+    }
 }
