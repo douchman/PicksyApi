@@ -12,6 +12,7 @@ import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
 import com.buck.vsplay.domain.vstopic.specification.VsTopicSpecification;
+import com.buck.vsplay.global.constants.SortBy;
 import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
@@ -154,25 +155,22 @@ public class VsTopicService implements IVsTopicService {
     public VsTopicDto.VsTopicSearchResponse searchPublicVsTopic( VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
         int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
 
-       Specification<VsTopic> vsTopicSpecification = VsTopicSpecification.keywordFilter(
-                vsTopicSearchRequest.getKeyword()
-        );
+        SortBy searchSortBy = vsTopicSearchRequest.getSearchSortBy();
+        Page<VsTopic> topicsWithPage;
 
-        vsTopicSpecification = vsTopicSpecification.and(VsTopicSpecification.deleteFilter(false));
-        vsTopicSpecification = vsTopicSpecification.and(VsTopicSpecification.visibilityFilter(Visibility.PUBLIC));
-
-
-        Page<VsTopic> topicPage = vsTopicRepository.findAll(
-                vsTopicSpecification,
-                PageRequest.of(page, vsTopicSearchRequest.getSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
+        if( SortBy.LATEST == searchSortBy) { // 인기순 정렬
+            topicsWithPage = vsTopicRepository.findPublicTopicsByTitleOrderByNewest(vsTopicSearchRequest.getKeyword(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
+        } else { // 최신순 정렬
+            topicsWithPage = vsTopicRepository.findPublicTopicsByTitleOrderByTotalMatches(vsTopicSearchRequest.getKeyword(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
+        }
 
         return VsTopicDto.VsTopicSearchResponse.builder()
-                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicPage.getContent()))
+                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicsWithPage.getContent()))
                 .pagination(Pagination.builder()
-                        .totalPages(topicPage.getTotalPages())
-                        .totalItems(topicPage.getTotalElements())
-                        .currentPage(topicPage.getNumber() + 1) // index 조정
-                        .pageSize(topicPage.getSize())
+                        .totalPages(topicsWithPage.getTotalPages())
+                        .totalItems(topicsWithPage.getTotalElements())
+                        .currentPage(topicsWithPage.getNumber() + 1) // index 조정
+                        .pageSize(topicsWithPage.getSize())
                         .build())
                 .build();
     }
