@@ -117,7 +117,7 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
         }
 
-        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntity(vsTopic));
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(vsTopic));
 
         if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
             for (TopicTournament tournament : vsTopic.getTournaments()) {
@@ -140,7 +140,7 @@ public class VsTopicService implements IVsTopicService {
 
         VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
 
-        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntity(vsTopic));
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(vsTopic));
 
         if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
             for (TopicTournament tournament : vsTopic.getTournaments()) {
