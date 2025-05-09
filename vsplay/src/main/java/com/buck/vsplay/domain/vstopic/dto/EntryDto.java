@@ -33,6 +33,16 @@ public class EntryDto {
     }
 
     @Data
+    public static class UpdateEntry{
+        private Long id;
+        private String entryName;
+        private String description;
+        private String mediaUrl;
+        private MultipartFile mediaFile;
+        private MultipartFile thumbnailFile;
+    }
+
+    @Data
     public static class CreateEntriesRequest{
         Long topicId;
         List<CreateEntry> entries;
@@ -43,7 +53,8 @@ public class EntryDto {
         List<Entry> entries = new ArrayList<>();
     }
 
-    @EqualsAndHashCode(callSuper = true)
     @Data
-    public static class UpdateEntryRequest extends CreateEntry{}
+    public static class UpdateEntryRequest{
+        List<UpdateEntry> entriesToUpdate;
+    }
 }
