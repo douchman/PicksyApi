@@ -37,10 +37,9 @@ public class EntryController {
     @PatchMapping("{topicId}/entries/{entryId}")
     public ResponseEntity<SingleResponseDto<Integer>> updateEntry(
             @PathVariable("topicId") Long topicId,
-            @PathVariable("entryId") Long entryId,
             @ModelAttribute EntryDto.UpdateEntryRequest request
     ){
-        entryService.updateEntries(topicId, entryId, request);
+        entryService.updateEntries(topicId, request);
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
     }
 }

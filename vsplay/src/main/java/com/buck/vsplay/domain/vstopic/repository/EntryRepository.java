@@ -15,4 +15,6 @@ public interface EntryRepository extends JpaRepository<TopicEntry, Long> {
 
     @Query("SELECT e FROM TopicEntry e JOIN FETCH e.topic WHERE e.id = :entryId")
     TopicEntry findWithTopicByEntryId(@Param("entryId") Long entryId);
+
+    List<TopicEntry> findByTopicIdAndIdIn(Long topicId, List<Long> ids);
 }

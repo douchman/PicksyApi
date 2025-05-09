@@ -5,5 +5,5 @@ import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 public interface IEntryService {
     EntryDto.EntryList getEntriesByTopicId(Long topicId);
     void createEntries(Long topicId, EntryDto.CreateEntriesRequest request);
-    void updateEntries(Long topicId, Long entryId, EntryDto.UpdateEntryRequest updatedRequest);
+    void updateEntries(Long topicId, EntryDto.UpdateEntryRequest updatedRequest);
 }
