@@ -58,7 +58,14 @@ public class EntryService implements IEntryService {
 
         if( createdEntries != null && !createdEntries.isEmpty()){
             for (TopicEntry createdEntry : createdEntries) {
-                entryList.getEntries().add(topicEntryMapper.toEntryDtoFromEntity(createdEntry));
+
+                boolean isYoutube = MediaType.YOUTUBE == createdEntry.getMediaType();
+
+                entryList.getEntries().add(
+                        isYoutube ?
+                                topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(createdEntry)
+                                : topicEntryMapper.toEntryDtoFromEntity(createdEntry)
+                );
             }
         }
 
