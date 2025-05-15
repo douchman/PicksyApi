@@ -60,6 +60,7 @@ public class VsTopicDto {
     @Builder
     public static class VsTopicCreateResponse{
         private Long topicId;
+        private String title;
         private String subject;
         private String description;
     }
