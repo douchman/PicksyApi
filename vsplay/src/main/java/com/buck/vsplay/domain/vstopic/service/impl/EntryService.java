@@ -119,7 +119,7 @@ public class EntryService implements IEntryService {
                 .ofNullable(updatedRequest.getEntriesToUpdate())
                 .orElse(Collections.emptyList());
 
-        if( entriesToUpdate.isEmpty() )return;
+        if( entriesToUpdate.isEmpty() ) return;
 
         List<Long> updateTargetEntryIds = entriesToUpdate.stream()
                 .map(EntryDto.UpdateEntry::getId)
@@ -130,30 +130,35 @@ public class EntryService implements IEntryService {
         Map<Long, TopicEntry> entryMap = existingEntries.stream()
                 .collect(Collectors.toMap(TopicEntry::getId, Function.identity()));
 
-        // S3 업로드 경호
+        // S3 업로드 경로
         String objectPath = s3Util.buildS3Path(String.valueOf(authUser.getId()), String.valueOf(topicId));
 
         for (EntryDto.UpdateEntry updateTargetEntry : entriesToUpdate) {
             TopicEntry existingEntry = entryMap.get(updateTargetEntry.getId());
 
             if( existingEntry != null ){
-                existingEntry.setEntryName(updateTargetEntry.getEntryName());
-                existingEntry.setDescription(updateTargetEntry.getDescription());
 
-                if( updateTargetEntry.getMediaFile() != null && !updateTargetEntry.getMediaFile().isEmpty()) {
-                    S3Dto.S3UploadResult mediaFileUploadResult = s3Util.putObject(updateTargetEntry.getMediaFile(), objectPath);
-                    existingEntry.setMediaUrl(mediaFileUploadResult.getObjectKey());
-                    existingEntry.setMediaType(mediaFileUploadResult.getMediaType());
-                    existingEntry.setThumbnail(null); // 썸네일 비우기
+                if(updateTargetEntry.isDelete()){
+                    existingEntry.setDelete(true);
                 } else {
-                    existingEntry.setMediaUrl(updateTargetEntry.getMediaUrl());
-                    existingEntry.setMediaType(MediaType.YOUTUBE);
-                }
+                    existingEntry.setEntryName(updateTargetEntry.getEntryName());
+                    existingEntry.setDescription(updateTargetEntry.getDescription());
 
-                // 썸네일 존재 시 썸네일도 업로드 ( VIDEO & YOUTUBE )
-                if( updateTargetEntry.getThumbnailFile() != null && !updateTargetEntry.getThumbnailFile().isEmpty()) {
-                    S3Dto.S3UploadResult thumbFileUploadResult = s3Util.putObject(updateTargetEntry.getThumbnailFile(), objectPath);
-                    existingEntry.setThumbnail(thumbFileUploadResult.getObjectKey());
+                    if( updateTargetEntry.getMediaFile() != null && !updateTargetEntry.getMediaFile().isEmpty()) {
+                        S3Dto.S3UploadResult mediaFileUploadResult = s3Util.putObject(updateTargetEntry.getMediaFile(), objectPath);
+                        existingEntry.setMediaUrl(mediaFileUploadResult.getObjectKey());
+                        existingEntry.setMediaType(mediaFileUploadResult.getMediaType());
+                        existingEntry.setThumbnail(null); // 썸네일 비우기
+                    } else {
+                        existingEntry.setMediaUrl(updateTargetEntry.getMediaUrl());
+                        existingEntry.setMediaType(MediaType.YOUTUBE);
+                    }
+
+                    // 썸네일 존재 시 썸네일도 업로드 ( VIDEO & YOUTUBE )
+                    if( updateTargetEntry.getThumbnailFile() != null && !updateTargetEntry.getThumbnailFile().isEmpty()) {
+                        S3Dto.S3UploadResult thumbFileUploadResult = s3Util.putObject(updateTargetEntry.getThumbnailFile(), objectPath);
+                        existingEntry.setThumbnail(thumbFileUploadResult.getObjectKey());
+                    }
                 }
             }
         }
