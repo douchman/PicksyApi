@@ -72,6 +72,7 @@ public class VsTopicService implements IVsTopicService {
         applicationEventPublisher.publishEvent(new TopicEvent.CreateEvent(vsTopic));
 
         return VsTopicDto.VsTopicCreateResponse.builder()
+                .title(vsTopic.getTitle())
                 .topicId(vsTopic.getId())
                 .subject(vsTopic.getSubject())
                 .description(vsTopic.getDescription())
