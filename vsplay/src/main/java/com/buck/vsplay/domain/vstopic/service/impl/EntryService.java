@@ -123,7 +123,7 @@ public class EntryService implements IEntryService {
 
         List<Long> updateTargetEntryIds = entriesToUpdate.stream()
                 .map(EntryDto.UpdateEntry::getId)
-                .collect(Collectors.toList());
+                .toList();
 
         List<TopicEntry> existingEntries = entryRepository.findByTopicIdAndIdIn(topicId, updateTargetEntryIds);
 
