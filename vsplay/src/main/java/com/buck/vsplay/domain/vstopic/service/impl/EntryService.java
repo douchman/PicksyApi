@@ -136,29 +136,28 @@ public class EntryService implements IEntryService {
         for (EntryDto.UpdateEntry updateTargetEntry : entriesToUpdate) {
             TopicEntry existingEntry = entryMap.get(updateTargetEntry.getId());
 
-            if( existingEntry != null ){
+            if( existingEntry == null ) { continue; }
 
-                if(updateTargetEntry.isDelete()){
-                    existingEntry.setDelete(true);
+            if(updateTargetEntry.isDelete()){
+                existingEntry.setDelete(true);
+            } else {
+                existingEntry.setEntryName(updateTargetEntry.getEntryName());
+                existingEntry.setDescription(updateTargetEntry.getDescription());
+
+                if( updateTargetEntry.getMediaFile() != null && !updateTargetEntry.getMediaFile().isEmpty()) {
+                    S3Dto.S3UploadResult mediaFileUploadResult = s3Util.putObject(updateTargetEntry.getMediaFile(), objectPath);
+                    existingEntry.setMediaUrl(mediaFileUploadResult.getObjectKey());
+                    existingEntry.setMediaType(mediaFileUploadResult.getMediaType());
+                    existingEntry.setThumbnail(null); // 썸네일 비우기
                 } else {
-                    existingEntry.setEntryName(updateTargetEntry.getEntryName());
-                    existingEntry.setDescription(updateTargetEntry.getDescription());
+                    existingEntry.setMediaUrl(updateTargetEntry.getMediaUrl());
+                    existingEntry.setMediaType(MediaType.YOUTUBE);
+                }
 
-                    if( updateTargetEntry.getMediaFile() != null && !updateTargetEntry.getMediaFile().isEmpty()) {
-                        S3Dto.S3UploadResult mediaFileUploadResult = s3Util.putObject(updateTargetEntry.getMediaFile(), objectPath);
-                        existingEntry.setMediaUrl(mediaFileUploadResult.getObjectKey());
-                        existingEntry.setMediaType(mediaFileUploadResult.getMediaType());
-                        existingEntry.setThumbnail(null); // 썸네일 비우기
-                    } else {
-                        existingEntry.setMediaUrl(updateTargetEntry.getMediaUrl());
-                        existingEntry.setMediaType(MediaType.YOUTUBE);
-                    }
-
-                    // 썸네일 존재 시 썸네일도 업로드 ( VIDEO & YOUTUBE )
-                    if( updateTargetEntry.getThumbnailFile() != null && !updateTargetEntry.getThumbnailFile().isEmpty()) {
-                        S3Dto.S3UploadResult thumbFileUploadResult = s3Util.putObject(updateTargetEntry.getThumbnailFile(), objectPath);
-                        existingEntry.setThumbnail(thumbFileUploadResult.getObjectKey());
-                    }
+                // 썸네일 존재 시 썸네일도 업로드 ( VIDEO & YOUTUBE )
+                if( updateTargetEntry.getThumbnailFile() != null && !updateTargetEntry.getThumbnailFile().isEmpty()) {
+                    S3Dto.S3UploadResult thumbFileUploadResult = s3Util.putObject(updateTargetEntry.getThumbnailFile(), objectPath);
+                    existingEntry.setThumbnail(thumbFileUploadResult.getObjectKey());
                 }
             }
         }
