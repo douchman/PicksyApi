@@ -40,6 +40,7 @@ public class EntryDto {
         private String mediaUrl;
         private MultipartFile mediaFile;
         private MultipartFile thumbnailFile;
+        private boolean delete = false;
     }
 
     @Data

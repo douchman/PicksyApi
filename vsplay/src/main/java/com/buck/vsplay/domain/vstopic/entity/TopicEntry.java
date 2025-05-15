@@ -48,4 +48,7 @@ public class TopicEntry extends Timestamp {
     @Comment("엔트리 썸네일")
     private String thumbnail;
 
+    @Column(name = "is_delete", columnDefinition = "boolean default false")
+    @Comment("삭제 여부")
+    private boolean isDelete;
 }
