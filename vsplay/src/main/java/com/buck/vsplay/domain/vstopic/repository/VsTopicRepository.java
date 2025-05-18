@@ -38,4 +38,13 @@ public interface VsTopicRepository extends JpaRepository<VsTopic, Long>, JpaSpec
     ORDER BY ts.totalMatches DESC
     """)
     Page<VsTopic> findPublicTopicsByTitleOrderByTotalMatches(@Param("title") String title, Pageable pageable);
+
+    @Query("""
+    SELECT vt FROM VsTopic vt
+    WHERE vt.member.id = :memberId
+    AND ( :title IS NULL OR :title = '' OR vt.title LIKE CONCAT('%',:title , '%'))
+    AND vt.deleted = false
+    ORDER BY vt.createdAt DESC
+    """)
+    Page<VsTopic> findTopicsByMemberIdAndTitle(@Param("memberId") Long memberId, @Param("title") String title, Pageable pageable);
 }
