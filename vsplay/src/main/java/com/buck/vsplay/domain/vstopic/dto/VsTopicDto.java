@@ -33,6 +33,7 @@ public class VsTopicDto {
         private String subject;
         private String description;
         private String thumbnail;
+        private Visibility visibility;
     }
 
     @EqualsAndHashCode(callSuper = true)
