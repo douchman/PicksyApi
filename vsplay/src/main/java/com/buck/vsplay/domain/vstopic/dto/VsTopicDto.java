@@ -87,6 +87,12 @@ public class VsTopicDto {
         VsTopic topic;
         List<Tournament> tournamentList = new ArrayList<>();
     }
+    @Data
+    @ToString
+    @Builder
+    public static class VsTopicDetailResponse{
+        VsTopic topic;
+    }
 
     @Getter
     @Builder
