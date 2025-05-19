@@ -53,6 +53,13 @@ public class VsTopicController {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailWithTournaments(topicId)),HttpStatus.OK );
     }
 
+    @GetMapping("{id}/edit-info")
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicDetailResponse>> getVsTopicDetailForModify (
+            @PathVariable("id") Long topicId
+    ) {
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailForModify(topicId)),HttpStatus.OK );
+    }
+
     @GetMapping("link/{shortCode}")
     public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicDetailWithTournamentsResponse>> getTopicDetailWithTournamentsByShortCode (
             @PathVariable("shortCode") String shortCode
