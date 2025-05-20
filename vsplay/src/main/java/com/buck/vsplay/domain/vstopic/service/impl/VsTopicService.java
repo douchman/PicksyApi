@@ -101,22 +101,6 @@ public class VsTopicService implements IVsTopicService {
     }
 
     @Override
-    public VsTopicDto.VsTopicDetailResponse getVsTopicDetailForModify(Long topicId) {
-        Member existMember = authUserService.getAuthUser();
-
-        VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
-                () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
-
-        if(!vsTopic.getMember().getId().equals(existMember.getId())) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
-        }
-
-        return VsTopicDto.VsTopicDetailResponse.builder()
-                .topic(vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(vsTopic))
-                .build();
-    }
-
-    @Override
     public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
         Member existMember = authUserService.getAuthUser();
         VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
