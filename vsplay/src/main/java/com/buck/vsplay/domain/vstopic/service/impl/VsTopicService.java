@@ -118,7 +118,7 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
-
+        Member existMember = authUserService.getAuthUser();
         VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
 
         VsTopic vsTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
@@ -127,8 +127,13 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        if ( !isPublicTopic(vsTopic.getVisibility())) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
+        if(!isPublicTopic((vsTopic.getVisibility()))){
+            if( existMember == null) {
+                throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
+            }
+            if(!vsTopic.getMember().getId().equals(existMember.getId())){
+                throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
+            }
         }
 
         topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(vsTopic));
