@@ -64,6 +64,7 @@ public class VsTopicDto {
         private String title;
         private String subject;
         private String description;
+        private Visibility visibility;
     }
 
     @Data
