@@ -19,6 +19,7 @@ public class PublicPaths {
             Map.entry("/member/auth", Set.of(HttpMethod.GET)),
             Map.entry("/topics/visibilities", Set.of(HttpMethod.GET)),
             Map.entry("/topics", Set.of(HttpMethod.GET)),
+            Map.entry("/topics/*", Set.of(HttpMethod.GET)),
             Map.entry("/topics/link/*", Set.of(HttpMethod.GET)),
             Map.entry("/topics/*/play-records", Set.of(HttpMethod.POST)),
             Map.entry("/topics/play-records/*/matches", Set.of(HttpMethod.GET)),
