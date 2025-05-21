@@ -73,6 +73,7 @@ public class VsTopicService implements IVsTopicService {
                 .topicId(vsTopic.getId())
                 .subject(vsTopic.getSubject())
                 .description(vsTopic.getDescription())
+                .visibility(vsTopic.getVisibility())
                 .build();
     }
 
