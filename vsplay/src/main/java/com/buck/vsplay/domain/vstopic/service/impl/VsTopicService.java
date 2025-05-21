@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -103,7 +104,7 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
-        Member existMember = authUserService.getAuthUser();
+        Optional<Member> authUserOpt = authUserService.getAuthUserOptional();
         VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
 
         VsTopic vsTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
@@ -113,10 +114,10 @@ public class VsTopicService implements IVsTopicService {
         }
 
         if(!isPublicTopic((vsTopic.getVisibility()))){
-            if( existMember == null) {
+            if( authUserOpt.isEmpty()) {
                 throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
             }
-            if(!vsTopic.getMember().getId().equals(existMember.getId())){
+            if(!vsTopic.getMember().getId().equals(authUserOpt.get().getId())){
                 throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
             }
         }
