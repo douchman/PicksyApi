@@ -102,6 +102,7 @@ public class VsTopicDto {
         private Integer page = 1 ;
         private Integer size = 20;
         private SortBy searchSortBy = SortBy.LATEST;
+        private Visibility visibility;
     }
 
     @Data

@@ -2,6 +2,7 @@ package com.buck.vsplay.domain.vstopic.repository;
 
 
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
+import com.buck.vsplay.global.constants.Visibility;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,8 +44,9 @@ public interface VsTopicRepository extends JpaRepository<VsTopic, Long>, JpaSpec
     SELECT vt FROM VsTopic vt
     WHERE vt.member.id = :memberId
     AND ( :title IS NULL OR :title = '' OR vt.title LIKE CONCAT('%',:title , '%'))
+    AND ( :visibility IS NULL OR vt.visibility = :visibility)
     AND vt.deleted = false
     ORDER BY vt.createdAt DESC
     """)
-    Page<VsTopic> findTopicsByMemberIdAndTitle(@Param("memberId") Long memberId, @Param("title") String title, Pageable pageable);
+    Page<VsTopic> findTopicsByMemberIdAndTitleAndVisibility(@Param("memberId") Long memberId, @Param("title") String title, @Param("visibility") Visibility visibility, Pageable pageable);
 }
