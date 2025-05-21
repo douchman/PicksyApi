@@ -202,7 +202,7 @@ public class VsTopicService implements IVsTopicService {
         int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
         Page<VsTopic> topicsWithPage;
 
-        topicsWithPage = vsTopicRepository.findTopicsByMemberIdAndTitle(member.getId(), vsTopicSearchRequest.getKeyword(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
+        topicsWithPage = vsTopicRepository.findTopicsByMemberIdAndTitleAndVisibility(member.getId(), vsTopicSearchRequest.getKeyword(), vsTopicSearchRequest.getVisibility(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
 
         return VsTopicDto.VsTopicSearchResponse.builder()
                 .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicsWithPage.getContent()))
