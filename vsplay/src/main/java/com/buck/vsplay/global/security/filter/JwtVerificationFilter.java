@@ -29,9 +29,13 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String requestUri = request.getRequestURI();
         String method = request.getMethod();
-         
-        // 🔹 로그인 상태 확인 API는 필터 실행 (JWT 검증 필요)
-        if ("/member/auth".equals(requestUri) && "GET".equalsIgnoreCase(method)) {
+
+        /*
+         * - public 요청은 허용되지만, 내부 비즈니스 로직에서 SecurityContext 참조가 필요한 경로
+         * - 즉, 인증이 필수는 아니지만, 인증 정보(JWT)가 있다면 활용할 수 있도록
+         *   JwtVerificationFilter를 실행해 SecurityContext를 설정해야 하는 대상
+         */
+        if (PublicPaths.isOptionalAuthEndPoint(requestUri, method)) {
             return false; // ✅ JWT 필터 실행
         }
 
