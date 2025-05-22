@@ -29,11 +29,29 @@ public class PublicPaths {
             Map.entry("/statistics/**", Set.of(HttpMethod.GET))
     );
 
+    public static final Map<String, Set<HttpMethod>> OPTIONAL_AUTH_ENDPOINTS = Map.ofEntries(
+            Map.entry("/topics/*", Set.of(HttpMethod.GET)),
+            Map.entry("/member/auth", Set.of(HttpMethod.GET))
+    );
+
     public static boolean isPublicEndPoint(String endpoint, String method) {
         return PUBLIC_ENDPOINTS.entrySet().stream()
                 .anyMatch(
                         entry ->
                                 PATH_MATCHER.match(entry.getKey(), endpoint) && entry.getValue().contains(HttpMethod.valueOf(method)));
     }
+
+    /*
+     * - public 요청은 허용되지만, 내부 비즈니스 로직에서 SecurityContext 참조가 필요한 경로
+     * - 즉, 인증이 필수는 아니지만, 인증 정보(JWT)가 있다면 활용할 수 있도록
+     *   JwtVerificationFilter를 실행해 SecurityContext를 설정해야 하는 대상
+     */
+    public static boolean isOptionalAuthEndPoint(String endpoint, String method) {
+        return OPTIONAL_AUTH_ENDPOINTS.entrySet().stream()
+                .anyMatch(
+                        entry ->
+                                PATH_MATCHER.match(entry.getKey(), endpoint) && entry.getValue().contains(HttpMethod.valueOf(method)));
+    }
+
 
 }
