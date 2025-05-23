@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface VsTopicRepository extends JpaRepository<VsTopic, Long>, JpaSpecificationExecutor<VsTopic> {
 
-    @Query("SELECT vt FROM VsTopic vt LEFT JOIN FETCH vt.tournaments WHERE vt.id = :topicId")
+    @Query("SELECT vt FROM VsTopic vt LEFT JOIN FETCH vt.tournaments WHERE vt.id = :topicId AND vt.deleted = false")
     VsTopic findWithTournamentsByTopicId(@Param("topicId") Long topicId);
 
     VsTopic findWithTournamentsByShortCode(String shortCode);
