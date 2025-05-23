@@ -46,7 +46,7 @@ import java.util.*;
     @Override
     public TopicPlayRecordDto.PlayRecordResponse createTopicPlayRecord(Long topicId, TopicPlayRecordDto.PlayRecordRequest playRecordRequest) {
         try {
-            VsTopic topic = vsTopicRepository.findById(topicId).orElseThrow(
+            VsTopic topic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                     () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
             TopicTournament topicTournament = tournamentRepository.findByTopicIdAndTournamentStage(topicId, playRecordRequest.getTournamentStage());

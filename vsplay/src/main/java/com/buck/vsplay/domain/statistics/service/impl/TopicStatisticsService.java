@@ -85,7 +85,7 @@ public class TopicStatisticsService implements ITopicStatisticsService {
     @Override
     public TopicStatisticsDto.TopicStatisticsResponse getTopicStatistics(Long topicId) {
 
-        if(!vsTopicRepository.existsById(topicId)) {
+        if(!vsTopicRepository.existsByIdAndDeletedFalse(topicId)) {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 

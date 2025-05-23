@@ -109,7 +109,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                 EntryStatistics.OrderColumn.RANK, entryStatSearchRequest.getRankOrderType()
         ), EntryStatistics.OrderColumn::getProperty);
 
-        if(!vsTopicRepository.existsById(topicId)){
+        if(!vsTopicRepository.existsByIdAndDeletedFalse(topicId)){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
@@ -166,7 +166,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     @Override
     public EntryStatisticsDto.SingleEntryStatsResponse getSingleEntryStatistics(Long topicId, Long entryId) {
 
-        if(!vsTopicRepository.existsById(topicId)){
+        if(!vsTopicRepository.existsByIdAndDeletedFalse(topicId)){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 

@@ -86,7 +86,7 @@ public class VsTopicService implements IVsTopicService {
 
         Visibility updateVisibility = updateVsTopicRequest.getVisibility();
 
-        VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
+        VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
         if (isFileExist) {
@@ -218,7 +218,7 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public VsTopicDto.VsTopicUnlistedLinkResponse getVsTopicUnlistedLink(Long topicId) {
-        VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
+        VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
         if(!isUnlistedTopic(vsTopic.getVisibility())){

@@ -35,7 +35,7 @@ public class TopicCommentService implements ITopicCommentService {
     @Override
     public TopicCommentDto.CommentCreateResponse createTopicComment(Long topicId, TopicCommentDto.CommentCreateRequest commentCreateRequest) {
 
-        VsTopic vsTopic = topicRepository.findById(topicId).orElseThrow(() ->
+        VsTopic vsTopic = topicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
         TopicComment savedComment = topicCommentRepository.save(TopicComment.builder()
