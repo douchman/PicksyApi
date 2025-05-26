@@ -50,5 +50,5 @@ public class TopicEntry extends Timestamp {
 
     @Column(name = "is_delete", columnDefinition = "boolean default false")
     @Comment("삭제 여부")
-    private boolean isDelete;
+    private boolean deleted;
 }

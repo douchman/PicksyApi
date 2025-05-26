@@ -52,7 +52,7 @@ public class EntryService implements IEntryService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        List<TopicEntry> createdEntries = entryRepository.findByTopicId(topicId);
+        List<TopicEntry> createdEntries = entryRepository.findByTopicIdAndDeletedFalse(topicId);
 
         if( createdEntries != null && !createdEntries.isEmpty()){
             for (TopicEntry createdEntry : createdEntries) {
@@ -148,7 +148,7 @@ public class EntryService implements IEntryService {
     private void updateTopicTournament(VsTopic vsTopic) {
         log.info(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@ 토픽 토너먼트 @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         final int INITIAL_TOURNAMENT_STAGE = 2;
-        List<TopicEntry> topicEntries = entryRepository.findByTopicId(vsTopic.getId());
+        List<TopicEntry> topicEntries = entryRepository.findByTopicIdAndDeletedFalse(vsTopic.getId());
 
         boolean isEntryExist = (topicEntries != null && !topicEntries.isEmpty());
 
@@ -194,7 +194,7 @@ public class EntryService implements IEntryService {
 
 
     private void handleDeleteEntry(TopicEntry existingEntry) {
-        existingEntry.setDelete(true);
+        existingEntry.setDeleted(true);
     }
 
     private void handleUpdateEntry(TopicEntry existingEntry, EntryDto.UpdateEntry updateRequestEntry, String objectPath) {

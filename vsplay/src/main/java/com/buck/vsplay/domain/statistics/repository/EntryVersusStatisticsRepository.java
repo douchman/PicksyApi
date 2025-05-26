@@ -19,6 +19,7 @@ public interface EntryVersusStatisticsRepository extends JpaRepository<EntryVers
     SELECT evs FROM EntryVersusStatistics evs
     JOIN FETCH evs.opponentEntry oe
     WHERE evs.topicEntry.id = :entryId
+    AND oe.deleted = false
     ORDER BY evs.wins DESC, evs.winRate DESC
     """)
     List<EntryVersusStatistics> findByTopicEntryIdWithOpponentEntryFetch(@Param("entryId") Long entryId);

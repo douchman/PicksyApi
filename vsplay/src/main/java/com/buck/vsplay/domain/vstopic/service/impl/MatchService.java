@@ -170,7 +170,7 @@ import java.util.*;
      */
     private void initializeFirstTournament(TopicPlayRecord topicPlayRecord) throws PlayRecordException {
 
-        List<TopicEntry> entryList = entryRepository.findByTopicId(topicPlayRecord.getTopic().getId());
+        List<TopicEntry> entryList = entryRepository.findByTopicIdAndDeletedFalse(topicPlayRecord.getTopic().getId());
         Collections.shuffle(entryList); // 무작위 순서 셔플
 
         entryList = entryList.subList(0, topicPlayRecord.getSelectedTournament()); // 셔플 후 토너먼트 진행에 필요한 최대 엔트리 갯수만큼 자르기
