@@ -20,7 +20,7 @@ public interface EntryStatisticsRepository extends JpaRepository<EntryStatistics
     SELECT es
     FROM EntryStatistics es
     JOIN FETCH es.topicEntry te
-    WHERE te.id = :topicId
+    WHERE te.id = :entryId
     AND te.deleted = false
     """)
     Optional<EntryStatistics> findByTopicEntryIdAndDeletedFalse(@Param("entryId") Long entryId);
