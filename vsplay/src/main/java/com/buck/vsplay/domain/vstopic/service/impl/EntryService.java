@@ -48,7 +48,7 @@ public class EntryService implements IEntryService {
     public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
         EntryDto.EntryList entryList = new EntryDto.EntryList();
 
-        if(!topicRepository.existsById(topicId)) {
+        if(!topicRepository.existsByIdAndDeletedFalse(topicId)) {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 

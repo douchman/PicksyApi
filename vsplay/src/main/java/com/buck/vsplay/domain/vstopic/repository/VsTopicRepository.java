@@ -1,6 +1,5 @@
 package com.buck.vsplay.domain.vstopic.repository;
 
-
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.global.constants.Visibility;
 import org.springframework.data.domain.Page;
@@ -10,13 +9,17 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import java.util.Optional;
 
 
 @Repository
 public interface VsTopicRepository extends JpaRepository<VsTopic, Long>, JpaSpecificationExecutor<VsTopic> {
 
-    @Query("SELECT vt FROM VsTopic vt LEFT JOIN FETCH vt.tournaments WHERE vt.id = :topicId")
+    @Query("SELECT vt FROM VsTopic vt LEFT JOIN FETCH vt.tournaments WHERE vt.id = :topicId AND vt.deleted = false")
     VsTopic findWithTournamentsByTopicId(@Param("topicId") Long topicId);
+
+    boolean existsByIdAndDeletedFalse(Long id);
+    Optional<VsTopic> findByIdAndDeletedFalse(Long id);
 
     VsTopic findWithTournamentsByShortCode(String shortCode);
 
