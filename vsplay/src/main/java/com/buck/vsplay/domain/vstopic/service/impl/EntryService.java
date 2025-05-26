@@ -194,7 +194,7 @@ public class EntryService implements IEntryService {
 
 
     private void handleDeleteEntry(TopicEntry existingEntry) {
-        existingEntry.setDelete(true);
+        existingEntry.setDeleted(true);
     }
 
     private void handleUpdateEntry(TopicEntry existingEntry, EntryDto.UpdateEntry updateRequestEntry, String objectPath) {
