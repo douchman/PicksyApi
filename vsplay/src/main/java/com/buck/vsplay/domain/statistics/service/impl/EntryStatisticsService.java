@@ -170,11 +170,9 @@ public class EntryStatisticsService implements IEntryStatisticsService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        if(!entryStatisticsRepository.existsById(entryId)){
-            throw new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND);
-        }
-
-        EntryStatistics entryStatistics = entryStatisticsRepository.findByTopicEntryIdWithTopicEntry(entryId);
+        EntryStatistics entryStatistics= entryStatisticsRepository.findByTopicEntryIdAndDeletedFalse(entryId).orElseThrow(
+                () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND)
+        );
 
         boolean isYoutubeMediaType = MediaType.YOUTUBE == entryStatistics.getTopicEntry().getMediaType();
         EntryDto.Entry entry = isYoutubeMediaType?
