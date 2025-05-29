@@ -20,8 +20,22 @@ public class EntryStatisticsController {
     private final EntryStatisticsService entryStatisticsService;
 
     @GetMapping("{topicId}/entries")
-    public ResponseEntity<SingleResponseDto<EntryStatisticsDto.EntryStatWithEntryInfoList>> getEntriesStatistics(@PathVariable("topicId") Long topicId) {
+    public ResponseEntity<SingleResponseDto<EntryStatisticsDto.EntryStatSearchResponse>> getEntriesStatistics(
+            @PathVariable("topicId") Long topicId,
+            EntryStatisticsDto.EntryStatSearchRequest entryStatSearchRequest
+    ) {
 
-        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), entryStatisticsService.getEntryStatisticsWithEntryInfo(topicId)), HttpStatus.OK);
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), entryStatisticsService.getEntryStatisticsWithEntryInfo(topicId, entryStatSearchRequest)), HttpStatus.OK);
     }
+
+
+    @GetMapping("{topicId}/entries/{entryId}")
+    public ResponseEntity<SingleResponseDto<EntryStatisticsDto.SingleEntryStatsResponse>> getSingleEntryStatistics(
+            @PathVariable("topicId") Long topicId,
+            @PathVariable("entryId") Long entryId
+
+    ){
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), entryStatisticsService.getSingleEntryStatistics(topicId, entryId)), HttpStatus.OK);
+    }
+
 }

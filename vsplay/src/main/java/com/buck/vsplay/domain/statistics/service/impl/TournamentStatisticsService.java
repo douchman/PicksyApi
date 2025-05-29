@@ -55,7 +55,7 @@ public class TournamentStatisticsService implements ITournamentStatisticsService
     @Override
     public TournamentStatisticsDto.TournamentStatisticsResponse getTournamentStatistics(Long topicId) {
 
-        if(!vsTopicRepository.existsById(topicId)) {
+        if(!vsTopicRepository.existsByIdAndDeletedFalse(topicId)) {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 

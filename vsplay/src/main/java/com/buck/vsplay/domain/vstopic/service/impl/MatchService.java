@@ -3,6 +3,7 @@ package com.buck.vsplay.domain.vstopic.service.impl;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
+import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.dto.EntryMatchDto;
 import com.buck.vsplay.domain.vstopic.dto.TopicPlayRecordDto;
 import com.buck.vsplay.domain.vstopic.entity.*;
@@ -17,7 +18,9 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.*;
 import com.buck.vsplay.domain.vstopic.service.IMatchService;
+import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.PlayStatus;
+import com.buck.vsplay.global.constants.TournamentStage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +46,7 @@ import java.util.*;
     @Override
     public TopicPlayRecordDto.PlayRecordResponse createTopicPlayRecord(Long topicId, TopicPlayRecordDto.PlayRecordRequest playRecordRequest) {
         try {
-            VsTopic topic = vsTopicRepository.findById(topicId).orElseThrow(
+            VsTopic topic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                     () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
             TopicTournament topicTournament = tournamentRepository.findByTopicIdAndTournamentStage(topicId, playRecordRequest.getTournamentStage());
@@ -88,16 +91,11 @@ import java.util.*;
         EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
 
         entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
+        entryMatchResponse.setCurrentTournament(TournamentStage.findStageNameByStage(topicPlayRecord.getCurrentTournamentStage()));
         entryMatchResponse.getEntryMatch()
-                .setEntryA(
-                        topicEntryMapper.toEntryDtoFromEntity(
-                                entryMatchWithEntries.getEntryA()
-                        ));
+                .setEntryA(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryA()));
         entryMatchResponse.getEntryMatch()
-                .setEntryB(
-                        topicEntryMapper.toEntryDtoFromEntity(
-                                entryMatchWithEntries.getEntryB()
-                        ));
+                .setEntryB(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryB()));
 
         return entryMatchResponse;
     }
@@ -172,7 +170,7 @@ import java.util.*;
      */
     private void initializeFirstTournament(TopicPlayRecord topicPlayRecord) throws PlayRecordException {
 
-        List<TopicEntry> entryList = entryRepository.findByTopicId(topicPlayRecord.getTopic().getId());
+        List<TopicEntry> entryList = entryRepository.findByTopicIdAndDeletedFalse(topicPlayRecord.getTopic().getId());
         Collections.shuffle(entryList); // 무작위 순서 셔플
 
         entryList = entryList.subList(0, topicPlayRecord.getSelectedTournament()); // 셔플 후 토너먼트 진행에 필요한 최대 엔트리 갯수만큼 자르기
@@ -248,5 +246,13 @@ import java.util.*;
         EntryMatch entryMatch = entryMatchRepository.findByPlayRecordIdAndTournamentRoundOrderBySeqAsc(topicPlayRecord.getId(),currentTournamentStage);
 
         return entryMatch.getStatus().equals(PlayStatus.COMPLETED);
+    }
+
+    private EntryDto.Entry mappingTopicEntryToEntryDto(TopicEntry topicEntry){
+        if(MediaType.YOUTUBE == topicEntry.getMediaType()){
+            return topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(topicEntry);
+        } else {
+            return topicEntryMapper.toEntryDtoFromEntity(topicEntry);
+        }
     }
 }

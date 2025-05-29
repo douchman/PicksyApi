@@ -43,4 +43,12 @@ public class TopicCommentDto {
         Pagination pagination;
     }
 
+    @Getter
+    @Setter
+    @Builder
+    public static class CommentCreateResponse{
+        String author;
+        String content;
+        String createdAt;
+    }
 }

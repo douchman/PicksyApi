@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.specification;
 
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
+import com.buck.vsplay.global.constants.Visibility;
 import jakarta.persistence.criteria.Predicate;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,12 @@ import org.springframework.data.jpa.domain.Specification;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class VsTopicSpecification {
+
+    // 공개 여부
+    public static Specification<VsTopic> visibilityFilter(Visibility visibility) {
+        return (root, query, criteriaBuilder) ->
+                visibility != null ? criteriaBuilder.equal(root.get("visibility"), visibility) : criteriaBuilder.equal(root.get("visibility"), Visibility.PUBLIC);
+    }
 
     // 회원 식별자 검색
     public static Specification<VsTopic> memberIdFilter(Long memberId){

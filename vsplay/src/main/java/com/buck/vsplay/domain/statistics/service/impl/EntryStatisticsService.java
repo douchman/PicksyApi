@@ -6,15 +6,27 @@ import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.mapper.EntryStatisticsMapper;
 import com.buck.vsplay.domain.statistics.repository.EntryStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryStatisticsService;
+import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
+import com.buck.vsplay.global.batch.entity.BatchJobExecution;
+import com.buck.vsplay.global.batch.repository.BatchJobExecutionRepository;
+import com.buck.vsplay.global.constants.MediaType;
+import com.buck.vsplay.global.dto.Pagination;
+import com.buck.vsplay.global.util.DateTimeUtil;
+import com.buck.vsplay.global.util.SortUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
@@ -22,6 +34,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +45,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     private final VsTopicRepository vsTopicRepository;
     private final EntryStatisticsMapper entryStatisticsMapper;
     private final TopicEntryMapper topicEntryMapper;
+    private final BatchJobExecutionRepository batchJobExecutionRepository;
 
     @EventListener
     public void handleEntryCrateEvent(EntryEvent.CreateEvent entryCreateEvent){
@@ -86,24 +100,90 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     }
 
     @Override
-    public EntryStatisticsDto.EntryStatWithEntryInfoList getEntryStatisticsWithEntryInfo(Long topicId) {
-
+    public EntryStatisticsDto.EntryStatSearchResponse getEntryStatisticsWithEntryInfo(Long topicId, EntryStatisticsDto.EntryStatSearchRequest entryStatSearchRequest) {
         List<EntryStatisticsDto.EntryStatWithEntryInfo> entriesStatistics = new ArrayList<>();
+        int page = Math.max(entryStatSearchRequest.getPage() - 1 , 0); // index 조정
 
-        if(!vsTopicRepository.existsById(topicId)){
+        // 정렬 기준 설정
+        Sort sort = SortUtil.buildSort(Map.of(
+                EntryStatistics.OrderColumn.RANK, entryStatSearchRequest.getRankOrderType()
+        ), EntryStatistics.OrderColumn::getProperty);
+
+        if(!vsTopicRepository.existsByIdAndDeletedFalse(topicId)){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        List<EntryStatistics> entryStatistics = entryStatisticsRepository.findWithTopicEntryByTopicId(topicId);
+        Page<EntryStatistics> entryStatistics = entryStatisticsRepository.findByTopicIdAndEntryNameWithTopicEntryFetch(
+                topicId,
+                entryStatSearchRequest.getKeyword(),
+                PageRequest.of(page, entryStatSearchRequest.getPageSize(), sort));
+
+        if (page >= entryStatistics.getTotalPages() && entryStatistics.getTotalPages() > 0) {
+            entryStatistics = entryStatisticsRepository.findByTopicIdAndEntryNameWithTopicEntryFetch(
+                    topicId,
+                    entryStatSearchRequest.getKeyword(),
+                    PageRequest.of(entryStatistics.getTotalPages() - 1, entryStatSearchRequest.getPageSize(), Sort.unsorted())
+            );
+        }
 
         for (EntryStatistics entryStatistic : entryStatistics) {
+            boolean isYouTube = MediaType.YOUTUBE == entryStatistic.getTopicEntry().getMediaType();
             entriesStatistics.add(
                     EntryStatisticsDto.EntryStatWithEntryInfo.builder()
-                            .entry(topicEntryMapper.toTopicEntryDtoFromEntity(entryStatistic.getTopicEntry()))
+                            .entry(
+                                    isYouTube ?
+                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryStatistic.getTopicEntry())
+                                            :topicEntryMapper.toEntryDtoFromEntity(entryStatistic.getTopicEntry())
+                            )
                             .statistics(entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistic))
                             .build()
             );
         }
-        return new EntryStatisticsDto.EntryStatWithEntryInfoList(entriesStatistics);
+
+        // 가장 최근 랭킹 갱신 날짜 조회
+        BatchJobExecution lastEntryStatsExecution =
+                batchJobExecutionRepository.findCompletedEntryStatsRankingJobsOrderByEndTimeDesc()
+                        .stream()
+                        .findFirst()
+                        .orElse(null);
+
+        String lastUpdatedAt = (lastEntryStatsExecution != null && lastEntryStatsExecution.getEndTime() != null)
+                ? DateTimeUtil.formatDateToSting(lastEntryStatsExecution.getEndTime())
+                : null;
+
+        return EntryStatisticsDto.EntryStatSearchResponse.builder()
+                .entriesStatistics(entriesStatistics)
+                .lastUpdatedAt(lastUpdatedAt)
+                .pagination(Pagination.builder()
+                        .totalPages(entryStatistics.getTotalPages())
+                        .totalItems(entryStatistics.getTotalElements())
+                        .currentPage(entryStatistics.getNumber() + 1) // index 조정
+                        .pageSize(entryStatistics.getSize())
+                        .build())
+                .build();
     }
+
+    @Override
+    public EntryStatisticsDto.SingleEntryStatsResponse getSingleEntryStatistics(Long topicId, Long entryId) {
+
+        if(!vsTopicRepository.existsByIdAndDeletedFalse(topicId)){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        EntryStatistics entryStatistics= entryStatisticsRepository.findByTopicEntryIdAndDeletedFalse(entryId).orElseThrow(
+                () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND)
+        );
+
+        boolean isYoutubeMediaType = MediaType.YOUTUBE == entryStatistics.getTopicEntry().getMediaType();
+        EntryDto.Entry entry = isYoutubeMediaType?
+                        topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryStatistics.getTopicEntry())
+                        : topicEntryMapper.toEntryDtoFromEntity(entryStatistics.getTopicEntry());
+        EntryStatisticsDto.EntryStatistics statistics = entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistics);
+
+        return EntryStatisticsDto.SingleEntryStatsResponse.builder()
+                .entry(entry)
+                .statistics(statistics)
+                .build();
+    }
+
 }

@@ -35,19 +35,22 @@ public class S3Util {
 
     @Named("signedMediaUrl")
     public String getUploadedObjectUrl(String objectKey){
-        // S3 GetObject
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(bucketName)
-                .key(objectKey)
-                .build();
+        if(objectKey != null && !objectKey.isEmpty()){
+            // S3 GetObject
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .build();
 
-        // PreSigned URL
-        GetObjectPresignRequest preSignRequest = GetObjectPresignRequest.builder()
-                .getObjectRequest(getObjectRequest)
-                .signatureDuration(Duration.ofSeconds(30))
-                .build();
+            // PreSigned URL
+            GetObjectPresignRequest preSignRequest = GetObjectPresignRequest.builder()
+                    .getObjectRequest(getObjectRequest)
+                    .signatureDuration(Duration.ofSeconds(30))
+                    .build();
 
-        return s3Presigner.presignGetObject(preSignRequest).url().toString();
+            return s3Presigner.presignGetObject(preSignRequest).url().toString();
+        }
+        return null;
     }
 
     public S3Dto.S3UploadResult putObject(MultipartFile file, String objectPath) {

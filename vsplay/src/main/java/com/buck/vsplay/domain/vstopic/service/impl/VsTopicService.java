@@ -11,7 +11,7 @@ import com.buck.vsplay.domain.vstopic.mapper.TournamentMapper;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
-import com.buck.vsplay.domain.vstopic.specification.VsTopicSpecification;
+import com.buck.vsplay.global.constants.SortBy;
 import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
@@ -25,14 +25,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -71,9 +70,11 @@ public class VsTopicService implements IVsTopicService {
         applicationEventPublisher.publishEvent(new TopicEvent.CreateEvent(vsTopic));
 
         return VsTopicDto.VsTopicCreateResponse.builder()
+                .title(vsTopic.getTitle())
                 .topicId(vsTopic.getId())
                 .subject(vsTopic.getSubject())
                 .description(vsTopic.getDescription())
+                .visibility(vsTopic.getVisibility())
                 .build();
     }
 
@@ -85,7 +86,7 @@ public class VsTopicService implements IVsTopicService {
 
         Visibility updateVisibility = updateVsTopicRequest.getVisibility();
 
-        VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
+        VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
         if (isFileExist) {
@@ -103,7 +104,7 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
-
+        Optional<Member> authUserOpt = authUserService.getAuthUserOptional();
         VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
 
         VsTopic vsTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
@@ -112,11 +113,16 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        if ( !isPublicTopic(vsTopic.getVisibility())) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
+        if(!isPublicTopic((vsTopic.getVisibility()))){
+            if( authUserOpt.isEmpty()) {
+                throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
+            }
+            if(!vsTopic.getMember().getId().equals(authUserOpt.get().getId())){
+                throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
+            }
         }
 
-        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntity(vsTopic));
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(vsTopic));
 
         if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
             for (TopicTournament tournament : vsTopic.getTournaments()) {
@@ -139,7 +145,7 @@ public class VsTopicService implements IVsTopicService {
 
         VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
 
-        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntity(vsTopic));
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(vsTopic));
 
         if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
             for (TopicTournament tournament : vsTopic.getTournaments()) {
@@ -154,24 +160,22 @@ public class VsTopicService implements IVsTopicService {
     public VsTopicDto.VsTopicSearchResponse searchPublicVsTopic( VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
         int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
 
-       Specification<VsTopic> vsTopicSpecification = VsTopicSpecification.keywordFilter(
-                vsTopicSearchRequest.getKeyword()
-        );
+        SortBy searchSortBy = vsTopicSearchRequest.getSearchSortBy();
+        Page<VsTopic> topicsWithPage;
 
-        vsTopicSpecification = vsTopicSpecification.and(VsTopicSpecification.deleteFilter(false));
-
-
-        Page<VsTopic> topicPage = vsTopicRepository.findAll(
-                vsTopicSpecification,
-                PageRequest.of(page, vsTopicSearchRequest.getSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
+        if( SortBy.LATEST == searchSortBy) { // 인기순 정렬
+            topicsWithPage = vsTopicRepository.findPublicTopicsByTitleOrderByNewest(vsTopicSearchRequest.getKeyword(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
+        } else { // 최신순 정렬
+            topicsWithPage = vsTopicRepository.findPublicTopicsByTitleOrderByTotalMatches(vsTopicSearchRequest.getKeyword(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
+        }
 
         return VsTopicDto.VsTopicSearchResponse.builder()
-                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicPage.getContent()))
+                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicsWithPage.getContent()))
                 .pagination(Pagination.builder()
-                        .totalPages(topicPage.getTotalPages())
-                        .totalItems(topicPage.getTotalElements())
-                        .currentPage(topicPage.getNumber() + 1) // index 조정
-                        .pageSize(topicPage.getSize())
+                        .totalPages(topicsWithPage.getTotalPages())
+                        .totalItems(topicsWithPage.getTotalElements())
+                        .currentPage(topicsWithPage.getNumber() + 1) // index 조정
+                        .pageSize(topicsWithPage.getSize())
                         .build())
                 .build();
     }
@@ -195,32 +199,26 @@ public class VsTopicService implements IVsTopicService {
     @Override
     public VsTopicDto.VsTopicSearchResponse getMyVsTopics(VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
         Member member = authUserService.getAuthUser();
+
         int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
+        Page<VsTopic> topicsWithPage;
 
-        Specification<VsTopic> vsTopicSpecification = VsTopicSpecification.withAllFilters(
-                member.getId(),
-                vsTopicSearchRequest.getKeyword(),
-                false
-        );
-
-        Page<VsTopic> topicPage = vsTopicRepository.findAll(
-                vsTopicSpecification,
-                PageRequest.of(page, vsTopicSearchRequest.getSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
+        topicsWithPage = vsTopicRepository.findTopicsByMemberIdAndTitleAndVisibility(member.getId(), vsTopicSearchRequest.getKeyword(), vsTopicSearchRequest.getVisibility(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
 
         return VsTopicDto.VsTopicSearchResponse.builder()
-                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicPage.getContent()))
+                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicsWithPage.getContent()))
                 .pagination(Pagination.builder()
-                        .totalPages(topicPage.getTotalPages())
-                        .totalItems(topicPage.getTotalElements())
-                        .currentPage(topicPage.getNumber() + 1) // index 조정
-                        .pageSize(topicPage.getSize())
+                        .totalPages(topicsWithPage.getTotalPages())
+                        .totalItems(topicsWithPage.getTotalElements())
+                        .currentPage(topicsWithPage.getNumber() + 1) // index 조정
+                        .pageSize(topicsWithPage.getSize())
                         .build())
                 .build();
     }
 
     @Override
     public VsTopicDto.VsTopicUnlistedLinkResponse getVsTopicUnlistedLink(Long topicId) {
-        VsTopic vsTopic = vsTopicRepository.findById(topicId).orElseThrow(
+        VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
         if(!isUnlistedTopic(vsTopic.getVisibility())){

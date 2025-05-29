@@ -1,6 +1,5 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
-import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.vstopic.dto.TopicCommentDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicComment;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,19 +33,23 @@ public class TopicCommentService implements ITopicCommentService {
 
 
     @Override
-    public void createTopicComment(Long topicId, TopicCommentDto.CommentCreateRequest commentCreateRequest) {
+    public TopicCommentDto.CommentCreateResponse createTopicComment(Long topicId, TopicCommentDto.CommentCreateRequest commentCreateRequest) {
 
-        Optional<Member> authUser = authUserService.getAuthUserOptional();
-        VsTopic vsTopic = topicRepository.findById(topicId).orElseThrow(() ->
+        VsTopic vsTopic = topicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-        topicCommentRepository.save(TopicComment.builder()
+        TopicComment savedComment = topicCommentRepository.save(TopicComment.builder()
                 .topic(vsTopic)
-                .member(authUser.orElse(null))
+                .member(authUserService.getAuthUserOptional().orElse(null))
                 .author(commentCreateRequest.getAuthor())
                 .content(commentCreateRequest.getContent())
                 .build());
 
+        return TopicCommentDto.CommentCreateResponse.builder()
+                .author(savedComment.getAuthor())
+                .content(savedComment.getContent())
+                .createdAt(DateTimeUtil.formatDateToSting(savedComment.getCreatedAt()))
+                .build();
     }
 
     @Override
@@ -59,7 +61,7 @@ public class TopicCommentService implements ITopicCommentService {
         }
 
         Page<TopicComment> topicCommentPage = topicCommentRepository.findAll(
-                TopicCommentSpecification.withAllFilters(commentSearchRequest.getKeyword(), false),
+                TopicCommentSpecification.withAllFilters(topicId, commentSearchRequest.getKeyword(), false),
                 PageRequest.of(page, commentSearchRequest.getSize(), Sort.by(Sort.Direction.DESC, "createdAt")));
 
         List<TopicCommentDto.Comment> topicCommentList = new ArrayList<>();
@@ -68,6 +70,7 @@ public class TopicCommentService implements ITopicCommentService {
         for (TopicComment topicComment : topicCommentPage.getContent()) {
             topicCommentList.add(
                     TopicCommentDto.Comment.builder()
+                            .author(topicComment.getAuthor())
                             .content(topicComment.getContent())
                             .createdAt(DateTimeUtil.formatDateToSting(topicComment.getCreatedAt())).build()
             );

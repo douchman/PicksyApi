@@ -2,6 +2,8 @@ package com.buck.vsplay.domain.statistics.dto;
 
 
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
+import com.buck.vsplay.global.constants.OrderType;
+import com.buck.vsplay.global.dto.Pagination;
 import lombok.*;
 
 import java.util.List;
@@ -12,6 +14,7 @@ public class EntryStatisticsDto {
     @Setter
     @Getter
     public static class EntryStatistics{
+        Integer rank;
         Integer totalMatches;
         Integer totalWins;
         Integer totalLosses;
@@ -27,12 +30,33 @@ public class EntryStatisticsDto {
         EntryStatistics statistics;
     }
 
+    @Getter
+    @Setter
+    public static class EntryStatSearchRequest{
+        private String keyword;
+        private OrderType rankOrderType = OrderType.ASC;
+        private OrderType totalMatchesOrderType = OrderType.NONE;
+        private OrderType totalWinsOrderType = OrderType.NONE;
+        private OrderType winRateOrderType = OrderType.NONE;
+        private Integer page = 1;
+        private Integer pageSize = 20;
+    }
 
 
     @Getter
     @Setter
-    @AllArgsConstructor
-    public static class EntryStatWithEntryInfoList {
+    @Builder
+    public static class EntryStatSearchResponse {
         List<EntryStatWithEntryInfo> entriesStatistics;
+        String lastUpdatedAt;
+        Pagination pagination;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    public static class SingleEntryStatsResponse{
+        EntryDto.Entry entry;
+        EntryStatistics statistics;
     }
 }

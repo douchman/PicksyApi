@@ -27,6 +27,9 @@ public class EntryStatistics extends Timestamp {
     @JoinColumn(name = "entry_id")
     private TopicEntry topicEntry;
 
+    @Column(name = "rank")
+    private Integer rank;
+
     @Column(name = "total_matches")
     private Integer totalMatches;
 
@@ -42,6 +45,8 @@ public class EntryStatistics extends Timestamp {
     @Column(name = "highest_tournament")
     @Comment("가장 높이 올라간 토너먼트")
     private Integer highestTournament;
+
+    private Double rankScore; // 메타데이터로 사용할 랭크점수 저장용 임시 인스턴스
 
     public void increaseTotalMatches() {
         this.totalMatches += 1;
@@ -64,5 +69,18 @@ public class EntryStatistics extends Timestamp {
         if( this.highestTournament.equals(0) || currentTournament < this.highestTournament ){
             this.highestTournament = currentTournament;
         }
+    }
+
+    @Getter
+    public enum OrderColumn {
+        RANK("rank"),
+        WIN_RATE("winRate");
+
+        private final String property;
+
+        OrderColumn(String property) {
+            this.property = property;
+        }
+
     }
 }

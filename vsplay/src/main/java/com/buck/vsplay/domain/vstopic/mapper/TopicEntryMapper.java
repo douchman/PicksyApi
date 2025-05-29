@@ -9,13 +9,14 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", uses = S3Util.class)
 public interface TopicEntryMapper {
 
-    @Mapping(target = "mediaUrl" , qualifiedByName = "signedMediaUrl")
-    EntryDto.Entry toTopicEntryDtoFromEntity(TopicEntry topicEntry);
-
     TopicEntry toEntityFromCreatedEntryDto(EntryDto.CreateEntry topicEntry);
 
     @Mapping(target = "mediaUrl", qualifiedByName = "signedMediaUrl")
+    @Mapping(target = "thumbnail", qualifiedByName = "signedMediaUrl")
     EntryDto.Entry toEntryDtoFromEntity(TopicEntry topicEntry);
+
+    @Mapping(target = "thumbnail", qualifiedByName = "signedMediaUrl")
+    EntryDto.Entry toEntryDtoFromEntityWithoutSignedMediaUrl(TopicEntry topicEntry);
 
     /**
      * 엔티티 업데이트를 위해 DTO 의 값을 기존 Entry 엔티티에 적용

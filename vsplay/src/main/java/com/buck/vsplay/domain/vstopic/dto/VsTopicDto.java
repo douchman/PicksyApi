@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.dto;
 
 
+import com.buck.vsplay.global.constants.SortBy;
 import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -31,6 +32,8 @@ public class VsTopicDto {
         private String title;
         private String subject;
         private String description;
+        private String thumbnail;
+        private Visibility visibility;
     }
 
     @EqualsAndHashCode(callSuper = true)
@@ -58,8 +61,10 @@ public class VsTopicDto {
     @Builder
     public static class VsTopicCreateResponse{
         private Long topicId;
+        private String title;
         private String subject;
         private String description;
+        private Visibility visibility;
     }
 
     @Data
@@ -96,6 +101,8 @@ public class VsTopicDto {
         private String keyword;
         private Integer page = 1 ;
         private Integer size = 20;
+        private SortBy searchSortBy = SortBy.LATEST;
+        private Visibility visibility;
     }
 
     @Data

@@ -14,6 +14,7 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
+import com.buck.vsplay.global.constants.MediaType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -52,11 +53,11 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
     }
 
     @Override
-    public List<EntryVersusStatisticsDto.EntryVersusStatistics> getEntryVersusStatistics(Long topicId, Long entryId) {
+    public EntryVersusStatisticsDto.EntryVersusStatisticsResponse getEntryVersusStatistics(Long topicId, Long entryId) {
 
-        List<EntryVersusStatisticsDto.EntryVersusStatistics> entryVersusStatisticsList = new ArrayList<>();
+        List<EntryVersusStatisticsDto.OpponentEntryInfoWithMatchRecord> opponentEntryInfoWithMatchRecords = new ArrayList<>();
 
-        if(!topicRepository.existsById(topicId)) {
+        if(!topicRepository.existsByIdAndDeletedFalse(topicId)) {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
@@ -69,23 +70,31 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
             throw new EntryException(EntryExceptionCode.ENTRY_NOT_INCLUDED_IN_TOPIC);
         }
 
-        List<EntryVersusStatistics> entryVersusStatistics = entryVersusStatisticsRepository.findWithOpponentEntryByEntryId(entryId);
+        List<EntryVersusStatistics> entryVersusStatistics = entryVersusStatisticsRepository.findByTopicEntryIdWithOpponentEntryFetch(entryId);
 
         if ( entryVersusStatistics != null && !entryVersusStatistics.isEmpty()){
             for (EntryVersusStatistics entryVersusStatistic : entryVersusStatistics) {
-                entryVersusStatisticsList.add(
-                        EntryVersusStatisticsDto.EntryVersusStatistics.builder()
-                                .opponentEntry(topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry()))
-                                .totalMatches(entryVersusStatistic.getTotalMatches())
-                                .wins(entryVersusStatistic.getWins())
-                                .losses(entryVersusStatistic.getLosses())
-                                .winRate(entryVersusStatistic.getWinRate())
+                boolean isYoutubeMediaType = MediaType.YOUTUBE == entryVersusStatistic.getOpponentEntry().getMediaType();
+                opponentEntryInfoWithMatchRecords.add(
+                        EntryVersusStatisticsDto.OpponentEntryInfoWithMatchRecord.builder()
+                                .opponentEntry(
+                                        isYoutubeMediaType ?
+                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryVersusStatistic.getOpponentEntry())
+                                            : topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry()))
+                                .matchRecord(EntryVersusStatisticsDto.MatchRecord.builder()
+                                        .totalMatches(entryVersusStatistic.getTotalMatches())
+                                        .wins(entryVersusStatistic.getWins())
+                                        .losses(entryVersusStatistic.getLosses())
+                                        .winRate(entryVersusStatistic.getWinRate())
+                                        .build())
                                 .build()
                 );
             }
         }
 
-        return entryVersusStatisticsList;
+        return EntryVersusStatisticsDto.EntryVersusStatisticsResponse.builder()
+                .matchUpRecords(opponentEntryInfoWithMatchRecords)
+                .build();
     }
 
     private EntryVersusStatistics upsertStats(TopicEntry entry, TopicEntry opponentEntry, boolean isWin) {

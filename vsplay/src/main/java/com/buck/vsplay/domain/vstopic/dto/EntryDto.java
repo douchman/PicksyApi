@@ -20,13 +20,27 @@ public class EntryDto {
         private String description;
         private MediaType mediaType;
         private String mediaUrl;
+        private String thumbnail;
     }
 
     @Data
     public static class CreateEntry{
         private String entryName;
         private String description;
-        private MultipartFile file;
+        private String mediaUrl;
+        private MultipartFile mediaFile;
+        private MultipartFile thumbnailFile;
+    }
+
+    @Data
+    public static class UpdateEntry{
+        private Long id;
+        private String entryName;
+        private String description;
+        private String mediaUrl;
+        private MultipartFile mediaFile;
+        private MultipartFile thumbnailFile;
+        private boolean delete = false;
     }
 
     @Data
@@ -40,7 +54,8 @@ public class EntryDto {
         List<Entry> entries = new ArrayList<>();
     }
 
-    @EqualsAndHashCode(callSuper = true)
     @Data
-    public static class UpdateEntryRequest extends CreateEntry{}
+    public static class UpdateEntryRequest{
+        List<UpdateEntry> entriesToUpdate;
+    }
 }
