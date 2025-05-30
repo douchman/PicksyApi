@@ -14,7 +14,7 @@ public class EntryStatisticsDto {
     @Setter
     @Getter
     public static class EntryStatistics{
-        Integer rank;
+        Integer entryRank;
         Integer totalMatches;
         Integer totalWins;
         Integer totalLosses;
