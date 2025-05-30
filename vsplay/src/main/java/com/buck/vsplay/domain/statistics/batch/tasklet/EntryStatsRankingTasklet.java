@@ -57,10 +57,10 @@ public class EntryStatsRankingTasklet implements Tasklet {
                 .sorted(Comparator.comparing(EntryStatistics::getRankScore).reversed())
                 .forEach(es ->{
                     Integer newRank = rank.getAndIncrement(); // 새로운 랭크
-                    Integer previousRank = es.getRank() ; // 이전 랭크
+                    Integer previousRank = es.getEntryRank() ; // 이전 랭크
                     if( !Objects.equals(previousRank, newRank) ) { // 랭크 변동이 있는 경우만 순위 갱신
-                        log.info("\uD83D\uDCCA Entry Stats Rank 변경: entryId {} - {} → {}", es.getId(), es.getRank(), newRank);
-                        es.setRank(newRank);
+                        log.info("\uD83D\uDCCA Entry Stats Rank 변경: entryId {} - {} → {}", es.getId(), es.getEntryRank(), newRank);
+                        es.setEntryRank(newRank);
                     }
                 });
     }
