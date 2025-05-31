@@ -73,7 +73,7 @@ public class EntryStatistics extends Timestamp {
 
     @Getter
     public enum OrderColumn {
-        RANK("rank"),
+        RANK("entryRank"),
         WIN_RATE("winRate");
 
         private final String property;
