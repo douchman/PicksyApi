@@ -9,6 +9,7 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TournamentMapper;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
+import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
 import com.buck.vsplay.global.constants.SortBy;
@@ -104,23 +105,12 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
-        Optional<Member> authUserOpt = authUserService.getAuthUserOptional();
+        Optional<Member> authUser = authUserService.getAuthUserOptional();
         VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
 
         VsTopic vsTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
 
-        if ( vsTopic == null ) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
-
-        if(!isPublicTopic((vsTopic.getVisibility()))){
-            if( authUserOpt.isEmpty()) {
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
-            }
-            if(!vsTopic.getMember().getId().equals(authUserOpt.get().getId())){
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
-            }
-        }
+        TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
 
         topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(vsTopic));
 
@@ -233,10 +223,6 @@ public class VsTopicService implements IVsTopicService {
     private String generateShortCode(Long topicId) {
         UUID uuid = UUID.nameUUIDFromBytes(String.valueOf(topicId).getBytes(StandardCharsets.UTF_8));
         return uuid.toString().replace("-", "").substring(0, 32);
-    }
-
-    private boolean isPublicTopic(Visibility visibility) {
-        return Visibility.PUBLIC.equals(visibility);
     }
 
     private boolean isUnlistedTopic(Visibility visibility) {

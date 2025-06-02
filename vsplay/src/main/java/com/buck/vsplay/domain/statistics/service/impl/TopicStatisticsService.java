@@ -11,12 +11,10 @@ import com.buck.vsplay.domain.statistics.service.ITopicStatisticsService;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
-import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
-import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
+import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.constants.MediaType;
-import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import jakarta.transaction.Transactional;
@@ -90,21 +88,10 @@ public class TopicStatisticsService implements ITopicStatisticsService {
     @Override
     public TopicStatisticsDto.TopicStatisticsResponse getTopicStatistics(Long topicId) {
 
-        Optional<Member> authUserOpt = authUserService.getAuthUserOptional();
+        Optional<Member> authUser = authUserService.getAuthUserOptional();
         VsTopic targetTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
 
-        if( targetTopic == null ) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
-
-        if(!isPublicTopic((targetTopic.getVisibility()))){
-            if( authUserOpt.isEmpty()) {
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
-            }
-            if(!targetTopic.getMember().getId().equals(authUserOpt.get().getId())){
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
-            }
-        }
+        TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
 
         TopicStatistics topicStatisticsEntity = topicStatisticsRepository.findByVsTopic(topicId);
         TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(topicStatisticsEntity);
@@ -123,9 +110,5 @@ public class TopicStatisticsService implements ITopicStatisticsService {
                 .topic(vsTopic)
                 .topicStatistics(topicStatistics)
                 .build();
-    }
-
-    private boolean isPublicTopic(Visibility visibility) {
-        return Visibility.PUBLIC.equals(visibility);
     }
 }

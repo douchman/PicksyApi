@@ -13,14 +13,12 @@ import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
-import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
-import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
+import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.batch.entity.BatchJobExecution;
 import com.buck.vsplay.global.batch.repository.BatchJobExecutionRepository;
 import com.buck.vsplay.global.constants.MediaType;
-import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.DateTimeUtil;
@@ -108,21 +106,10 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     @Override
     public EntryStatisticsDto.EntryStatSearchResponse getEntryStatisticsWithEntryInfo(Long topicId, EntryStatisticsDto.EntryStatSearchRequest entryStatSearchRequest) {
 
-        Optional<Member> authUserOpt = authUserService.getAuthUserOptional();
+        Optional<Member> authUser = authUserService.getAuthUserOptional();
         VsTopic targetTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
 
-        if( targetTopic == null ) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
-
-        if(!isPublicTopic((targetTopic.getVisibility()))){
-            if( authUserOpt.isEmpty()) {
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
-            }
-            if(!targetTopic.getMember().getId().equals(authUserOpt.get().getId())){
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
-            }
-        }
+        TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
 
         List<EntryStatisticsDto.EntryStatWithEntryInfo> entriesStatistics = new ArrayList<>();
         int page = Math.max(entryStatSearchRequest.getPage() - 1 , 0); // index 조정
@@ -184,21 +171,11 @@ public class EntryStatisticsService implements IEntryStatisticsService {
 
     @Override
     public EntryStatisticsDto.SingleEntryStatsResponse getSingleEntryStatistics(Long topicId, Long entryId) {
-        Optional<Member> authUserOpt = authUserService.getAuthUserOptional();
+        Optional<Member> authUser = authUserService.getAuthUserOptional();
         VsTopic targetTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
 
-        if( targetTopic == null ) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
 
-        if(!isPublicTopic((targetTopic.getVisibility()))){
-            if( authUserOpt.isEmpty()) {
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
-            }
-            if(!targetTopic.getMember().getId().equals(authUserOpt.get().getId())){
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
-            }
-        }
+        TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
 
         EntryStatistics entryStatistics= entryStatisticsRepository.findByTopicEntryIdAndDeletedFalse(entryId).orElseThrow(
                 () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND)
@@ -214,9 +191,5 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                 .entry(entry)
                 .statistics(statistics)
                 .build();
-    }
-
-    private boolean isPublicTopic(Visibility visibility) {
-        return Visibility.PUBLIC.equals(visibility);
     }
 }

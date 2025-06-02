@@ -11,13 +11,11 @@ import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
-import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
-import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
+import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.constants.MediaType;
-import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -63,21 +61,10 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
 
         List<EntryVersusStatisticsDto.OpponentEntryInfoWithMatchRecord> opponentEntryInfoWithMatchRecords = new ArrayList<>();
 
-        Optional<Member> authUserOpt = authUserService.getAuthUserOptional();
+        Optional<Member> authUser = authUserService.getAuthUserOptional();
         VsTopic targetTopic = topicRepository.findWithTournamentsByTopicId(topicId);
 
-        if( targetTopic == null ) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
-
-        if(!isPublicTopic((targetTopic.getVisibility()))){
-            if( authUserOpt.isEmpty()) {
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
-            }
-            if(!targetTopic.getMember().getId().equals(authUserOpt.get().getId())){
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
-            }
-        }
+        TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
 
         TopicEntry topicEntry = entryRepository.findWithTopicByEntryId(entryId);
 
@@ -140,10 +127,5 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
         }
 
         return entryVersusStatistics;
-    }
-
-
-    private boolean isPublicTopic(Visibility visibility) {
-        return Visibility.PUBLIC.equals(visibility);
     }
 }
