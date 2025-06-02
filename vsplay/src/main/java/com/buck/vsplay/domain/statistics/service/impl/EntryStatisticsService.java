@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.statistics.service.impl;
 
+import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.statistics.dto.EntryStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.EntryStatistics;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
@@ -9,6 +10,7 @@ import com.buck.vsplay.domain.statistics.service.IEntryStatisticsService;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
+import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
@@ -18,7 +20,9 @@ import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.batch.entity.BatchJobExecution;
 import com.buck.vsplay.global.batch.repository.BatchJobExecutionRepository;
 import com.buck.vsplay.global.constants.MediaType;
+import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
+import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.DateTimeUtil;
 import com.buck.vsplay.global.util.SortUtil;
 import jakarta.transaction.Transactional;
@@ -35,6 +39,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +51,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     private final EntryStatisticsMapper entryStatisticsMapper;
     private final TopicEntryMapper topicEntryMapper;
     private final BatchJobExecutionRepository batchJobExecutionRepository;
+    private final AuthUserService authUserService;
 
     @EventListener
     public void handleEntryCrateEvent(EntryEvent.CreateEvent entryCreateEvent){
@@ -101,6 +107,23 @@ public class EntryStatisticsService implements IEntryStatisticsService {
 
     @Override
     public EntryStatisticsDto.EntryStatSearchResponse getEntryStatisticsWithEntryInfo(Long topicId, EntryStatisticsDto.EntryStatSearchRequest entryStatSearchRequest) {
+
+        Optional<Member> authUserOpt = authUserService.getAuthUserOptional();
+        VsTopic targetTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
+
+        if( targetTopic == null ) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        if(!isPublicTopic((targetTopic.getVisibility()))){
+            if( authUserOpt.isEmpty()) {
+                throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
+            }
+            if(!targetTopic.getMember().getId().equals(authUserOpt.get().getId())){
+                throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
+            }
+        }
+
         List<EntryStatisticsDto.EntryStatWithEntryInfo> entriesStatistics = new ArrayList<>();
         int page = Math.max(entryStatSearchRequest.getPage() - 1 , 0); // index 조정
 
@@ -108,10 +131,6 @@ public class EntryStatisticsService implements IEntryStatisticsService {
         Sort sort = SortUtil.buildSort(Map.of(
                 EntryStatistics.OrderColumn.RANK, entryStatSearchRequest.getRankOrderType()
         ), EntryStatistics.OrderColumn::getProperty);
-
-        if(!vsTopicRepository.existsByIdAndDeletedFalse(topicId)){
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
 
         Page<EntryStatistics> entryStatistics = entryStatisticsRepository.findByTopicIdAndEntryNameWithTopicEntryFetch(
                 topicId,
@@ -165,9 +184,20 @@ public class EntryStatisticsService implements IEntryStatisticsService {
 
     @Override
     public EntryStatisticsDto.SingleEntryStatsResponse getSingleEntryStatistics(Long topicId, Long entryId) {
+        Optional<Member> authUserOpt = authUserService.getAuthUserOptional();
+        VsTopic targetTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
 
-        if(!vsTopicRepository.existsByIdAndDeletedFalse(topicId)){
+        if( targetTopic == null ) {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+
+        if(!isPublicTopic((targetTopic.getVisibility()))){
+            if( authUserOpt.isEmpty()) {
+                throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
+            }
+            if(!targetTopic.getMember().getId().equals(authUserOpt.get().getId())){
+                throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
+            }
         }
 
         EntryStatistics entryStatistics= entryStatisticsRepository.findByTopicEntryIdAndDeletedFalse(entryId).orElseThrow(
@@ -186,4 +216,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                 .build();
     }
 
+    private boolean isPublicTopic(Visibility visibility) {
+        return Visibility.PUBLIC.equals(visibility);
+    }
 }
