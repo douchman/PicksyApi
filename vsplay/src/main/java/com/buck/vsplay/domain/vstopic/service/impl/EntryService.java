@@ -143,6 +143,8 @@ public class EntryService implements IEntryService {
                         }
                     });
         }
+
+        // TODO : 엔트리 업데이트 시 이용가능 토너먼트도 갱신 필요
     }
 
     private void updateTopicTournament(VsTopic vsTopic) {
