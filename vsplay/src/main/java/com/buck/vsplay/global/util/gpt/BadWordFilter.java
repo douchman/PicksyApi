@@ -1,7 +1,5 @@
 package com.buck.vsplay.global.util.gpt;
 
-import com.buck.vsplay.domain.gpt.exception.GptApiException;
-import com.buck.vsplay.domain.gpt.exception.GptApiExceptionCode;
 import com.buck.vsplay.global.util.gpt.prompt.GptApiPrompt;
 import com.buck.vsplay.global.util.gpt.prompt.GptPromptType;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -68,7 +66,7 @@ public class BadWordFilter {
 
 
         } catch (JsonProcessingException e) {
-            throw new GptApiException(GptApiExceptionCode.GPT_API_ERROR);
+            throw new RuntimeException();
         }
     }
 
