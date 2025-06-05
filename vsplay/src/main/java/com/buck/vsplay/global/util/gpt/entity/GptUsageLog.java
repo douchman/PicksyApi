@@ -31,11 +31,11 @@ public class GptUsageLog extends Timestamp {
     @Comment("GPT 모델")
     private String model;
 
-    @Column(name = "prompt_toknes")
+    @Column(name = "prompt_tokens")
     @Comment("요청 프롬프트 토큰 수")
     private Integer promptTokens;
 
-    @Column(name = "competion_tokens")
+    @Column(name = "completion_tokens")
     @Comment("응답 생성 토큰 수")
     private Integer completionTokens;
 
@@ -44,10 +44,10 @@ public class GptUsageLog extends Timestamp {
     private Integer totalTokens;
 
     @Column(name = "estimated_cost")
-    @Comment("예상 비용 ( 단위 : 원 )")
+    @Comment("예상 비용 ( 단위 : 달러 )")
     private Double estimatedCost;
 
-    @Column(name = "response_timemills")
+    @Column(name = "response_time_mills")
     @Comment("응답 소요 시간")
     private Long responseTimeMills;
 
