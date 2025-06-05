@@ -121,12 +121,15 @@ public class BadWordFilter {
     private String createBadWordGptApiInput(List<String> stringList) throws JsonProcessingException {
         Map<String, Map<String, String>> gptInputMap = new LinkedHashMap<>();
 
-        if( stringList != null && !stringList.isEmpty()){
-            for(int i = 0; i < stringList.size(); i++) {
-                String key = String.valueOf(i + 1);
-                gptInputMap.put(key, Map.of("text", stringList.get(i)));
-            }
+        if(stringList == null || stringList.isEmpty()){
+            return "{}";
         }
+
+        for(int i = 0; i < stringList.size(); i++) {
+            String key = String.valueOf(i + 1);
+            gptInputMap.put(key, Map.of("text", stringList.get(i)));
+        }
+
         return objectMapper.writeValueAsString(gptInputMap);
     }
 }
