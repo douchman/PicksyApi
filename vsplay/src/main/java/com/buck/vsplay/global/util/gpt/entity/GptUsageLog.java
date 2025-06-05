@@ -23,6 +23,7 @@ public class GptUsageLog extends Timestamp {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GPT_USAGE_SEQ_LOG_GENERATOR")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "prompt_type")
     @Comment("호출 용도")
     private GptPromptType promptType;
