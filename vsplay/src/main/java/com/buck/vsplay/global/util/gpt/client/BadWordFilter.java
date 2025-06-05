@@ -1,4 +1,4 @@
-package com.buck.vsplay.global.util.gpt;
+package com.buck.vsplay.global.util.gpt.client;
 
 import com.buck.vsplay.global.util.gpt.prompt.GptApiPrompt;
 import com.buck.vsplay.global.util.gpt.prompt.GptPromptType;
