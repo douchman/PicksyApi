@@ -3,6 +3,7 @@ package com.buck.vsplay.global.util.gpt.client;
 import com.buck.vsplay.global.util.gpt.entity.GptUsageLog;
 import com.buck.vsplay.global.util.gpt.exception.GptException;
 import com.buck.vsplay.global.util.gpt.exception.GptExceptionCode;
+import com.buck.vsplay.global.util.gpt.model.GptModelType;
 import com.buck.vsplay.global.util.gpt.prompt.GptApiPrompt;
 import com.buck.vsplay.global.util.gpt.prompt.GptPromptType;
 import com.buck.vsplay.global.util.gpt.repository.GptUsageLogRepository;
@@ -33,7 +34,7 @@ public class BadWordFilter {
 
     public void filterTextContent(List<String> textList){
         boolean apiSuccess = true;
-        String gptModel = "gpt-4-turbo";
+        GptModelType gptMdodel = GptModelType.GPT_4_1;
         String gptApiUrl = "https://api.openai.com/v1/chat/completions";
         ObjectMapper objectMapper = new ObjectMapper();
         RestTemplate restTemplate = new RestTemplate();
@@ -59,7 +60,7 @@ public class BadWordFilter {
             Map<String, Object> userMsg = Map.of("role", "user", "content", apiInput);
 
             Map<String, Object> requestBody = Map.of(
-                    "model", gptModel,
+                    "model", gptMdodel.getModelName(),
                     "messages", List.of(systemMsg, userMsg)
             );
 
@@ -98,12 +99,12 @@ public class BadWordFilter {
             // 로그 저장
             GptUsageLog usageLog = GptUsageLog.builder()
                     .promptType(GptPromptType.BAD_WORD_CHECK)
-                    .model(gptModel)
+                    .model(gptMdodel.getModelName())
                     .promptTokens(promptTokens)
                     .completionTokens(completionTokens)
                     .totalTokens(totalTokens)
                     .responseTimeMills(responseTime)
-                    .estimatedCost(0.0)
+                    .estimatedCost(gptMdodel.getRate().calculateCost(promptTokens, completionTokens))
                     .inputPreview(apiInput)
                     .success(apiSuccess)
                     .errorCode(errorCode)
