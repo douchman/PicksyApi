@@ -18,6 +18,7 @@ import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
+import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -51,14 +52,26 @@ public class VsTopicService implements IVsTopicService {
     private final TournamentMapper tournamentMapper;
     private final AuthUserService authUserService;
     private final EntityManager entityManager;
+    private final BadWordFilter badWordFilter;
 
     @Override
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
         S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(createVsTopicRequest.getThumbnail() , existMember.getId().toString());
 
-        Visibility requestVisibility = createVsTopicRequest.getVisibility();
+        List<String> stringList = buildStringList(
+                createVsTopicRequest.getTitle(),
+                createVsTopicRequest.getSubject(),
+                createVsTopicRequest.getDescription());
 
+
+        boolean hasBadWord = badWordFilter.containsBadWords(stringList);
+
+        if( hasBadWord ){
+            throw new VsTopicException(VsTopicExceptionCode.BAD_WORD_DETECTED);
+        }
+
+        Visibility requestVisibility = createVsTopicRequest.getVisibility();
         VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
         vsTopic.setThumbnail(s3UploadResult.getObjectKey());
@@ -233,4 +246,7 @@ public class VsTopicService implements IVsTopicService {
         return appBaseDomain + "vstopic/link/" + shortCode;
     }
 
+    private List<String> buildStringList(String ... strings){
+        return List.of(strings);
+    }
 }
