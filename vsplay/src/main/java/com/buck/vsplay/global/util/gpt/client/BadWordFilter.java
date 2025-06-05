@@ -17,6 +17,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 @RequiredArgsConstructor
 public class BadWordFilter {
 
@@ -31,7 +33,7 @@ public class BadWordFilter {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${app.gpt-api-key}")
-    private static String openaiApiKey;
+    private String openaiApiKey;
 
     public boolean containsBadWords(List<String> textList){
         boolean apiSuccess = true;
