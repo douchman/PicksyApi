@@ -28,6 +28,7 @@ import java.util.Map;
 public class BadWordFilter {
 
     private final GptUsageLogRepository gptUsageLogRepository;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${app.gpt-api-key}")
     private static String openaiApiKey;
@@ -36,7 +37,6 @@ public class BadWordFilter {
         boolean apiSuccess = true;
         GptModelType gptMdodel = GptModelType.GPT_4_1;
         String gptApiUrl = "https://api.openai.com/v1/chat/completions";
-        ObjectMapper objectMapper = new ObjectMapper();
         RestTemplate restTemplate = new RestTemplate();
 
         int promptTokens = 0;
@@ -119,7 +119,6 @@ public class BadWordFilter {
     }
 
     private String createBadWordGptApiInput(List<String> stringList) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Map<String, String>> gptInputMap = new LinkedHashMap<>();
 
         if( stringList != null && !stringList.isEmpty()){
