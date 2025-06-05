@@ -32,7 +32,7 @@ public class BadWordFilter {
     @Value("${app.gpt-api-key}")
     private static String openaiApiKey;
 
-    public void filterTextContent(List<String> textList){
+    public boolean containsBadWords(List<String> textList){
         boolean apiSuccess = true;
         GptModelType gptMdodel = GptModelType.GPT_4_1;
         String gptApiUrl = "https://api.openai.com/v1/chat/completions";
@@ -47,6 +47,8 @@ public class BadWordFilter {
         long responseTime = 0L;
         String apiInput = "";
         String errorCode = "";
+
+        Map<String, Boolean> resultMap = Map.of(); // safe 하게 기본값 초기화
 
         try {
             apiInput =createBadWordGptApiInput(textList); // 입력 변환
@@ -77,14 +79,14 @@ public class BadWordFilter {
             JsonNode root = objectMapper.readTree(response.getBody());
             String content = root.path("choices").get(0).path("message").path("content").asText();
 
-            // 결과 파싱
-            Map<String, Boolean> resultMap = objectMapper.readValue(content,new TypeReference<>() {});
-
             // 소모 토큰
             JsonNode usageNode = root.path("usage");
             promptTokens = usageNode.path("prompt_tokens").asInt();
             completionTokens = usageNode.path("completion_tokens").asInt();
             totalTokens = usageNode.path("total_tokens").asInt();
+
+            // 결과 파싱
+            resultMap = objectMapper.readValue(content,new TypeReference<>() {});
 
         } catch (JsonProcessingException e) {
             apiSuccess = false;
@@ -112,6 +114,8 @@ public class BadWordFilter {
 
             gptUsageLogRepository.save(usageLog);
         }
+
+        return resultMap.values().stream().anyMatch(Boolean::booleanValue);
     }
 
     private String createBadWordGptApiInput(List<String> stringList) throws JsonProcessingException {
@@ -126,5 +130,4 @@ public class BadWordFilter {
         }
         return objectMapper.writeValueAsString(gptInputMap);
     }
-
 }
