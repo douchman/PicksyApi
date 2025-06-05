@@ -95,13 +95,24 @@ public class VsTopicService implements IVsTopicService {
     @Override
     public void updateVsTopic(Long topicId, VsTopicDto.VsTopicUpdateRequest updateVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
-        MultipartFile thumbnail = updateVsTopicRequest.getThumbnail();
-        boolean isFileExist = (thumbnail != null && !thumbnail.isEmpty());
-
-        Visibility updateVisibility = updateVsTopicRequest.getVisibility();
 
         VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+
+        List<String> stringList = buildStringList(
+                updateVsTopicRequest.getTitle(),
+                updateVsTopicRequest.getSubject(),
+                updateVsTopicRequest.getDescription());
+
+        boolean hasBadWord = badWordFilter.containsBadWords(stringList);
+
+        if( hasBadWord ){
+            throw new VsTopicException(VsTopicExceptionCode.BAD_WORD_DETECTED);
+        }
+
+        MultipartFile thumbnail = updateVsTopicRequest.getThumbnail();
+        boolean isFileExist = (thumbnail != null && !thumbnail.isEmpty());
+        Visibility updateVisibility = updateVsTopicRequest.getVisibility();
 
         if (isFileExist) {
             String objectKey = s3Util.buildS3Path(existMember.getId().toString(), String.valueOf(topicId));
