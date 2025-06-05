@@ -35,7 +35,7 @@ public class BadWordFilter {
 
     public boolean containsBadWords(List<String> textList){
         boolean apiSuccess = true;
-        GptModelType gptMdodel = GptModelType.GPT_4_1;
+        GptModelType gptModel = GptModelType.GPT_4_1;
         String gptApiUrl = "https://api.openai.com/v1/chat/completions";
         RestTemplate restTemplate = new RestTemplate();
 
@@ -62,7 +62,7 @@ public class BadWordFilter {
             Map<String, Object> userMsg = Map.of("role", "user", "content", apiInput);
 
             Map<String, Object> requestBody = Map.of(
-                    "model", gptMdodel.getModelName(),
+                    "model", gptModel.getModelName(),
                     "messages", List.of(systemMsg, userMsg)
             );
 
@@ -101,12 +101,12 @@ public class BadWordFilter {
             // 로그 저장
             GptUsageLog usageLog = GptUsageLog.builder()
                     .promptType(GptPromptType.BAD_WORD_CHECK)
-                    .model(gptMdodel.getModelName())
+                    .model(gptModel.getModelName())
                     .promptTokens(promptTokens)
                     .completionTokens(completionTokens)
                     .totalTokens(totalTokens)
                     .responseTimeMills(responseTime)
-                    .estimatedCost(gptMdodel.getRate().calculateCost(promptTokens, completionTokens))
+                    .estimatedCost(gptModel.getRate().calculateCost(promptTokens, completionTokens))
                     .inputPreview(apiInput)
                     .success(apiSuccess)
                     .errorCode(errorCode)
