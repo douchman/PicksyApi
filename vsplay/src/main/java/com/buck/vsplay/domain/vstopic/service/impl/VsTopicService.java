@@ -12,6 +12,7 @@ import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
+import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.constants.SortBy;
 import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
@@ -74,6 +75,7 @@ public class VsTopicService implements IVsTopicService {
         Visibility requestVisibility = createVsTopicRequest.getVisibility();
         VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
+        vsTopic.setModerationStatus(ModerationStatus.PASSED);
         vsTopic.setThumbnail(s3UploadResult.getObjectKey());
 
         entityManager.persist(vsTopic);
@@ -121,6 +123,7 @@ public class VsTopicService implements IVsTopicService {
         }
 
         vsTopic.setShortCode(Visibility.UNLISTED.equals(updateVisibility) ? generateShortCode(vsTopic.getId()) : null);
+        vsTopic.setModerationStatus(ModerationStatus.PASSED);
 
         vsTopicMapper.updateVsTopicFromUpdateRequest(updateVsTopicRequest, vsTopic);
         vsTopicRepository.save(vsTopic);
