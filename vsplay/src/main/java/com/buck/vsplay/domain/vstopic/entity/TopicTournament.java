@@ -33,4 +33,8 @@ public class TopicTournament extends Timestamp {
     @Comment("토너먼트 ( ex. 4강 8강 16강")
     private Integer tournamentStage;
 
+    @Column(name = "is_active")
+    @Comment("사용 가능 여부")
+    private boolean active;
+
 }
