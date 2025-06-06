@@ -126,9 +126,10 @@ public class EntryService implements IEntryService {
     public void updateEntries(Long topicId, EntryDto.UpdateEntryRequest updatedRequest) {
 
         Member authUser = authUserService.getAuthUser();
-        if( !topicRepository.existsById(topicId) ) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
+
+        VsTopic topic = topicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
+            new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND)
+        );
 
         List<EntryDto.UpdateEntry> entriesToUpdate = Optional
                 .ofNullable(updatedRequest.getEntriesToUpdate())
@@ -168,8 +169,7 @@ public class EntryService implements IEntryService {
                         }
                     });
         }
-
-        // TODO : 엔트리 업데이트 시 이용가능 토너먼트도 갱신 필요
+        updateTopicTournament(topic);
     }
 
     private void updateTopicTournament(VsTopic vsTopic) {
