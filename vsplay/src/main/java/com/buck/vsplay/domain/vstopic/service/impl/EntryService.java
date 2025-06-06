@@ -143,33 +143,30 @@ public class EntryService implements IEntryService {
                         }
                     });
         }
+
+        // TODO : 엔트리 업데이트 시 이용가능 토너먼트도 갱신 필요
     }
 
     private void updateTopicTournament(VsTopic vsTopic) {
-        log.info(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@ 토픽 토너먼트 @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         final int INITIAL_TOURNAMENT_STAGE = 2;
         List<TopicEntry> topicEntries = entryRepository.findByTopicIdAndDeletedFalse(vsTopic.getId());
 
         boolean isEntryExist = (topicEntries != null && !topicEntries.isEmpty());
 
         if(!isEntryExist) { // 엔트리가 존재하지 않으면 처리하지 않음
-            log.info(" 엔트리가 없어서 토너먼트를 추가하지 않습니다");
             return;
         }
 
         int power = 1;
         int entryCount = topicEntries.size();
-        log.info("entryCount  ->>> {} ", entryCount );
         while ( true ) { // 사용가능 토너먼트 계산 및 저장
             int tournamentStage = (int)Math.pow(INITIAL_TOURNAMENT_STAGE, power);
 
-            log.info("tournamentStage ! ->>> {} ", tournamentStage );
             if( tournamentStage > entryCount){
                 break;
             }
 
             if( !isTournamentExist(vsTopic, tournamentStage) ) {
-                log.info("토너먼트가 없네요? 추가해볼게요");
                 TopicTournament saveTournament = saveTournament(vsTopic, tournamentStage); // 토너먼트 엔티티 커밋
                 applicationEventPublisher.publishEvent(new TournamentEvent.CreateEvent(saveTournament)); // 커밋된 엔티티로 이벤트 발행
             }
