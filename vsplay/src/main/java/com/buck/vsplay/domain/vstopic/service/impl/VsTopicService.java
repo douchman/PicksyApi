@@ -9,14 +9,17 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TournamentMapper;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
+import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
+import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.constants.SortBy;
 import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
+import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -50,16 +53,29 @@ public class VsTopicService implements IVsTopicService {
     private final TournamentMapper tournamentMapper;
     private final AuthUserService authUserService;
     private final EntityManager entityManager;
+    private final BadWordFilter badWordFilter;
 
     @Override
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
         S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(createVsTopicRequest.getThumbnail() , existMember.getId().toString());
 
-        Visibility requestVisibility = createVsTopicRequest.getVisibility();
+        List<String> stringList = buildStringList(
+                createVsTopicRequest.getTitle(),
+                createVsTopicRequest.getSubject(),
+                createVsTopicRequest.getDescription());
 
+
+        boolean hasBadWord = badWordFilter.containsBadWords(stringList);
+
+        if( hasBadWord ){
+            throw new VsTopicException(VsTopicExceptionCode.BAD_WORD_DETECTED);
+        }
+
+        Visibility requestVisibility = createVsTopicRequest.getVisibility();
         VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
+        vsTopic.setModerationStatus(ModerationStatus.PASSED);
         vsTopic.setThumbnail(s3UploadResult.getObjectKey());
 
         entityManager.persist(vsTopic);
@@ -81,13 +97,24 @@ public class VsTopicService implements IVsTopicService {
     @Override
     public void updateVsTopic(Long topicId, VsTopicDto.VsTopicUpdateRequest updateVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
-        MultipartFile thumbnail = updateVsTopicRequest.getThumbnail();
-        boolean isFileExist = (thumbnail != null && !thumbnail.isEmpty());
-
-        Visibility updateVisibility = updateVsTopicRequest.getVisibility();
 
         VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+
+        List<String> stringList = buildStringList(
+                updateVsTopicRequest.getTitle(),
+                updateVsTopicRequest.getSubject(),
+                updateVsTopicRequest.getDescription());
+
+        boolean hasBadWord = badWordFilter.containsBadWords(stringList);
+
+        if( hasBadWord ){
+            throw new VsTopicException(VsTopicExceptionCode.BAD_WORD_DETECTED);
+        }
+
+        MultipartFile thumbnail = updateVsTopicRequest.getThumbnail();
+        boolean isFileExist = (thumbnail != null && !thumbnail.isEmpty());
+        Visibility updateVisibility = updateVsTopicRequest.getVisibility();
 
         if (isFileExist) {
             String objectKey = s3Util.buildS3Path(existMember.getId().toString(), String.valueOf(topicId));
@@ -96,6 +123,7 @@ public class VsTopicService implements IVsTopicService {
         }
 
         vsTopic.setShortCode(Visibility.UNLISTED.equals(updateVisibility) ? generateShortCode(vsTopic.getId()) : null);
+        vsTopic.setModerationStatus(ModerationStatus.PASSED);
 
         vsTopicMapper.updateVsTopicFromUpdateRequest(updateVsTopicRequest, vsTopic);
         vsTopicRepository.save(vsTopic);
@@ -104,23 +132,12 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
-        Optional<Member> authUserOpt = authUserService.getAuthUserOptional();
+        Optional<Member> authUser = authUserService.getAuthUserOptional();
         VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
 
         VsTopic vsTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
 
-        if ( vsTopic == null ) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
-
-        if(!isPublicTopic((vsTopic.getVisibility()))){
-            if( authUserOpt.isEmpty()) {
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
-            }
-            if(!vsTopic.getMember().getId().equals(authUserOpt.get().getId())){
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
-            }
-        }
+        TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
 
         topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(vsTopic));
 
@@ -235,10 +252,6 @@ public class VsTopicService implements IVsTopicService {
         return uuid.toString().replace("-", "").substring(0, 32);
     }
 
-    private boolean isPublicTopic(Visibility visibility) {
-        return Visibility.PUBLIC.equals(visibility);
-    }
-
     private boolean isUnlistedTopic(Visibility visibility) {
         return Visibility.UNLISTED.equals(visibility);
     }
@@ -247,4 +260,7 @@ public class VsTopicService implements IVsTopicService {
         return appBaseDomain + "vstopic/link/" + shortCode;
     }
 
+    private List<String> buildStringList(String ... strings){
+        return List.of(strings);
+    }
 }

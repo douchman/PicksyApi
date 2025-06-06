@@ -31,7 +31,8 @@ public class PublicPaths {
 
     public static final Map<String, Set<HttpMethod>> OPTIONAL_AUTH_ENDPOINTS = Map.ofEntries(
             Map.entry("/topics/*", Set.of(HttpMethod.GET)),
-            Map.entry("/member/auth", Set.of(HttpMethod.GET))
+            Map.entry("/member/auth", Set.of(HttpMethod.GET)),
+            Map.entry("/statistics/**", Set.of(HttpMethod.GET))
     );
 
     public static boolean isPublicEndPoint(String endpoint, String method) {
