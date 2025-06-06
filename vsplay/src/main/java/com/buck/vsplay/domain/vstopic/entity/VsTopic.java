@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.entity;
 
 import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
@@ -60,4 +61,9 @@ public class VsTopic extends Timestamp{
 
     @OneToMany(mappedBy = "vsTopic", fetch = FetchType.LAZY)
     private List<TopicTournament> tournaments;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moderation_status")
+    @Comment("비속어 필터 검토 상태")
+    private ModerationStatus moderationStatus = ModerationStatus.WAITING;
 }
