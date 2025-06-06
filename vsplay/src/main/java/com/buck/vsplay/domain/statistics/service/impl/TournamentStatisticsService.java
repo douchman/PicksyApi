@@ -13,9 +13,11 @@ import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class TournamentStatisticsService implements ITournamentStatisticsService {
 
     private final TournamentStatisticsRepository tournamentStatisticsRepository;
