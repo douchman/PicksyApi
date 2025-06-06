@@ -1,10 +1,10 @@
-package com.buck.vsplay.domain.gpt.exception;
+package com.buck.vsplay.global.util.gpt.exception;
 
 import com.buck.vsplay.global.exception.BaseExceptionCode;
 
-public enum GptApiExceptionCode implements BaseExceptionCode {
-
-    GPT_API_ERROR(500, "GPT API 오류","GPT_API_ERROR");
+public enum GptExceptionCode implements BaseExceptionCode {
+    GPT_API_ERROR(500, "GPT API 오류","GPT_API_ERROR"),
+    GPT_COMMUNICATION_ERROR(500, "GPT API 오류","GPT_COMMUNICATION_ERROR");
 
     private final int status;
     private final String message;
@@ -26,7 +26,7 @@ public enum GptApiExceptionCode implements BaseExceptionCode {
         return errorCode;
     }
 
-    GptApiExceptionCode(int status, String message, String errorCode) {
+    GptExceptionCode(int status, String message, String errorCode) {
         this.status = status;
         this.message = message;
         this.errorCode = errorCode;
