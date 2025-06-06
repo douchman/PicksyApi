@@ -7,6 +7,8 @@ import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
@@ -19,6 +21,7 @@ import com.buck.vsplay.global.constants.TournamentStage;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
+import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +46,7 @@ public class EntryService implements IEntryService {
     private final EntryRepository entryRepository;
     private final TournamentRepository tournamentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final BadWordFilter badWordFilter;
 
     @Override
     public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
@@ -78,6 +82,17 @@ public class EntryService implements IEntryService {
 
 
         List<EntryDto.CreateEntry> entries = request.getEntries();
+
+        List<String> textsForBadWordFilter = new ArrayList<>();
+        for(EntryDto.CreateEntry entry : entries){
+            textsForBadWordFilter.addAll(buildStringList(entry.getEntryName(), entry.getDescription()));
+        }
+
+        boolean hasBadWord = badWordFilter.containsBadWords(textsForBadWordFilter);
+        if(hasBadWord){
+            throw new EntryException(EntryExceptionCode.BAD_WORD_DETECTED);
+        }
+
         List<TopicEntry> topicEntries = new ArrayList<>();
         String objectPath = s3Util.buildS3Path(String.valueOf(authUser.getId()), String.valueOf(vsTopic.getId()));
 
@@ -124,6 +139,16 @@ public class EntryService implements IEntryService {
         List<Long> updateTargetEntryIds = entriesToUpdate.stream()
                 .map(EntryDto.UpdateEntry::getId)
                 .toList();
+
+        List<String> textsForBadWordFilter = new ArrayList<>();
+        for(EntryDto.UpdateEntry entry : entriesToUpdate){
+            textsForBadWordFilter.addAll(buildStringList(entry.getEntryName(), entry.getDescription()));
+        }
+
+        boolean hasBadWord = badWordFilter.containsBadWords(textsForBadWordFilter);
+        if(hasBadWord){
+            throw new EntryException(EntryExceptionCode.BAD_WORD_DETECTED);
+        }
 
         List<TopicEntry> existingEntries = entryRepository.findByTopicIdAndIdIn(topicId, updateTargetEntryIds);
 
@@ -213,5 +238,9 @@ public class EntryService implements IEntryService {
             S3Dto.S3UploadResult thumbFileUploadResult = s3Util.putObject(updateRequestEntry.getThumbnailFile(), objectPath);
             existingEntry.setThumbnail(thumbFileUploadResult.getObjectKey());
         }
+    }
+
+    private List<String> buildStringList(String ... strings) {
+        return List.of(strings);
     }
 }
