@@ -23,7 +23,6 @@ import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.DateTimeUtil;
 import com.buck.vsplay.global.util.SortUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -31,6 +30,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -57,6 +58,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     }
 
     @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW) // 클래스 트랜잭션과 분리
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @EventListener
     public void handleEntryMatchCompleteEvent(EntryEvent.MatchCompleteEvent entryMatchCompleteEvent){
