@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public interface VsTopicRepository extends JpaRepository<VsTopic, Long>, JpaSpecificationExecutor<VsTopic> {
 
-    @Query("SELECT vt FROM VsTopic vt LEFT JOIN FETCH vt.tournaments WHERE vt.id = :topicId AND vt.deleted = false")
+    @Query("SELECT vt FROM VsTopic vt LEFT JOIN FETCH vt.tournaments tt WHERE vt.id = :topicId AND vt.deleted = false AND tt.active = true")
     VsTopic findWithTournamentsByTopicId(@Param("topicId") Long topicId);
 
     boolean existsByIdAndDeletedFalse(Long id);
