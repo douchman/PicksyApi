@@ -92,7 +92,7 @@ public class VsTopicDto {
     @Data
     @ToString
     public static class VsTopicDetailWithTournamentsResponse{
-        VsTopic topic;
+        VsTopicWithModeration topic;
         List<Tournament> tournamentList = new ArrayList<>();
     }
 
