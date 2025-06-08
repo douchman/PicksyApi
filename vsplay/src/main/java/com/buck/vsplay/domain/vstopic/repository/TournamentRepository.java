@@ -15,6 +15,8 @@ public interface TournamentRepository extends JpaRepository<TopicTournament, Lon
 
     boolean existsByVsTopicIdAndTournamentStage(Long topicId, Integer tournamentStage);
 
+    List<TopicTournament> findByVsTopicIdAndActiveTrue(Long topicId);
+
     List<TopicTournament> findByVsTopicId(Long topicId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
