@@ -11,6 +11,8 @@ import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
@@ -64,7 +66,8 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
         List<EntryVersusStatisticsDto.OpponentEntryInfoWithMatchRecord> opponentEntryInfoWithMatchRecords = new ArrayList<>();
 
         Optional<Member> authUser = authUserService.getAuthUserOptional();
-        VsTopic targetTopic = topicRepository.findWithTournamentsByTopicId(topicId);
+        VsTopic targetTopic = topicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
+                new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
         TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
 

@@ -13,6 +13,8 @@ import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
@@ -109,7 +111,8 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     public EntryStatisticsDto.EntryStatSearchResponse getEntryStatisticsWithEntryInfo(Long topicId, EntryStatisticsDto.EntryStatSearchRequest entryStatSearchRequest) {
 
         Optional<Member> authUser = authUserService.getAuthUserOptional();
-        VsTopic targetTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
+        VsTopic targetTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
+                new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
         TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
 
@@ -174,7 +177,8 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     @Override
     public EntryStatisticsDto.SingleEntryStatsResponse getSingleEntryStatistics(Long topicId, Long entryId) {
         Optional<Member> authUser = authUserService.getAuthUserOptional();
-        VsTopic targetTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
+        VsTopic targetTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
+                new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
 
         TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
