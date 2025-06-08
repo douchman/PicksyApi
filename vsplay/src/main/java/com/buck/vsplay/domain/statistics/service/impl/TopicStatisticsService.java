@@ -11,6 +11,8 @@ import com.buck.vsplay.domain.statistics.service.ITopicStatisticsService;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
+import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
@@ -89,7 +91,9 @@ public class TopicStatisticsService implements ITopicStatisticsService {
     public TopicStatisticsDto.TopicStatisticsResponse getTopicStatistics(Long topicId) {
 
         Optional<Member> authUser = authUserService.getAuthUserOptional();
-        VsTopic targetTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
+
+        VsTopic targetTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
+                new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
         TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
 
