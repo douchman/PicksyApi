@@ -13,8 +13,6 @@ public interface TournamentRepository extends JpaRepository<TopicTournament, Lon
     @Query("SELECT tt FROM TopicTournament tt WHERE tt.vsTopic.id = :topicId AND tt.tournamentStage = :tournamentStage")
     TopicTournament findByTopicIdAndTournamentStage(@Param("topicId") Long topicId, @Param("tournamentStage") Integer tournamentStage);
 
-    boolean existsByVsTopicIdAndTournamentStage(Long topicId, Integer tournamentStage);
-
     List<TopicTournament> findByVsTopicIdAndActiveTrue(Long topicId);
 
     List<TopicTournament> findByVsTopicId(Long topicId);
