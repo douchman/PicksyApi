@@ -12,6 +12,6 @@ public interface IVsTopicService {
     VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournamentsByShortCode(String shortCode);
     VsTopicDto.VsTopicSearchResponse searchPublicVsTopic(VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest);
     List<VsTopicDto.TopicVisibility> getTopicVisibilities();
-    VsTopicDto.VsTopicSearchResponse getMyVsTopics(VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest);
+    VsTopicDto.MyTopicsResponse getMyVsTopics(VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest);
     VsTopicDto.VsTopicUnlistedLinkResponse getVsTopicUnlistedLink(Long topicId);
 }
