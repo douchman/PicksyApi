@@ -13,10 +13,6 @@ import lombok.NoArgsConstructor;
 public class TopicAccessGuard {
     public static void validateTopicAccess(VsTopic topic, Member member){
 
-        if(topic == null){
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
-
         boolean isNotPublic = !isPublicTopic(topic.getVisibility());
         boolean isNotOwner = member == null || !topic.getMember().getId().equals(member.getId());
         boolean isNotPassed = topic.getModerationStatus() != ModerationStatus.PASSED;
