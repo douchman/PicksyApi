@@ -10,6 +10,7 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TournamentMapper;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
+import com.buck.vsplay.domain.vstopic.repository.TournamentRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
 import com.buck.vsplay.global.constants.ModerationStatus;
@@ -49,6 +50,7 @@ public class VsTopicService implements IVsTopicService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final S3Util s3Util;
     private final VsTopicRepository vsTopicRepository;
+    private final TournamentRepository tournamentRepository;
     private final VsTopicMapper vsTopicMapper;
     private final TournamentMapper tournamentMapper;
     private final AuthUserService authUserService;
@@ -135,10 +137,12 @@ public class VsTopicService implements IVsTopicService {
         Optional<Member> authUser = authUserService.getAuthUserOptional();
         VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
 
-        VsTopic vsTopic = vsTopicRepository.findWithTournamentsByTopicId(topicId);
+        VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
+                new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
         TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
 
+        vsTopic.setTournaments(tournamentRepository.findByVsTopicIdAndActiveTrue(vsTopic.getId()));
         topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(vsTopic));
 
         if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
