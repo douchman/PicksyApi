@@ -214,7 +214,7 @@ public class VsTopicService implements IVsTopicService {
     }
 
     @Override
-    public VsTopicDto.VsTopicSearchResponse getMyVsTopics(VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
+    public VsTopicDto.MyTopicsResponse getMyVsTopics(VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
         Member member = authUserService.getAuthUser();
 
         int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
@@ -222,8 +222,8 @@ public class VsTopicService implements IVsTopicService {
 
         topicsWithPage = vsTopicRepository.findTopicsByMemberIdAndTitleAndVisibility(member.getId(), vsTopicSearchRequest.getKeyword(), vsTopicSearchRequest.getVisibility(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
 
-        return VsTopicDto.VsTopicSearchResponse.builder()
-                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicsWithPage.getContent()))
+        return VsTopicDto.MyTopicsResponse.builder()
+                .topicList(vsTopicMapper.toVsTopicDtoWithModerationListFromEntityList(topicsWithPage.getContent()))
                 .pagination(Pagination.builder()
                         .totalPages(topicsWithPage.getTotalPages())
                         .totalItems(topicsWithPage.getTotalElements())

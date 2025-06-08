@@ -18,7 +18,7 @@ public class MyTopicController {
     private final VsTopicService vsTopicService;
 
     @GetMapping("topics")
-    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicSearchResponse>> myVsTopics(
+    public ResponseEntity<SingleResponseDto<VsTopicDto.MyTopicsResponse>> myVsTopics(
             VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest
     ) {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getMyVsTopics(vsTopicSearchRequest)), HttpStatus.OK);
