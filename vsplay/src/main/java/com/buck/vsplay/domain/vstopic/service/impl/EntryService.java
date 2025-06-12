@@ -2,28 +2,28 @@ package com.buck.vsplay.domain.vstopic.service.impl;
 
 import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
-import com.buck.vsplay.domain.statistics.event.TournamentEvent;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
-import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
+import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
-import com.buck.vsplay.domain.vstopic.repository.TournamentRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IEntryService;
+import com.buck.vsplay.domain.vstopic.service.support.TournamentHandler;
 import com.buck.vsplay.global.constants.MediaType;
-import com.buck.vsplay.global.constants.TournamentStage;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
-import jakarta.transaction.Transactional;
+import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.function.Function;
@@ -41,8 +41,9 @@ public class EntryService implements IEntryService {
     private final TopicEntryMapper topicEntryMapper;
     private final AuthUserService authUserService;
     private final EntryRepository entryRepository;
-    private final TournamentRepository tournamentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final BadWordFilter badWordFilter;
+    private final TournamentHandler tournamentHandler;
 
     @Override
     public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
@@ -78,6 +79,17 @@ public class EntryService implements IEntryService {
 
 
         List<EntryDto.CreateEntry> entries = request.getEntries();
+
+        List<String> textsForBadWordFilter = new ArrayList<>();
+        for(EntryDto.CreateEntry entry : entries){
+            textsForBadWordFilter.addAll(buildStringList(entry.getEntryName(), entry.getDescription()));
+        }
+
+        boolean hasBadWord = badWordFilter.containsBadWords(textsForBadWordFilter);
+        if(hasBadWord){
+            throw new EntryException(EntryExceptionCode.BAD_WORD_DETECTED);
+        }
+
         List<TopicEntry> topicEntries = new ArrayList<>();
         String objectPath = s3Util.buildS3Path(String.valueOf(authUser.getId()), String.valueOf(vsTopic.getId()));
 
@@ -104,16 +116,17 @@ public class EntryService implements IEntryService {
 
         entryRepository.saveAll(topicEntries);
         applicationEventPublisher.publishEvent(new EntryEvent.CreateEvent(topicEntries));
-        updateTopicTournament(vsTopic);
+        tournamentHandler.handleTournament(vsTopic);
     }
 
     @Override
     public void updateEntries(Long topicId, EntryDto.UpdateEntryRequest updatedRequest) {
 
         Member authUser = authUserService.getAuthUser();
-        if( !topicRepository.existsById(topicId) ) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
+
+        VsTopic topic = topicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
+            new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND)
+        );
 
         List<EntryDto.UpdateEntry> entriesToUpdate = Optional
                 .ofNullable(updatedRequest.getEntriesToUpdate())
@@ -124,6 +137,16 @@ public class EntryService implements IEntryService {
         List<Long> updateTargetEntryIds = entriesToUpdate.stream()
                 .map(EntryDto.UpdateEntry::getId)
                 .toList();
+
+        List<String> textsForBadWordFilter = new ArrayList<>();
+        for(EntryDto.UpdateEntry entry : entriesToUpdate){
+            textsForBadWordFilter.addAll(buildStringList(entry.getEntryName(), entry.getDescription()));
+        }
+
+        boolean hasBadWord = badWordFilter.containsBadWords(textsForBadWordFilter);
+        if(hasBadWord){
+            throw new EntryException(EntryExceptionCode.BAD_WORD_DETECTED);
+        }
 
         List<TopicEntry> existingEntries = entryRepository.findByTopicIdAndIdIn(topicId, updateTargetEntryIds);
 
@@ -143,53 +166,7 @@ public class EntryService implements IEntryService {
                         }
                     });
         }
-    }
-
-    private void updateTopicTournament(VsTopic vsTopic) {
-        log.info(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@ 토픽 토너먼트 @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        final int INITIAL_TOURNAMENT_STAGE = 2;
-        List<TopicEntry> topicEntries = entryRepository.findByTopicIdAndDeletedFalse(vsTopic.getId());
-
-        boolean isEntryExist = (topicEntries != null && !topicEntries.isEmpty());
-
-        if(!isEntryExist) { // 엔트리가 존재하지 않으면 처리하지 않음
-            log.info(" 엔트리가 없어서 토너먼트를 추가하지 않습니다");
-            return;
-        }
-
-        int power = 1;
-        int entryCount = topicEntries.size();
-        log.info("entryCount  ->>> {} ", entryCount );
-        while ( true ) { // 사용가능 토너먼트 계산 및 저장
-            int tournamentStage = (int)Math.pow(INITIAL_TOURNAMENT_STAGE, power);
-
-            log.info("tournamentStage ! ->>> {} ", tournamentStage );
-            if( tournamentStage > entryCount){
-                break;
-            }
-
-            if( !isTournamentExist(vsTopic, tournamentStage) ) {
-                log.info("토너먼트가 없네요? 추가해볼게요");
-                TopicTournament saveTournament = saveTournament(vsTopic, tournamentStage); // 토너먼트 엔티티 커밋
-                applicationEventPublisher.publishEvent(new TournamentEvent.CreateEvent(saveTournament)); // 커밋된 엔티티로 이벤트 발행
-            }
-
-            power++;
-        }
-    }
-
-    private boolean isTournamentExist(VsTopic vsTopic, int tournamentStage) {
-        return tournamentRepository.existsByVsTopicIdAndTournamentStage(vsTopic.getId(), tournamentStage);
-
-    }
-
-    private TopicTournament saveTournament(VsTopic vsTopic, int tournamentStage) {
-
-        TopicTournament topicTournament = new TopicTournament();
-        topicTournament.setVsTopic(vsTopic);
-        topicTournament.setTournamentName(TournamentStage.findStageNameByStage(tournamentStage));
-        topicTournament.setTournamentStage(tournamentStage);
-        return tournamentRepository.save(topicTournament);
+        tournamentHandler.handleTournament(topic);
     }
 
 
@@ -216,5 +193,9 @@ public class EntryService implements IEntryService {
             S3Dto.S3UploadResult thumbFileUploadResult = s3Util.putObject(updateRequestEntry.getThumbnailFile(), objectPath);
             existingEntry.setThumbnail(thumbFileUploadResult.getObjectKey());
         }
+    }
+
+    private List<String> buildStringList(String ... strings) {
+        return List.of(strings);
     }
 }

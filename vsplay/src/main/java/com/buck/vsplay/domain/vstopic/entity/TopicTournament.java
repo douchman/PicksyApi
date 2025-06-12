@@ -2,9 +2,7 @@ package com.buck.vsplay.domain.vstopic.entity;
 
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 @Entity
@@ -12,8 +10,10 @@ import org.hibernate.annotations.Comment;
 @Setter
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @SequenceGenerator(name = "TOPIC_TOURNAMENT_SEQ_GENERATOR" , sequenceName = "TOPIC_TOURNAMENT_SEQ")
 @Comment("대결 주제내에서 수행 가능한 토너먼트 정보")
+@Builder
 public class TopicTournament extends Timestamp {
 
     @Id
@@ -32,5 +32,9 @@ public class TopicTournament extends Timestamp {
     @Column(name = "tournament_stage", nullable = false)
     @Comment("토너먼트 ( ex. 4강 8강 16강")
     private Integer tournamentStage;
+
+    @Column(name = "is_active")
+    @Comment("사용 가능 여부")
+    private boolean active;
 
 }

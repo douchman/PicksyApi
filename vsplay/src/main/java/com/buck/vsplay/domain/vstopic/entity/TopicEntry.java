@@ -2,6 +2,7 @@ package com.buck.vsplay.domain.vstopic.entity;
 
 
 import com.buck.vsplay.global.constants.MediaType;
+import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -51,4 +52,9 @@ public class TopicEntry extends Timestamp {
     @Column(name = "is_delete", columnDefinition = "boolean default false")
     @Comment("삭제 여부")
     private boolean deleted;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moderation_status")
+    @Comment("비속어 필터 검토 상태")
+    private ModerationStatus moderationStatus = ModerationStatus.WAITING;
 }

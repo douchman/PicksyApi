@@ -15,9 +15,6 @@ import java.util.Optional;
 @Repository
 public interface VsTopicRepository extends JpaRepository<VsTopic, Long>, JpaSpecificationExecutor<VsTopic> {
 
-    @Query("SELECT vt FROM VsTopic vt LEFT JOIN FETCH vt.tournaments WHERE vt.id = :topicId AND vt.deleted = false")
-    VsTopic findWithTournamentsByTopicId(@Param("topicId") Long topicId);
-
     boolean existsByIdAndDeletedFalse(Long id);
     Optional<VsTopic> findByIdAndDeletedFalse(Long id);
 
@@ -27,6 +24,7 @@ public interface VsTopicRepository extends JpaRepository<VsTopic, Long>, JpaSpec
     SELECT vt FROM VsTopic vt
     WHERE vt.visibility = 'PUBLIC'
     AND vt.deleted = false
+    AND vt.moderationStatus = 'PASSED'
     AND ( :title IS NULL OR :title = '' OR vt.title LIKE CONCAT('%',:title , '%'))
     ORDER BY vt.createdAt DESC
     """)
@@ -38,6 +36,7 @@ public interface VsTopicRepository extends JpaRepository<VsTopic, Long>, JpaSpec
     ON ts.vsTopic.id = vt.id
     WHERE vt.visibility = 'PUBLIC'
     AND vt.deleted = false
+    AND vt.moderationStatus = 'PASSED'
     AND ( :title IS NULL OR :title = '' OR vt.title LIKE CONCAT('%',:title , '%'))
     ORDER BY ts.totalMatches DESC
     """)

@@ -19,6 +19,9 @@ public interface VsTopicMapper {
     @Mapping(target = "thumbnail", qualifiedByName = "signedMediaUrl")
     VsTopicDto.VsTopicWithThumbnail toVsTopicDtoFromEntityWithThumbnail(VsTopic vsTopic);
 
+    @Mapping(target = "thumbnail", qualifiedByName = "signedMediaUrl")
+    VsTopicDto.VsTopicWithModeration toVsTopicDtoFromEntityWithModeration(VsTopic vsTopic);
+
     @Mapping(target = "thumbnail", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateVsTopicFromUpdateRequest(VsTopicDto.VsTopicUpdateRequest vsTopicUpdateRequest, @MappingTarget VsTopic vsTopic);
@@ -26,6 +29,12 @@ public interface VsTopicMapper {
     default List<VsTopicDto.VsTopicWithThumbnail> toVsTopicDtoWithThumbnailListFromEntityList(List<VsTopic> vsTopics) {
         return vsTopics.stream()
                 .map(this::toVsTopicDtoFromEntityWithThumbnail)
+                .toList();
+    }
+
+    default List<VsTopicDto.VsTopicWithModeration> toVsTopicDtoWithModerationListFromEntityList(List<VsTopic> vsTopics) {
+        return vsTopics.stream()
+                .map(this::toVsTopicDtoFromEntityWithModeration)
                 .toList();
     }
 }

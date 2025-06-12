@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.dto;
 
 
+import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.constants.SortBy;
 import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
@@ -40,6 +41,12 @@ public class VsTopicDto {
     @Data
     public static class VsTopicWithThumbnail extends VsTopic{
         String thumbnail;
+    }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public static class VsTopicWithModeration extends VsTopicWithThumbnail{
+        private ModerationStatus moderationStatus;
     }
 
     @Data
@@ -85,7 +92,7 @@ public class VsTopicDto {
     @Data
     @ToString
     public static class VsTopicDetailWithTournamentsResponse{
-        VsTopic topic;
+        VsTopicWithModeration topic;
         List<Tournament> tournamentList = new ArrayList<>();
     }
 
@@ -95,6 +102,14 @@ public class VsTopicDto {
         List<VsTopicDto.VsTopicWithThumbnail> topicList;
         Pagination pagination;
     }
+
+    @Getter
+    @Builder
+    public static class MyTopicsResponse{
+        List<VsTopicDto.VsTopicWithModeration> topicList;
+        Pagination pagination;
+    }
+
 
     @Data
     public static class VsTopicSearchRequest{

@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.statistics.service.impl;
 
+import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.statistics.dto.EntryVersusStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.EntryVersusStatistics;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
@@ -7,23 +8,28 @@ import com.buck.vsplay.domain.statistics.repository.EntryVersusStatisticsReposit
 import com.buck.vsplay.domain.statistics.service.IEntryVersusStatisticsService;
 import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
+import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
+import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.constants.MediaType;
-import jakarta.transaction.Transactional;
+import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,8 +40,10 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
     private final VsTopicRepository topicRepository;
     private final EntryRepository entryRepository;
     private final TopicEntryMapper topicEntryMapper;
+    private final AuthUserService authUserService;
 
     @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW) // 클래스 트랜잭션과 분리
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Override
     public void handleEntryMatchCompletedEventForVersusStats(EntryEvent.VersusStatisticsEvent matchCompleteEvent) {
@@ -57,9 +65,11 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
 
         List<EntryVersusStatisticsDto.OpponentEntryInfoWithMatchRecord> opponentEntryInfoWithMatchRecords = new ArrayList<>();
 
-        if(!topicRepository.existsByIdAndDeletedFalse(topicId)) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
+        Optional<Member> authUser = authUserService.getAuthUserOptional();
+        VsTopic targetTopic = topicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
+                new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+
+        TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
 
         TopicEntry topicEntry = entryRepository.findWithTopicByEntryId(entryId);
 

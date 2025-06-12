@@ -1,5 +1,6 @@
 app:
   base-domain: ${VSPLAY_APP_BASE_URL}
+  gpt-api-key : ${GPT_API_KEY}
 
 spring:
   datasource:

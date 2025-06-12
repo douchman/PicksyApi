@@ -9,11 +9,11 @@ import com.buck.vsplay.domain.member.repository.MemberRepository;
 import com.buck.vsplay.domain.member.role.Role;
 import com.buck.vsplay.domain.member.service.IMemberService;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
