@@ -1,0 +1,3 @@
+<included>
+    <property name="LOG_PATTERN_CONSOLE" value="%green([%d{HH:mm:ss.SSS}]) %magenta([%thread]) %highlight(%-5level) %cyan(%logger{36}) - %yellow(%msg%n)"/>
+</included>
