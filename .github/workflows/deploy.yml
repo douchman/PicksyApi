@@ -37,6 +37,7 @@ jobs:
         echo "VSPLAY_S3_REGION=${{secrets.S3_REGION}}" >> $GITHUB_ENV
         echo "VSPLAY_APP_BASE_URL=${{secrets.VSPLAY_APP_BASE_URL}}" >> $GITHUB_ENV
         echo "GPT_API_KEY=${{secrets.GPT_API_KEY}}" >> $GITHUB_ENV
+        echo "LOG_PATH=${{secrets.LOG_PATH}}" >> $GITHUB_ENV
       
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
