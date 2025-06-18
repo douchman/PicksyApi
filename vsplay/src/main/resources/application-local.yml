@@ -42,3 +42,13 @@ aws:
     secret-key: ${VSPLAY_S3_SECRET}
   region: ${VSPLAY_S3_REGION}
 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
