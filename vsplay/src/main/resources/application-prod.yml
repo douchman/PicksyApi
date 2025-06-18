@@ -45,3 +45,13 @@ aws:
 logging:
   file:
     path: ${LOG_PATH}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
