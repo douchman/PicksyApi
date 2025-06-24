@@ -33,6 +33,7 @@ public class PresignedUrlService implements IPresignedUrlService {
                             Duration.ofMinutes(3));
 
                     return PresignedUrlDto.PresignedFile.builder()
+                            .originalFileName(file.getOriginalFileName())
                             .objectKey(objectKey)
                             .presignedUploadUrl(presignedUploadUrl)
                             .build();

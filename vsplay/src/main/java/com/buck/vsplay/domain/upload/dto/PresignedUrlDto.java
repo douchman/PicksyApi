@@ -20,6 +20,7 @@ public class PresignedUrlDto {
     @Setter
     @Builder
     public static class PresignedFile{
+        String originalFileName;
         String objectKey;
         String presignedUploadUrl;
     }
