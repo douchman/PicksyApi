@@ -119,7 +119,7 @@ public class S3Util {
         return joinedPath.endsWith("/") ? joinedPath : joinedPath + "/";
     }
 
-    private MediaType determineMediaType(String contentType) {
+    public MediaType determineMediaType(String contentType) {
         if (contentType == null || contentType.isEmpty()) {
             return MediaType.IMAGE;
         }

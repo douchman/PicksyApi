@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.upload.dto;
 
+import com.buck.vsplay.global.constants.MediaType;
 import lombok.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class PresignedUrlDto {
         String originalFileName;
         String objectKey;
         String presignedUploadUrl;
+        MediaType mediaType;
     }
 
     @Setter

@@ -36,6 +36,7 @@ public class PresignedUrlService implements IPresignedUrlService {
                             .originalFileName(file.getOriginalFileName())
                             .objectKey(objectKey)
                             .presignedUploadUrl(presignedUploadUrl)
+                            .mediaType(s3Util.determineMediaType(file.getContentType()))
                             .build();
                 }).toList();
 
