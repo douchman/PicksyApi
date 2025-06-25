@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -53,6 +54,19 @@ public class S3Util {
         return null;
     }
 
+    public String generatePreSignedUploadUrl(String objectKey, String contentType, Duration duration){
+        PresignedPutObjectRequest presignedPutObjectRequest = s3Presigner.presignPutObject( builder ->
+                builder.putObjectRequest(PutObjectRequest.builder()
+                                .bucket(bucketName)
+                                .key(objectKey)
+                                .contentType(contentType)
+                                .build())
+                        .signatureDuration(duration)
+                );
+
+        return presignedPutObjectRequest.url().toString();
+    }
+
     public S3Dto.S3UploadResult putObject(MultipartFile file, String objectPath) {
         try {
 
@@ -84,11 +98,13 @@ public class S3Util {
         }
     }
 
-    private String generateRandomFileName(){
+    @Named("generateRandomFileName") // TODO : 임시 처리로 추후 mapper 와 관련하여 조정 필요
+    public String generateRandomFileName(){
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    private String getFileExtension(String originalFileName){
+    @Named("getFileExtension") // TODO : 임시 처리로 추후 mapper 와 관련하여 조정 필요
+    public String getFileExtension(String originalFileName){
         return originalFileName.substring(originalFileName.lastIndexOf("."));
     }
 
@@ -103,7 +119,7 @@ public class S3Util {
         return joinedPath.endsWith("/") ? joinedPath : joinedPath + "/";
     }
 
-    private MediaType determineMediaType(String contentType) {
+    public MediaType determineMediaType(String contentType) {
         if (contentType == null || contentType.isEmpty()) {
             return MediaType.IMAGE;
         }
