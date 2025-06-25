@@ -18,8 +18,6 @@ import com.buck.vsplay.global.constants.SortBy;
 import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
-import com.buck.vsplay.global.util.aws.s3.S3Util;
-import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
 import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +28,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -48,7 +45,6 @@ public class VsTopicService implements IVsTopicService {
     private String appBaseDomain;
 
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final S3Util s3Util;
     private final VsTopicRepository vsTopicRepository;
     private final TournamentRepository tournamentRepository;
     private final VsTopicMapper vsTopicMapper;
@@ -60,7 +56,6 @@ public class VsTopicService implements IVsTopicService {
     @Override
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
-        S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(createVsTopicRequest.getThumbnail() , existMember.getId().toString());
 
         List<String> stringList = buildStringList(
                 createVsTopicRequest.getTitle(),
@@ -78,7 +73,7 @@ public class VsTopicService implements IVsTopicService {
         VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
-        vsTopic.setThumbnail(s3UploadResult.getObjectKey());
+        vsTopic.setThumbnail(createVsTopicRequest.getThumbnail());
 
         entityManager.persist(vsTopic);
         entityManager.flush();
@@ -103,6 +98,8 @@ public class VsTopicService implements IVsTopicService {
         VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
+        // TODO : 소유자 확인 필요
+
         List<String> stringList = buildStringList(
                 updateVsTopicRequest.getTitle(),
                 updateVsTopicRequest.getSubject(),
@@ -114,18 +111,11 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.BAD_WORD_DETECTED);
         }
 
-        MultipartFile thumbnail = updateVsTopicRequest.getThumbnail();
-        boolean isFileExist = (thumbnail != null && !thumbnail.isEmpty());
         Visibility updateVisibility = updateVsTopicRequest.getVisibility();
-
-        if (isFileExist) {
-            String objectKey = s3Util.buildS3Path(existMember.getId().toString(), String.valueOf(topicId));
-            S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(thumbnail, objectKey);
-            vsTopic.setThumbnail(s3UploadResult.getObjectKey());
-        }
 
         vsTopic.setShortCode(Visibility.UNLISTED.equals(updateVisibility) ? generateShortCode(vsTopic.getId()) : null);
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
+        vsTopic.setThumbnail(updateVsTopicRequest.getThumbnail());
 
         vsTopicMapper.updateVsTopicFromUpdateRequest(updateVsTopicRequest, vsTopic);
         vsTopicRepository.save(vsTopic);

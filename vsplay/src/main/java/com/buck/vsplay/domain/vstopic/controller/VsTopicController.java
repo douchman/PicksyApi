@@ -37,10 +37,10 @@ public class VsTopicController {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.createVsTopic(vsTopicDCreateVsTopicRequest)),HttpStatus.OK );
     }
 
-    @PatchMapping("{id}")
+    @PostMapping("{id}")
     public ResponseEntity<SingleResponseDto<Integer>> updateTopic(
             @PathVariable("id") Long topicId,
-            @ModelAttribute VsTopicDto.VsTopicUpdateRequest topicDUpdateVsTopicRequest
+            @RequestBody VsTopicDto.VsTopicUpdateRequest topicDUpdateVsTopicRequest
     ){
         vsTopicService.updateVsTopic(topicId, topicDUpdateVsTopicRequest);
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()),HttpStatus.OK );
