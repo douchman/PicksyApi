@@ -98,7 +98,9 @@ public class VsTopicService implements IVsTopicService {
         VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-        // TODO : 소유자 확인 필요
+        if(vsTopic.getMember().getId().equals(existMember.getId())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
+        }
 
         List<String> stringList = buildStringList(
                 updateVsTopicRequest.getTitle(),
