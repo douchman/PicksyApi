@@ -72,10 +72,14 @@ public class EntryService implements IEntryService {
     @Override
     public void createEntries(Long topicId, EntryDto.CreateEntriesRequest request) {
         Member authUser = authUserService.getAuthUser();
+
         VsTopic vsTopic = topicRepository.findById(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-        // TODO : 소유자 검증 필요
+        if(!vsTopic.getMember().getId().equals(authUser.getId())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
+        }
+
         List<EntryDto.CreateEntry> entries = request.getEntries();
 
         List<String> textsForBadWordFilter = new ArrayList<>();
@@ -110,7 +114,9 @@ public class EntryService implements IEntryService {
             new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND)
         );
 
-        // TODO : 소유자 검증 필요
+        if(!topic.getMember().getId().equals(authUser.getId())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
+        }
 
         List<EntryDto.UpdateEntry> entriesToUpdate = Optional
                 .ofNullable(updatedRequest.getEntriesToUpdate())
