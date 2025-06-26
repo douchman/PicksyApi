@@ -17,6 +17,7 @@ import com.buck.vsplay.domain.vstopic.service.support.TournamentHandler;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
+import com.buck.vsplay.global.util.aws.s3.S3Util;
 import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ public class EntryService implements IEntryService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final BadWordFilter badWordFilter;
     private final TournamentHandler tournamentHandler;
+    private final S3Util s3Util;
 
     @Override
     public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
@@ -60,8 +62,8 @@ public class EntryService implements IEntryService {
 
                 entryList.getEntries().add(
                         isYoutube ?
-                                topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(createdEntry)
-                                : topicEntryMapper.toEntryDtoFromEntity(createdEntry)
+                                topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(createdEntry, s3Util)
+                                : topicEntryMapper.toEntryDtoFromEntity(createdEntry, s3Util)
                 );
             }
         }

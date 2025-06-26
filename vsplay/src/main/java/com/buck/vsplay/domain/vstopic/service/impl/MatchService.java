@@ -21,6 +21,7 @@ import com.buck.vsplay.domain.vstopic.service.IMatchService;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.PlayStatus;
 import com.buck.vsplay.global.constants.TournamentStage;
+import com.buck.vsplay.global.util.aws.s3.S3Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -43,6 +44,7 @@ import java.util.*;
     private final TournamentRepository tournamentRepository;
     private final EntryMatchRepository entryMatchRepository;
     private final TopicEntryMapper topicEntryMapper;
+    private final S3Util s3Util;
 
     @Override
     public TopicPlayRecordDto.PlayRecordResponse createTopicPlayRecord(Long topicId, TopicPlayRecordDto.PlayRecordRequest playRecordRequest) {
@@ -251,9 +253,9 @@ import java.util.*;
 
     private EntryDto.Entry mappingTopicEntryToEntryDto(TopicEntry topicEntry){
         if(MediaType.YOUTUBE == topicEntry.getMediaType()){
-            return topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(topicEntry);
+            return topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(topicEntry, s3Util);
         } else {
-            return topicEntryMapper.toEntryDtoFromEntity(topicEntry);
+            return topicEntryMapper.toEntryDtoFromEntity(topicEntry, s3Util);
         }
     }
 }
