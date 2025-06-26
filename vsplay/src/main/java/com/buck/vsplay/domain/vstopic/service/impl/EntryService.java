@@ -15,6 +15,7 @@ import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IEntryService;
 import com.buck.vsplay.domain.vstopic.service.support.TournamentHandler;
 import com.buck.vsplay.global.constants.MediaType;
+import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import lombok.RequiredArgsConstructor;
@@ -92,6 +93,7 @@ public class EntryService implements IEntryService {
         for (EntryDto.CreateEntry entry : entries) {
             TopicEntry topicEntry = topicEntryMapper.toEntityFromCreatedEntryDto(entry);
             topicEntry.setTopic(vsTopic);
+            topicEntry.setModerationStatus(ModerationStatus.PASSED);
             topicEntries.add(topicEntry); // DTO -> Entity 매핑
         }
 
