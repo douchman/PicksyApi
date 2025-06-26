@@ -25,6 +25,7 @@ import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.DateTimeUtil;
 import com.buck.vsplay.global.util.SortUtil;
+import com.buck.vsplay.global.util.aws.s3.S3Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -53,6 +54,7 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     private final TopicEntryMapper topicEntryMapper;
     private final BatchJobExecutionRepository batchJobExecutionRepository;
     private final AuthUserService authUserService;
+    private final S3Util s3Util;
 
     @EventListener
     public void handleEntryCrateEvent(EntryEvent.CreateEvent entryCreateEvent){
@@ -143,8 +145,8 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                     EntryStatisticsDto.EntryStatWithEntryInfo.builder()
                             .entry(
                                     isYouTube ?
-                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryStatistic.getTopicEntry())
-                                            :topicEntryMapper.toEntryDtoFromEntity(entryStatistic.getTopicEntry())
+                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryStatistic.getTopicEntry(), s3Util)
+                                            :topicEntryMapper.toEntryDtoFromEntity(entryStatistic.getTopicEntry(), s3Util)
                             )
                             .statistics(entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistic))
                             .build()
@@ -189,8 +191,8 @@ public class EntryStatisticsService implements IEntryStatisticsService {
 
         boolean isYoutubeMediaType = MediaType.YOUTUBE == entryStatistics.getTopicEntry().getMediaType();
         EntryDto.Entry entry = isYoutubeMediaType?
-                        topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryStatistics.getTopicEntry())
-                        : topicEntryMapper.toEntryDtoFromEntity(entryStatistics.getTopicEntry());
+                        topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryStatistics.getTopicEntry(), s3Util)
+                        : topicEntryMapper.toEntryDtoFromEntity(entryStatistics.getTopicEntry(), s3Util);
         EntryStatisticsDto.EntryStatistics statistics = entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistics);
 
         return EntryStatisticsDto.SingleEntryStatsResponse.builder()

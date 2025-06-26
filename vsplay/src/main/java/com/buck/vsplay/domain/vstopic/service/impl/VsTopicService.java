@@ -18,6 +18,7 @@ import com.buck.vsplay.global.constants.SortBy;
 import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
+import com.buck.vsplay.global.util.aws.s3.S3Util;
 import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,7 @@ public class VsTopicService implements IVsTopicService {
     private final AuthUserService authUserService;
     private final EntityManager entityManager;
     private final BadWordFilter badWordFilter;
+    private final S3Util s3Util;
 
     @Override
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
@@ -135,7 +137,7 @@ public class VsTopicService implements IVsTopicService {
         TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
 
         List<TopicTournament> topicTournaments = tournamentRepository.findByVsTopicIdAndActiveTrue(vsTopic.getId());
-        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic));
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic, s3Util));
 
         if ( topicTournaments != null && !topicTournaments.isEmpty() ) {
             for (TopicTournament tournament : topicTournaments) {
@@ -158,7 +160,7 @@ public class VsTopicService implements IVsTopicService {
 
         VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
 
-        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic));
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic, s3Util));
 
         if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
             for (TopicTournament tournament : vsTopic.getTournaments()) {
@@ -183,7 +185,7 @@ public class VsTopicService implements IVsTopicService {
         }
 
         return VsTopicDto.VsTopicSearchResponse.builder()
-                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicsWithPage.getContent()))
+                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicsWithPage.getContent(), s3Util))
                 .pagination(Pagination.builder()
                         .totalPages(topicsWithPage.getTotalPages())
                         .totalItems(topicsWithPage.getTotalElements())
@@ -219,7 +221,7 @@ public class VsTopicService implements IVsTopicService {
         topicsWithPage = vsTopicRepository.findTopicsByMemberIdAndTitleAndVisibility(member.getId(), vsTopicSearchRequest.getKeyword(), vsTopicSearchRequest.getVisibility(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
 
         return VsTopicDto.MyTopicsResponse.builder()
-                .topicList(vsTopicMapper.toVsTopicDtoWithModerationListFromEntityList(topicsWithPage.getContent()))
+                .topicList(vsTopicMapper.toVsTopicDtoWithModerationListFromEntityList(topicsWithPage.getContent(), s3Util))
                 .pagination(Pagination.builder()
                         .totalPages(topicsWithPage.getTotalPages())
                         .totalItems(topicsWithPage.getTotalElements())
