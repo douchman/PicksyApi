@@ -8,7 +8,6 @@ import com.buck.vsplay.global.dto.Pagination;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +57,7 @@ public class VsTopicDto {
 
         private String subject;
         private String description;
-        private MultipartFile thumbnail;
+        private String thumbnail;
 
         @NotNull(message = "공개 범위는 필수 입력 항목입니다.")
         private Visibility visibility;
@@ -79,7 +78,7 @@ public class VsTopicDto {
         private String title;
         private String subject;
         private String description;
-        private MultipartFile thumbnail;
+        private String thumbnail;
         private Visibility visibility;
     }
 

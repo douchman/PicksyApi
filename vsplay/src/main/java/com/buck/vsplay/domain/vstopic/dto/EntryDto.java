@@ -3,7 +3,6 @@ package com.buck.vsplay.domain.vstopic.dto;
 
 import com.buck.vsplay.global.constants.MediaType;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +26,9 @@ public class EntryDto {
     public static class CreateEntry{
         private String entryName;
         private String description;
-        private String mediaUrl;
-        private MultipartFile mediaFile;
-        private MultipartFile thumbnailFile;
+        private String mediaUrl; // 파일 또는 유튜브
+        private String thumbnail; // 썸네일
+        private MediaType mediaType;
     }
 
     @Data
@@ -38,8 +37,8 @@ public class EntryDto {
         private String entryName;
         private String description;
         private String mediaUrl;
-        private MultipartFile mediaFile;
-        private MultipartFile thumbnailFile;
+        private String thumbnail;
+        private MediaType mediaType;
         private boolean delete = false;
     }
 
