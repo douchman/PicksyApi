@@ -132,11 +132,11 @@ public class VsTopicService implements IVsTopicService {
 
         TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
 
-        vsTopic.setTournaments(tournamentRepository.findByVsTopicIdAndActiveTrue(vsTopic.getId()));
+        List<TopicTournament> topicTournaments = tournamentRepository.findByVsTopicIdAndActiveTrue(vsTopic.getId());
         topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic));
 
-        if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
-            for (TopicTournament tournament : vsTopic.getTournaments()) {
+        if ( topicTournaments != null && !topicTournaments.isEmpty() ) {
+            for (TopicTournament tournament : topicTournaments) {
                 topicDetailWithTournamentsResponse.getTournamentList()
                         .add(tournamentMapper.toTournamentDtoFromEntityWithoutId(tournament));
             }
