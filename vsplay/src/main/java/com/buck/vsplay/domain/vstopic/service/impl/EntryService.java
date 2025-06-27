@@ -132,7 +132,8 @@ public class EntryService implements IEntryService {
 
         List<String> textsForBadWordFilter = new ArrayList<>();
         for(EntryDto.UpdateEntry entry : entriesToUpdate){
-            textsForBadWordFilter.addAll(buildStringList(entry.getEntryName(), entry.getDescription()));
+            if( !entry.isDelete())
+                textsForBadWordFilter.addAll(buildStringList(entry.getEntryName(), entry.getDescription()));
         }
 
         boolean hasBadWord = badWordFilter.containsBadWords(textsForBadWordFilter);
@@ -184,7 +185,9 @@ public class EntryService implements IEntryService {
     }
 
     private List<String> buildStringList(String ... strings) {
-        return List.of(strings);
+        return Arrays.stream(strings)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     private boolean isEntryMediaUpdated(String mediaUrl){
