@@ -44,7 +44,7 @@ public class EntryDto {
 
     @Data
     public static class CreateEntriesRequest{
-        List<CreateEntry> entries;
+        List<CreateEntry> entriesToCreate;
     }
 
     @Data

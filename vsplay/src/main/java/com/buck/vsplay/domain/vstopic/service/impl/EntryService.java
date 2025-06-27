@@ -82,7 +82,7 @@ public class EntryService implements IEntryService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
         }
 
-        List<EntryDto.CreateEntry> entries = request.getEntries();
+        List<EntryDto.CreateEntry> entries = request.getEntriesToCreate();
 
         List<String> textsForBadWordFilter = new ArrayList<>();
         for(EntryDto.CreateEntry entry : entries){
