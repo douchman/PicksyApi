@@ -19,6 +19,7 @@ import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
+import com.buck.vsplay.global.util.aws.s3.S3Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
     private final EntryRepository entryRepository;
     private final TopicEntryMapper topicEntryMapper;
     private final AuthUserService authUserService;
+    private final S3Util s3Util;
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW) // 클래스 트랜잭션과 분리
@@ -89,8 +91,8 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
                         EntryVersusStatisticsDto.OpponentEntryInfoWithMatchRecord.builder()
                                 .opponentEntry(
                                         isYoutubeMediaType ?
-                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryVersusStatistic.getOpponentEntry())
-                                            : topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry()))
+                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryVersusStatistic.getOpponentEntry(), s3Util)
+                                            : topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry(), s3Util))
                                 .matchRecord(EntryVersusStatisticsDto.MatchRecord.builder()
                                         .totalMatches(entryVersusStatistic.getTotalMatches())
                                         .wins(entryVersusStatistic.getWins())

@@ -19,7 +19,6 @@ import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
-import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
 import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -48,7 +46,6 @@ public class VsTopicService implements IVsTopicService {
     private String appBaseDomain;
 
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final S3Util s3Util;
     private final VsTopicRepository vsTopicRepository;
     private final TournamentRepository tournamentRepository;
     private final VsTopicMapper vsTopicMapper;
@@ -56,11 +53,11 @@ public class VsTopicService implements IVsTopicService {
     private final AuthUserService authUserService;
     private final EntityManager entityManager;
     private final BadWordFilter badWordFilter;
+    private final S3Util s3Util;
 
     @Override
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
-        S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(createVsTopicRequest.getThumbnail() , existMember.getId().toString());
 
         List<String> stringList = buildStringList(
                 createVsTopicRequest.getTitle(),
@@ -78,7 +75,7 @@ public class VsTopicService implements IVsTopicService {
         VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
-        vsTopic.setThumbnail(s3UploadResult.getObjectKey());
+        vsTopic.setThumbnail(createVsTopicRequest.getThumbnail());
 
         entityManager.persist(vsTopic);
         entityManager.flush();
@@ -103,6 +100,10 @@ public class VsTopicService implements IVsTopicService {
         VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
+        if(!vsTopic.getMember().getId().equals(existMember.getId())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
+        }
+
         List<String> stringList = buildStringList(
                 updateVsTopicRequest.getTitle(),
                 updateVsTopicRequest.getSubject(),
@@ -114,20 +115,16 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.BAD_WORD_DETECTED);
         }
 
-        MultipartFile thumbnail = updateVsTopicRequest.getThumbnail();
-        boolean isFileExist = (thumbnail != null && !thumbnail.isEmpty());
         Visibility updateVisibility = updateVsTopicRequest.getVisibility();
-
-        if (isFileExist) {
-            String objectKey = s3Util.buildS3Path(existMember.getId().toString(), String.valueOf(topicId));
-            S3Dto.S3UploadResult s3UploadResult = s3Util.putObject(thumbnail, objectKey);
-            vsTopic.setThumbnail(s3UploadResult.getObjectKey());
-        }
 
         vsTopic.setShortCode(Visibility.UNLISTED.equals(updateVisibility) ? generateShortCode(vsTopic.getId()) : null);
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
 
-        vsTopicMapper.updateVsTopicFromUpdateRequest(updateVsTopicRequest, vsTopic);
+        if(isThumbnailUpdated(updateVsTopicRequest.getThumbnail())){ // 썸네일 존재 시 업데이트
+            vsTopic.setThumbnail(updateVsTopicRequest.getThumbnail());
+        }
+
+        vsTopicMapper.toUpdateVsTopicFromUpdateRequest(updateVsTopicRequest, vsTopic);
         vsTopicRepository.save(vsTopic);
 
     }
@@ -142,11 +139,11 @@ public class VsTopicService implements IVsTopicService {
 
         TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
 
-        vsTopic.setTournaments(tournamentRepository.findByVsTopicIdAndActiveTrue(vsTopic.getId()));
-        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic));
+        List<TopicTournament> topicTournaments = tournamentRepository.findByVsTopicIdAndActiveTrue(vsTopic.getId());
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic, s3Util));
 
-        if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
-            for (TopicTournament tournament : vsTopic.getTournaments()) {
+        if ( topicTournaments != null && !topicTournaments.isEmpty() ) {
+            for (TopicTournament tournament : topicTournaments) {
                 topicDetailWithTournamentsResponse.getTournamentList()
                         .add(tournamentMapper.toTournamentDtoFromEntityWithoutId(tournament));
             }
@@ -166,7 +163,7 @@ public class VsTopicService implements IVsTopicService {
 
         VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
 
-        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic));
+        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic, s3Util));
 
         if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
             for (TopicTournament tournament : vsTopic.getTournaments()) {
@@ -191,7 +188,7 @@ public class VsTopicService implements IVsTopicService {
         }
 
         return VsTopicDto.VsTopicSearchResponse.builder()
-                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicsWithPage.getContent()))
+                .topicList(vsTopicMapper.toVsTopicDtoWithThumbnailListFromEntityList(topicsWithPage.getContent(), s3Util))
                 .pagination(Pagination.builder()
                         .totalPages(topicsWithPage.getTotalPages())
                         .totalItems(topicsWithPage.getTotalElements())
@@ -227,7 +224,7 @@ public class VsTopicService implements IVsTopicService {
         topicsWithPage = vsTopicRepository.findTopicsByMemberIdAndTitleAndVisibility(member.getId(), vsTopicSearchRequest.getKeyword(), vsTopicSearchRequest.getVisibility(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
 
         return VsTopicDto.MyTopicsResponse.builder()
-                .topicList(vsTopicMapper.toVsTopicDtoWithModerationListFromEntityList(topicsWithPage.getContent()))
+                .topicList(vsTopicMapper.toVsTopicDtoWithModerationListFromEntityList(topicsWithPage.getContent(), s3Util))
                 .pagination(Pagination.builder()
                         .totalPages(topicsWithPage.getTotalPages())
                         .totalItems(topicsWithPage.getTotalElements())
@@ -266,5 +263,9 @@ public class VsTopicService implements IVsTopicService {
 
     private List<String> buildStringList(String ... strings){
         return List.of(strings);
+    }
+
+    private boolean isThumbnailUpdated(String thumbnail){
+        return thumbnail != null && !thumbnail.isEmpty();
     }
 }

@@ -8,33 +8,31 @@ import org.mapstruct.*;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = S3Util.class)
+@Mapper(componentModel = "spring")
 public interface VsTopicMapper {
 
-    @Mapping(target = "thumbnail", ignore = true)
     VsTopic toEntityFromVstopicCreateRequestDtoWithoutThumbnail(VsTopicDto.VsTopicCreateRequest vsTopicCreateRequest);
 
     VsTopicDto.VsTopic toVsTopicDtoFromEntity(VsTopic vsTopic);
 
-    @Mapping(target = "thumbnail", qualifiedByName = "signedMediaUrl")
-    VsTopicDto.VsTopicWithThumbnail toVsTopicDtoFromEntityWithThumbnail(VsTopic vsTopic);
+    @Mapping(target = "thumbnail", expression = "java(s3Util.getUploadedObjectUrl(vsTopic.getThumbnail()))")
+    VsTopicDto.VsTopicWithThumbnail toVsTopicDtoFromEntityWithThumbnail(VsTopic vsTopic, S3Util s3Util);
 
-    @Mapping(target = "thumbnail", qualifiedByName = "signedMediaUrl")
-    VsTopicDto.VsTopicWithModeration toVsTopicDtoFromEntityWithModeration(VsTopic vsTopic);
+    @Mapping(target = "thumbnail", expression = "java(s3Util.getUploadedObjectUrl(vsTopic.getThumbnail()))")
+    VsTopicDto.VsTopicWithModeration toVsTopicDtoFromEntityWithModeration(VsTopic vsTopic, S3Util s3Util);
 
-    @Mapping(target = "thumbnail", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateVsTopicFromUpdateRequest(VsTopicDto.VsTopicUpdateRequest vsTopicUpdateRequest, @MappingTarget VsTopic vsTopic);
+    void toUpdateVsTopicFromUpdateRequest(VsTopicDto.VsTopicUpdateRequest vsTopicUpdateRequest, @MappingTarget VsTopic vsTopic);
 
-    default List<VsTopicDto.VsTopicWithThumbnail> toVsTopicDtoWithThumbnailListFromEntityList(List<VsTopic> vsTopics) {
+    default List<VsTopicDto.VsTopicWithThumbnail> toVsTopicDtoWithThumbnailListFromEntityList(List<VsTopic> vsTopics, S3Util s3Util) {
         return vsTopics.stream()
-                .map(this::toVsTopicDtoFromEntityWithThumbnail)
+                .map(v -> toVsTopicDtoFromEntityWithThumbnail(v, s3Util))
                 .toList();
     }
 
-    default List<VsTopicDto.VsTopicWithModeration> toVsTopicDtoWithModerationListFromEntityList(List<VsTopic> vsTopics) {
+    default List<VsTopicDto.VsTopicWithModeration> toVsTopicDtoWithModerationListFromEntityList(List<VsTopic> vsTopics, S3Util s3Util) {
         return vsTopics.stream()
-                .map(this::toVsTopicDtoFromEntityWithModeration)
+                .map(v -> toVsTopicDtoFromEntityWithModeration(v, s3Util))
                 .toList();
     }
 }

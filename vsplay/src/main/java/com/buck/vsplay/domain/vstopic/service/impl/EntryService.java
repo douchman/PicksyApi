@@ -15,9 +15,9 @@ import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IEntryService;
 import com.buck.vsplay.domain.vstopic.service.support.TournamentHandler;
 import com.buck.vsplay.global.constants.MediaType;
+import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
-import com.buck.vsplay.global.util.aws.s3.dto.S3Dto;
 import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 @Transactional
 public class EntryService implements IEntryService {
 
-    private final S3Util s3Util;
     private final VsTopicRepository topicRepository;
     private final TopicEntryMapper topicEntryMapper;
     private final AuthUserService authUserService;
@@ -44,6 +43,7 @@ public class EntryService implements IEntryService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final BadWordFilter badWordFilter;
     private final TournamentHandler tournamentHandler;
+    private final S3Util s3Util;
 
     @Override
     public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
@@ -62,8 +62,8 @@ public class EntryService implements IEntryService {
 
                 entryList.getEntries().add(
                         isYoutube ?
-                                topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(createdEntry)
-                                : topicEntryMapper.toEntryDtoFromEntity(createdEntry)
+                                topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(createdEntry, s3Util)
+                                : topicEntryMapper.toEntryDtoFromEntity(createdEntry, s3Util)
                 );
             }
         }
@@ -74,11 +74,15 @@ public class EntryService implements IEntryService {
     @Override
     public void createEntries(Long topicId, EntryDto.CreateEntriesRequest request) {
         Member authUser = authUserService.getAuthUser();
+
         VsTopic vsTopic = topicRepository.findById(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
+        if(!vsTopic.getMember().getId().equals(authUser.getId())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
+        }
 
-        List<EntryDto.CreateEntry> entries = request.getEntries();
+        List<EntryDto.CreateEntry> entries = request.getEntriesToCreate();
 
         List<String> textsForBadWordFilter = new ArrayList<>();
         for(EntryDto.CreateEntry entry : entries){
@@ -91,26 +95,11 @@ public class EntryService implements IEntryService {
         }
 
         List<TopicEntry> topicEntries = new ArrayList<>();
-        String objectPath = s3Util.buildS3Path(String.valueOf(authUser.getId()), String.valueOf(vsTopic.getId()));
 
         for (EntryDto.CreateEntry entry : entries) {
             TopicEntry topicEntry = topicEntryMapper.toEntityFromCreatedEntryDto(entry);
             topicEntry.setTopic(vsTopic);
-            // 미디어 파일 & 썸네일 업로드
-            if ( entry.getMediaFile() != null && !entry.getMediaFile().isEmpty()) {
-                S3Dto.S3UploadResult mediaFileUploadResult = s3Util.putObject(entry.getMediaFile(), objectPath);
-                topicEntry.setMediaUrl(mediaFileUploadResult.getObjectKey());
-                topicEntry.setMediaType(mediaFileUploadResult.getMediaType());
-            }else{
-                topicEntry.setMediaType(MediaType.YOUTUBE);
-            }
-
-            // 썸네일 존재 시 썸네일도 업로드
-            if( entry.getThumbnailFile() != null && !entry.getThumbnailFile().isEmpty()) {
-                S3Dto.S3UploadResult thumbFileUploadResult = s3Util.putObject(entry.getThumbnailFile(), objectPath);
-                topicEntry.setThumbnail(thumbFileUploadResult.getObjectKey());
-            }
-
+            topicEntry.setModerationStatus(ModerationStatus.PASSED);
             topicEntries.add(topicEntry); // DTO -> Entity 매핑
         }
 
@@ -121,12 +110,15 @@ public class EntryService implements IEntryService {
 
     @Override
     public void updateEntries(Long topicId, EntryDto.UpdateEntryRequest updatedRequest) {
-
         Member authUser = authUserService.getAuthUser();
 
         VsTopic topic = topicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
             new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND)
         );
+
+        if(!topic.getMember().getId().equals(authUser.getId())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
+        }
 
         List<EntryDto.UpdateEntry> entriesToUpdate = Optional
                 .ofNullable(updatedRequest.getEntriesToUpdate())
@@ -140,7 +132,8 @@ public class EntryService implements IEntryService {
 
         List<String> textsForBadWordFilter = new ArrayList<>();
         for(EntryDto.UpdateEntry entry : entriesToUpdate){
-            textsForBadWordFilter.addAll(buildStringList(entry.getEntryName(), entry.getDescription()));
+            if( !entry.isDelete())
+                textsForBadWordFilter.addAll(buildStringList(entry.getEntryName(), entry.getDescription()));
         }
 
         boolean hasBadWord = badWordFilter.containsBadWords(textsForBadWordFilter);
@@ -153,16 +146,13 @@ public class EntryService implements IEntryService {
         Map<Long, TopicEntry> entryMap = existingEntries.stream()
                 .collect(Collectors.toMap(TopicEntry::getId, Function.identity()));
 
-        // S3 업로드 경로
-        String objectPath = s3Util.buildS3Path(String.valueOf(authUser.getId()), String.valueOf(topicId));
-
         for (EntryDto.UpdateEntry updateRequestEntry : entriesToUpdate) {
             Optional.ofNullable(entryMap.get(updateRequestEntry.getId()))
                     .ifPresent(existingEntry -> {
                         if (updateRequestEntry.isDelete()) {
                             handleDeleteEntry(existingEntry);
                         } else {
-                            handleUpdateEntry(existingEntry, updateRequestEntry, objectPath);
+                            handleUpdateEntry(existingEntry, updateRequestEntry);
                         }
                     });
         }
@@ -174,28 +164,37 @@ public class EntryService implements IEntryService {
         existingEntry.setDeleted(true);
     }
 
-    private void handleUpdateEntry(TopicEntry existingEntry, EntryDto.UpdateEntry updateRequestEntry, String objectPath) {
-        existingEntry.setEntryName(updateRequestEntry.getEntryName());
-        existingEntry.setDescription(updateRequestEntry.getDescription());
+    private void handleUpdateEntry(TopicEntry existingEntry, EntryDto.UpdateEntry updateRequestEntry) {
 
-        if( updateRequestEntry.getMediaFile() != null && !updateRequestEntry.getMediaFile().isEmpty()) {
-            S3Dto.S3UploadResult mediaFileUploadResult = s3Util.putObject(updateRequestEntry.getMediaFile(), objectPath);
-            existingEntry.setMediaUrl(mediaFileUploadResult.getObjectKey());
-            existingEntry.setMediaType(mediaFileUploadResult.getMediaType());
-            existingEntry.setThumbnail(null); // 썸네일 비우기
-        } else {
-            existingEntry.setMediaUrl(updateRequestEntry.getMediaUrl());
-            existingEntry.setMediaType(MediaType.YOUTUBE);
+        if( updateRequestEntry.getEntryName() != null ){
+            existingEntry.setEntryName(updateRequestEntry.getEntryName());
         }
 
-        // 썸네일 존재 시 썸네일도 업로드 ( VIDEO & YOUTUBE )
-        if( updateRequestEntry.getThumbnailFile() != null && !updateRequestEntry.getThumbnailFile().isEmpty()) {
-            S3Dto.S3UploadResult thumbFileUploadResult = s3Util.putObject(updateRequestEntry.getThumbnailFile(), objectPath);
-            existingEntry.setThumbnail(thumbFileUploadResult.getObjectKey());
+        if( updateRequestEntry.getDescription() != null ){
+            existingEntry.setDescription(updateRequestEntry.getDescription());
+        }
+
+        if( isEntryMediaUpdated(updateRequestEntry.getMediaUrl())){
+            existingEntry.setMediaType(updateRequestEntry.getMediaType());
+            existingEntry.setMediaUrl(updateRequestEntry.getMediaUrl());
+        }
+
+        if(isThumbnailUpdated(updateRequestEntry.getThumbnail())){
+            existingEntry.setThumbnail(updateRequestEntry.getThumbnail());
         }
     }
 
     private List<String> buildStringList(String ... strings) {
-        return List.of(strings);
+        return Arrays.stream(strings)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private boolean isEntryMediaUpdated(String mediaUrl){
+        return mediaUrl != null && !mediaUrl.isEmpty();
+    }
+
+    private boolean isThumbnailUpdated(String thumbnail){
+        return thumbnail != null && !thumbnail.isEmpty();
     }
 }
