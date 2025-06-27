@@ -119,9 +119,12 @@ public class VsTopicService implements IVsTopicService {
 
         vsTopic.setShortCode(Visibility.UNLISTED.equals(updateVisibility) ? generateShortCode(vsTopic.getId()) : null);
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
-        vsTopic.setThumbnail(updateVsTopicRequest.getThumbnail());
 
-        vsTopicMapper.updateVsTopicFromUpdateRequest(updateVsTopicRequest, vsTopic);
+        if(isThumbnailUpdated(updateVsTopicRequest.getThumbnail())){ // 썸네일 존재 시 업데이트
+            vsTopic.setThumbnail(updateVsTopicRequest.getThumbnail());
+        }
+
+        vsTopicMapper.toUpdateVsTopicFromUpdateRequest(updateVsTopicRequest, vsTopic);
         vsTopicRepository.save(vsTopic);
 
     }
@@ -260,5 +263,9 @@ public class VsTopicService implements IVsTopicService {
 
     private List<String> buildStringList(String ... strings){
         return List.of(strings);
+    }
+
+    private boolean isThumbnailUpdated(String thumbnail){
+        return thumbnail != null && !thumbnail.isEmpty();
     }
 }
