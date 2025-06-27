@@ -32,12 +32,12 @@ public class VsTopicController {
 
     @PostMapping
     public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicCreateResponse>> createTopic(
-            @ModelAttribute @Valid VsTopicDto.VsTopicCreateRequest vsTopicDCreateVsTopicRequest) {
+            @RequestBody @Valid VsTopicDto.VsTopicCreateRequest vsTopicDCreateVsTopicRequest) {
 
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.createVsTopic(vsTopicDCreateVsTopicRequest)),HttpStatus.OK );
     }
 
-    @PostMapping("{id}")
+    @PatchMapping("{id}")
     public ResponseEntity<SingleResponseDto<Integer>> updateTopic(
             @PathVariable("id") Long topicId,
             @RequestBody VsTopicDto.VsTopicUpdateRequest topicDUpdateVsTopicRequest

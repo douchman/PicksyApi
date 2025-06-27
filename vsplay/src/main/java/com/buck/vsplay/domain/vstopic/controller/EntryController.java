@@ -27,7 +27,7 @@ public class EntryController {
     @PostMapping("{id}/entries")
     public ResponseEntity<SingleResponseDto<Integer>> createEntries(
             @PathVariable("id") Long topicId,
-            @ModelAttribute EntryDto.CreateEntriesRequest request
+            @RequestBody EntryDto.CreateEntriesRequest request
     ){
 
         entryService.createEntries(topicId, request);
@@ -37,7 +37,7 @@ public class EntryController {
     @PatchMapping("{topicId}/entries")
     public ResponseEntity<SingleResponseDto<Integer>> updateEntry(
             @PathVariable("topicId") Long topicId,
-            @ModelAttribute EntryDto.UpdateEntryRequest request
+            @RequestBody EntryDto.UpdateEntryRequest request
     ){
         entryService.updateEntries(topicId, request);
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
