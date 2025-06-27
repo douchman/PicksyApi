@@ -164,13 +164,34 @@ public class EntryService implements IEntryService {
     }
 
     private void handleUpdateEntry(TopicEntry existingEntry, EntryDto.UpdateEntry updateRequestEntry) {
-        existingEntry.setEntryName(updateRequestEntry.getEntryName());
-        existingEntry.setDescription(updateRequestEntry.getDescription());
-        existingEntry.setMediaUrl(updateRequestEntry.getMediaUrl());
-        existingEntry.setThumbnail(updateRequestEntry.getThumbnail());
+
+        if( updateRequestEntry.getEntryName() != null ){
+            existingEntry.setEntryName(updateRequestEntry.getEntryName());
+        }
+
+        if( updateRequestEntry.getDescription() != null ){
+            existingEntry.setDescription(updateRequestEntry.getDescription());
+        }
+
+        if( isEntryMediaUpdated(updateRequestEntry.getMediaUrl())){
+            existingEntry.setMediaType(updateRequestEntry.getMediaType());
+            existingEntry.setMediaUrl(updateRequestEntry.getMediaUrl());
+        }
+
+        if(isThumbnailUpdated(updateRequestEntry.getThumbnail())){
+            existingEntry.setThumbnail(updateRequestEntry.getThumbnail());
+        }
     }
 
     private List<String> buildStringList(String ... strings) {
         return List.of(strings);
+    }
+
+    private boolean isEntryMediaUpdated(String mediaUrl){
+        return mediaUrl != null && !mediaUrl.isEmpty();
+    }
+
+    private boolean isThumbnailUpdated(String thumbnail){
+        return thumbnail != null && !thumbnail.isEmpty();
     }
 }
