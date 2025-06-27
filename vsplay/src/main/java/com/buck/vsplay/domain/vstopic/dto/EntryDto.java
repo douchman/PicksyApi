@@ -44,7 +44,6 @@ public class EntryDto {
 
     @Data
     public static class CreateEntriesRequest{
-        Long topicId;
         List<CreateEntry> entries;
     }
 
