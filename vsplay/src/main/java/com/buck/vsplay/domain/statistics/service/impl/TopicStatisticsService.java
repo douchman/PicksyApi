@@ -2,11 +2,14 @@ package com.buck.vsplay.domain.statistics.service.impl;
 
 import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.statistics.dto.TopicStatisticsDto;
+import com.buck.vsplay.domain.statistics.dto.TournamentStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.TopicStatistics;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.mapper.TopicStatisticsMapper;
+import com.buck.vsplay.domain.statistics.mapper.TournamentStatisticsMapper;
 import com.buck.vsplay.domain.statistics.projection.MostPopularEntry;
 import com.buck.vsplay.domain.statistics.repository.TopicStatisticsRepository;
+import com.buck.vsplay.domain.statistics.repository.TournamentStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.ITopicStatisticsService;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
@@ -33,8 +36,10 @@ import java.util.Optional;
 public class TopicStatisticsService implements ITopicStatisticsService {
 
     private final TopicStatisticsRepository topicStatisticsRepository;
+    private final TournamentStatisticsRepository tournamentStatisticsRepository;
     private final VsTopicRepository vsTopicRepository;
     private final TopicStatisticsMapper topicStatisticsMapper;
+    private final TournamentStatisticsMapper tournamentStatisticsMapper;
     private final VsTopicMapper vsTopicMapper;
     private final S3Util s3Util;
     private final AuthUserService authUserService;
@@ -99,7 +104,9 @@ public class TopicStatisticsService implements ITopicStatisticsService {
 
         TopicStatistics topicStatisticsEntity = topicStatisticsRepository.findByVsTopic(topicId);
         TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(topicStatisticsEntity);
-        VsTopicDto.VsTopic vsTopic = vsTopicMapper.toVsTopicDtoFromEntity(topicStatisticsEntity.getVsTopic());
+        VsTopicDto.VsTopic vsTopic = vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(topicStatisticsEntity.getVsTopic(), s3Util);
+        List<TournamentStatisticsDto.TournamentStatistics> tournamentStatistics = tournamentStatisticsMapper.toTournamentStatisticsDtoList(
+                tournamentStatisticsRepository.findByTopicId(topicId));
 
         EntryDto.Entry mostPopularEntry = topicStatistics.getMostPopularEntry();
         if( mostPopularEntry != null ) {
@@ -112,6 +119,7 @@ public class TopicStatisticsService implements ITopicStatisticsService {
 
         return TopicStatisticsDto.TopicStatisticsResponse.builder()
                 .topic(vsTopic)
+                .tournamentStatistics(tournamentStatistics)
                 .topicStatistics(topicStatistics)
                 .build();
     }
