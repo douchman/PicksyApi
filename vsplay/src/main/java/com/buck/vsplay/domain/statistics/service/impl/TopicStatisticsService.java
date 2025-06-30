@@ -11,7 +11,6 @@ import com.buck.vsplay.domain.statistics.projection.MostPopularEntry;
 import com.buck.vsplay.domain.statistics.repository.TopicStatisticsRepository;
 import com.buck.vsplay.domain.statistics.repository.TournamentStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.ITopicStatisticsService;
-import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
@@ -19,7 +18,6 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
-import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import lombok.RequiredArgsConstructor;
@@ -107,15 +105,6 @@ public class TopicStatisticsService implements ITopicStatisticsService {
         VsTopicDto.VsTopic vsTopic = vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(topicStatisticsEntity.getVsTopic(), s3Util);
         List<TournamentStatisticsDto.TournamentStatistics> tournamentStatistics = tournamentStatisticsMapper.toTournamentStatisticsDtoList(
                 tournamentStatisticsRepository.findByTopicId(topicId));
-
-        EntryDto.Entry mostPopularEntry = topicStatistics.getMostPopularEntry();
-        if( mostPopularEntry != null ) {
-            boolean isMediaTypeYoutube = MediaType.YOUTUBE == mostPopularEntry.getMediaType();
-
-            if( !isMediaTypeYoutube ){ // 유튜브인 경우 signedUrl 변환 없음
-                mostPopularEntry.setMediaUrl(s3Util.getUploadedObjectUrl(mostPopularEntry.getMediaUrl()));
-            }
-        }
 
         return TopicStatisticsDto.TopicStatisticsResponse.builder()
                 .topic(vsTopic)
