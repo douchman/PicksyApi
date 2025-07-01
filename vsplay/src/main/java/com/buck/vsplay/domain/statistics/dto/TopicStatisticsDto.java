@@ -1,7 +1,6 @@
 package com.buck.vsplay.domain.statistics.dto;
 
 
-import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
 import lombok.*;
 
@@ -15,7 +14,6 @@ public class TopicStatisticsDto {
     public static class TopicStatistics{
         Integer totalMatches;
         Integer completedMatches;
-        EntryDto.Entry mostPopularEntry;
         String firstPlayedAt;
         String lastPlayedAt;
         String createdAt;
