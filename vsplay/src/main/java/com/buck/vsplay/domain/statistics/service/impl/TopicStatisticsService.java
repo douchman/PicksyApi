@@ -17,6 +17,7 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
+import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
@@ -35,6 +36,7 @@ public class TopicStatisticsService implements ITopicStatisticsService {
 
     private final TopicStatisticsRepository topicStatisticsRepository;
     private final TournamentStatisticsRepository tournamentStatisticsRepository;
+    private final EntryRepository entryRepository;
     private final VsTopicRepository vsTopicRepository;
     private final TopicStatisticsMapper topicStatisticsMapper;
     private final TournamentStatisticsMapper tournamentStatisticsMapper;
@@ -102,6 +104,7 @@ public class TopicStatisticsService implements ITopicStatisticsService {
 
         TopicStatistics topicStatisticsEntity = topicStatisticsRepository.findByVsTopic(topicId);
         TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(topicStatisticsEntity);
+        topicStatistics.setEntryCount(entryRepository.countAvailableEntriesByTopicId(topicId).intValue());
         VsTopicDto.VsTopic vsTopic = vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(topicStatisticsEntity.getVsTopic(), s3Util);
         List<TournamentStatisticsDto.TournamentStatistics> tournamentStatistics = tournamentStatisticsMapper.toTournamentStatisticsDtoList(
                 tournamentStatisticsRepository.findByTopicId(topicId));
