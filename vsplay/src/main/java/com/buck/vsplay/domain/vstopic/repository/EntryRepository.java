@@ -18,4 +18,7 @@ public interface EntryRepository extends JpaRepository<TopicEntry, Long> {
     TopicEntry findWithTopicByEntryId(@Param("entryId") Long entryId);
 
     List<TopicEntry> findByTopicIdAndIdIn(Long topicId, List<Long> ids);
+
+    @Query("SELECT COUNT(e) FROM TopicEntry e WHERE e.topic.id = :topicId AND e.deleted = false AND e.moderationStatus = 'PASSED'")
+    Long countAvailableEntriesByTopicId(@Param("topicId") Long topicId);
 }
