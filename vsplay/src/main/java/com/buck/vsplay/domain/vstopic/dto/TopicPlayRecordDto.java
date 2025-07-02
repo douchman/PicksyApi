@@ -9,6 +9,7 @@ public class TopicPlayRecordDto {
     @Data
     public static class PlayRecordRequest{
         Integer tournamentStage;
+        String accessCode;
     }
 
     @Data
