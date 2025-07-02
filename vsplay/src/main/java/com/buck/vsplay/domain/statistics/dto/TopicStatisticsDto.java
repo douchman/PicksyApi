@@ -12,6 +12,7 @@ public class TopicStatisticsDto {
     @Setter
     @Getter
     public static class TopicStatistics{
+        Integer entryCount;
         Integer totalMatches;
         Integer completedMatches;
         String firstPlayedAt;
