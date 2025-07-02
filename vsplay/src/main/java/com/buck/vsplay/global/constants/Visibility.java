@@ -6,8 +6,8 @@ import lombok.Getter;
 public enum Visibility {
     PUBLIC("PUBLIC", "전체공개"),
     PRIVATE("PRIVATE", "비공개"),
-    UNLISTED("UNLISTED", "비공개 링크");
-
+    PASSWORD("PASSWORD", "제한된 공개")
+    ;
     private final String code;
     private final String description;
 

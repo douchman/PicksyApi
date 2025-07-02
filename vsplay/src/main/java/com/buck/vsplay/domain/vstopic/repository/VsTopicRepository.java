@@ -18,7 +18,6 @@ public interface VsTopicRepository extends JpaRepository<VsTopic, Long>, JpaSpec
     boolean existsByIdAndDeletedFalse(Long id);
     Optional<VsTopic> findByIdAndDeletedFalse(Long id);
 
-    VsTopic findWithTournamentsByShortCode(String shortCode);
 
     @Query("""
     SELECT vt FROM VsTopic vt

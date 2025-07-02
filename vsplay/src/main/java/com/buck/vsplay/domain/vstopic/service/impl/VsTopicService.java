@@ -23,27 +23,21 @@ import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class VsTopicService implements IVsTopicService {
-
-    @Value("${app.base-domain}")
-    private String appBaseDomain;
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final VsTopicRepository vsTopicRepository;
@@ -59,11 +53,14 @@ public class VsTopicService implements IVsTopicService {
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
 
+        if(isMissingPasswordForProtectedTopic(createVsTopicRequest.getVisibility(), createVsTopicRequest.getAccessCode())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_REQUIRE);
+        }
+
         List<String> stringList = buildStringList(
                 createVsTopicRequest.getTitle(),
                 createVsTopicRequest.getSubject(),
                 createVsTopicRequest.getDescription());
-
 
         boolean hasBadWord = badWordFilter.containsBadWords(stringList);
 
@@ -71,7 +68,6 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.BAD_WORD_DETECTED);
         }
 
-        Visibility requestVisibility = createVsTopicRequest.getVisibility();
         VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
@@ -79,8 +75,6 @@ public class VsTopicService implements IVsTopicService {
 
         entityManager.persist(vsTopic);
         entityManager.flush();
-
-        vsTopic.setShortCode(Visibility.UNLISTED.equals(requestVisibility) ? generateShortCode(vsTopic.getId()) : null);
 
         applicationEventPublisher.publishEvent(new TopicEvent.CreateEvent(vsTopic));
 
@@ -104,6 +98,11 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
         }
 
+
+        if(isMissingPasswordForProtectedTopic(updateVsTopicRequest.getVisibility(), updateVsTopicRequest.getAccessCode())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_REQUIRE);
+        }
+
         List<String> stringList = buildStringList(
                 updateVsTopicRequest.getTitle(),
                 updateVsTopicRequest.getSubject(),
@@ -115,9 +114,6 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.BAD_WORD_DETECTED);
         }
 
-        Visibility updateVisibility = updateVsTopicRequest.getVisibility();
-
-        vsTopic.setShortCode(Visibility.UNLISTED.equals(updateVisibility) ? generateShortCode(vsTopic.getId()) : null);
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
 
         if(isThumbnailUpdated(updateVsTopicRequest.getThumbnail())){ // 썸네일 존재 시 업데이트
@@ -149,28 +145,6 @@ public class VsTopicService implements IVsTopicService {
             }
         }
 
-        return topicDetailWithTournamentsResponse;
-    }
-
-    @Override
-    public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournamentsByShortCode(String shortCode) {
-
-        VsTopic vsTopic = vsTopicRepository.findWithTournamentsByShortCode(shortCode);
-
-        if(vsTopic == null) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
-
-        VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
-
-        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic, s3Util));
-
-        if ( vsTopic.getTournaments() != null && !vsTopic.getTournaments().isEmpty() ) {
-            for (TopicTournament tournament : vsTopic.getTournaments()) {
-                topicDetailWithTournamentsResponse.getTournamentList()
-                        .add(tournamentMapper.toTournamentDtoFromEntityWithoutId(tournament));
-            }
-        }
         return topicDetailWithTournamentsResponse;
     }
 
@@ -234,38 +208,15 @@ public class VsTopicService implements IVsTopicService {
                 .build();
     }
 
-    @Override
-    public VsTopicDto.VsTopicUnlistedLinkResponse getVsTopicUnlistedLink(Long topicId) {
-        VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
-                () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
-
-        if(!isUnlistedTopic(vsTopic.getVisibility())){
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_UNLISTED);
-        }
-
-        return VsTopicDto.VsTopicUnlistedLinkResponse.builder()
-                .link(generateFullUrlOfUnlistedVstopic(vsTopic.getShortCode()))
-                .build();
-    }
-
-    private String generateShortCode(Long topicId) {
-        UUID uuid = UUID.nameUUIDFromBytes(String.valueOf(topicId).getBytes(StandardCharsets.UTF_8));
-        return uuid.toString().replace("-", "").substring(0, 32);
-    }
-
-    private boolean isUnlistedTopic(Visibility visibility) {
-        return Visibility.UNLISTED.equals(visibility);
-    }
-
-    private String generateFullUrlOfUnlistedVstopic(String shortCode){
-        return appBaseDomain + "vstopic/link/" + shortCode;
-    }
-
     private List<String> buildStringList(String ... strings){
         return List.of(strings);
     }
 
     private boolean isThumbnailUpdated(String thumbnail){
         return thumbnail != null && !thumbnail.isEmpty();
+    }
+
+    private boolean isMissingPasswordForProtectedTopic(Visibility visibility, String accessCode){
+        return visibility == Visibility.PASSWORD && (accessCode == null || accessCode.isBlank());
     }
 }

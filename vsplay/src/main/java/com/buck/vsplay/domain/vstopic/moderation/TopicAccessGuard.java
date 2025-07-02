@@ -13,20 +13,20 @@ import lombok.NoArgsConstructor;
 public class TopicAccessGuard {
     public static void validateTopicAccess(VsTopic topic, Member member){
 
-        boolean isNotPublic = !isPublicTopic(topic.getVisibility());
+        boolean isPrivate = isPrivateTopic(topic.getVisibility());
         boolean isNotOwner = member == null || !topic.getMember().getId().equals(member.getId());
         boolean isNotPassed = topic.getModerationStatus() != ModerationStatus.PASSED;
 
-        if( isNotOwner && isNotPublic) {
+        if( isNotOwner && isPrivate) {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
         }
 
-        if(isNotOwner && isNotPassed){
+        if( isNotOwner && isNotPassed){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_PUBLIC);
         }
     }
 
-    private static boolean isPublicTopic(Visibility visibility){
-        return visibility == Visibility.PUBLIC;
+    private static boolean isPrivateTopic(Visibility visibility) {
+        return visibility == Visibility.PRIVATE;
     }
 }

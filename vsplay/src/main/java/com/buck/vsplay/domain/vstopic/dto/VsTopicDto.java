@@ -61,6 +61,8 @@ public class VsTopicDto {
 
         @NotNull(message = "공개 범위는 필수 입력 항목입니다.")
         private Visibility visibility;
+
+        private String accessCode;
     }
 
     @Data
@@ -80,6 +82,7 @@ public class VsTopicDto {
         private String description;
         private String thumbnail;
         private Visibility visibility;
+        private String accessCode;
     }
 
     @Data
@@ -117,11 +120,5 @@ public class VsTopicDto {
         private Integer size = 20;
         private SortBy searchSortBy = SortBy.LATEST;
         private Visibility visibility;
-    }
-
-    @Data
-    @Builder
-    public static class VsTopicUnlistedLinkResponse{
-        private String link;
     }
 }
