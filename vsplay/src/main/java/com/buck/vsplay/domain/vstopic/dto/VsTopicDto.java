@@ -118,10 +118,4 @@ public class VsTopicDto {
         private SortBy searchSortBy = SortBy.LATEST;
         private Visibility visibility;
     }
-
-    @Data
-    @Builder
-    public static class VsTopicUnlistedLinkResponse{
-        private String link;
-    }
 }
