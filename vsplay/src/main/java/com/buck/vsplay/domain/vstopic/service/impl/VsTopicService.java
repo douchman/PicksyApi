@@ -53,11 +53,14 @@ public class VsTopicService implements IVsTopicService {
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
 
+        if(isMissingPasswordForProtectedTopic(createVsTopicRequest.getVisibility(), createVsTopicRequest.getAccessCode())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_REQUIRE);
+        }
+
         List<String> stringList = buildStringList(
                 createVsTopicRequest.getTitle(),
                 createVsTopicRequest.getSubject(),
                 createVsTopicRequest.getDescription());
-
 
         boolean hasBadWord = badWordFilter.containsBadWords(stringList);
 
@@ -93,6 +96,11 @@ public class VsTopicService implements IVsTopicService {
 
         if(!vsTopic.getMember().getId().equals(existMember.getId())){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
+        }
+
+
+        if(isMissingPasswordForProtectedTopic(updateVsTopicRequest.getVisibility(), updateVsTopicRequest.getAccessCode())){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_REQUIRE);
         }
 
         List<String> stringList = buildStringList(
@@ -206,5 +214,9 @@ public class VsTopicService implements IVsTopicService {
 
     private boolean isThumbnailUpdated(String thumbnail){
         return thumbnail != null && !thumbnail.isEmpty();
+    }
+
+    private boolean isMissingPasswordForProtectedTopic(Visibility visibility, String accessCode){
+        return visibility == Visibility.PASSWORD && (accessCode == null || accessCode.isBlank());
     }
 }
