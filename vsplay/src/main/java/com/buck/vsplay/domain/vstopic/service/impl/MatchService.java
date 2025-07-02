@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
+import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
@@ -16,11 +17,14 @@ import com.buck.vsplay.domain.vstopic.exception.tournament.TournamentExceptionCo
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
+import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.*;
 import com.buck.vsplay.domain.vstopic.service.IMatchService;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.PlayStatus;
 import com.buck.vsplay.global.constants.TournamentStage;
+import com.buck.vsplay.global.constants.Visibility;
+import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +41,7 @@ import java.util.*;
 @Transactional
  public class MatchService implements IMatchService {
 
+    private final AuthUserService authUserService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final VsTopicRepository vsTopicRepository;
     private final EntryRepository entryRepository;
@@ -48,9 +53,18 @@ import java.util.*;
 
     @Override
     public TopicPlayRecordDto.PlayRecordResponse createTopicPlayRecord(Long topicId, TopicPlayRecordDto.PlayRecordRequest playRecordRequest) {
+
+        Optional<Member> authUser = authUserService.getAuthUserOptional();
+
         try {
             VsTopic topic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                     () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+
+            TopicAccessGuard.validateTopicAccess(topic, authUser.orElse(null));
+
+            if(isPasswordTopic(topic.getVisibility()) && !isTopicAccessCodeValid(topic.getAccessCode(), playRecordRequest.getAccessCode())){
+                throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_INVALID);
+            }
 
             TopicTournament topicTournament = tournamentRepository.findByTopicIdAndTournamentStage(topicId, playRecordRequest.getTournamentStage());
 
@@ -258,4 +272,13 @@ import java.util.*;
             return topicEntryMapper.toEntryDtoFromEntity(topicEntry, s3Util);
         }
     }
+
+    private boolean isPasswordTopic(Visibility visibility){
+        return visibility.equals(Visibility.PASSWORD);
+    }
+
+    private boolean isTopicAccessCodeValid(String topicAccessCode, String inputAccessCode){
+        return Objects.equals(topicAccessCode, inputAccessCode);
+    }
+
 }
