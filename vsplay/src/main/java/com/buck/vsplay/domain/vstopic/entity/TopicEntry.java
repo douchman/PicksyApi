@@ -5,13 +5,13 @@ import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
 @Table(name = "TOPIC_ENTRY")
