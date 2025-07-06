@@ -2,7 +2,6 @@ package com.buck.vsplay.domain.statistics.service.impl;
 
 import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.statistics.dto.TopicStatisticsDto;
-import com.buck.vsplay.domain.statistics.dto.TournamentStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.TopicStatistics;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.mapper.TopicStatisticsMapper;
@@ -11,7 +10,6 @@ import com.buck.vsplay.domain.statistics.projection.MostPopularEntry;
 import com.buck.vsplay.domain.statistics.repository.TopicStatisticsRepository;
 import com.buck.vsplay.domain.statistics.repository.TournamentStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.ITopicStatisticsService;
-import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
@@ -97,21 +95,17 @@ public class TopicStatisticsService implements ITopicStatisticsService {
 
         Optional<Member> authUser = authUserService.getAuthUserOptional();
 
-        VsTopic targetTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
+        VsTopic topic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-        TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
+        TopicAccessGuard.validateTopicAccess(topic, authUser.orElse(null));
 
-        TopicStatistics topicStatisticsEntity = topicStatisticsRepository.findByVsTopic(topicId);
-        TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(topicStatisticsEntity);
+        TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(topicStatisticsRepository.findByVsTopic(topicId));
         topicStatistics.setEntryCount(entryRepository.countAvailableEntriesByTopicId(topicId).intValue());
-        VsTopicDto.VsTopic vsTopic = vsTopicMapper.toVsTopicDtoFromEntityWithPreSignedUrl(topicStatisticsEntity.getVsTopic(), s3Util);
-        List<TournamentStatisticsDto.TournamentStatistics> tournamentStatistics = tournamentStatisticsMapper.toTournamentStatisticsDtoList(
-                tournamentStatisticsRepository.findByTopicId(topicId));
 
         return TopicStatisticsDto.TopicStatisticsResponse.builder()
-                .topic(vsTopic)
-                .tournamentStatistics(tournamentStatistics)
+                .topic(vsTopicMapper.toVsTopicDtoFromEntityWithPreSignedUrl(topic, s3Util))
+                .tournamentStatistics(tournamentStatisticsMapper.toTournamentStatisticsDtoList(tournamentStatisticsRepository.findByTopicId(topicId)))
                 .topicStatistics(topicStatistics)
                 .build();
     }
