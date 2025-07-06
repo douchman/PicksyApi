@@ -6,14 +6,16 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TopicPlayRecordDto {
 
-    @Data
+    @Getter
+    @Setter
     public static class PlayRecordRequest{
         Integer tournamentStage;
         String accessCode;
     }
 
-    @Data
-    @AllArgsConstructor
+    @Getter
+    @Setter
+    @Builder
     public static class PlayRecordResponse{
         Long playRecordId;
     }
