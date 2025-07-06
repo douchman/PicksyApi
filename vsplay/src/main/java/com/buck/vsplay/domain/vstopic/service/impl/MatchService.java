@@ -100,19 +100,21 @@ import java.util.*;
         TopicPlayRecord topicPlayRecord = topicPlayRecordRepository.findById(playRecordId).orElseThrow(
                 () -> new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND));
 
-        if(topicPlayRecord.getStatus().equals(PlayStatus.COMPLETED)){
-            throw new PlayRecordException(PlayRecordExceptionCode.PLAY_RECORD_ALREADY_COMPLETED);
+        PlayStatus playStatus = topicPlayRecord.getStatus();
+
+        entryMatchResponse.setPlayStatus(topicPlayRecord.getStatus());
+
+        if( PlayStatus.IN_PROGRESS == playStatus){
+            entryMatchResponse.setCurrentTournament(TournamentStage.findStageNameByStage(topicPlayRecord.getCurrentTournamentStage()));
+            EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
+            EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
+            entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
+            entryMatchResponse.setEntryMatch( new EntryMatchDto.EntryMatch());
+            entryMatchResponse.getEntryMatch()
+                    .setEntryA(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryA()));
+            entryMatchResponse.getEntryMatch()
+                    .setEntryB(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryB()));
         }
-
-        EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
-        EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
-
-        entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
-        entryMatchResponse.setCurrentTournament(TournamentStage.findStageNameByStage(topicPlayRecord.getCurrentTournamentStage()));
-        entryMatchResponse.getEntryMatch()
-                .setEntryA(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryA()));
-        entryMatchResponse.getEntryMatch()
-                .setEntryB(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryB()));
 
         return entryMatchResponse;
     }
