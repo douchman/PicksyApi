@@ -22,7 +22,6 @@ public class TopicStatisticsDto {
 
     @Setter
     @Getter
-    @AllArgsConstructor
     @Builder
     public static class TopicStatisticsResponse{
         VsTopicDto.VsTopic topic;
