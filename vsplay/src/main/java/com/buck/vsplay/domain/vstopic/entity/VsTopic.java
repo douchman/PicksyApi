@@ -5,20 +5,20 @@ import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
 import java.util.List;
 
 @Entity
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Table(name = "VS_TOPIC")
 @SequenceGenerator(name = "TOPIC_SEQ_GENERATOR", sequenceName = "TOPIC_SEQ")
+@Builder
 public class VsTopic extends Timestamp{
 
     @Id
