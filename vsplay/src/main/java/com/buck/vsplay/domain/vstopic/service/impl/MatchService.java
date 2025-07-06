@@ -84,7 +84,9 @@ import java.util.*;
             applicationEventPublisher.publishEvent(new TopicEvent.PlayEvent(topic));
             applicationEventPublisher.publishEvent(new TournamentEvent.PlayEvent(topicTournament));
 
-            return new TopicPlayRecordDto.PlayRecordResponse(savedTopicPlayRecord.getId());
+            return TopicPlayRecordDto.PlayRecordResponse.builder()
+                    .playRecordId(savedTopicPlayRecord.getId())
+                    .build();
 
         }catch (PlayRecordException e) {
             log.error("토너먼트 대진표 초기화 중 오류가 발생했습니다", e);
