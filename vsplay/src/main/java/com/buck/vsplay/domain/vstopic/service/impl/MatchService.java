@@ -97,25 +97,24 @@ import java.util.*;
     @Override
     public EntryMatchDto.EntryMatchResponse getEntryMatch(Long playRecordId) {
 
-        EntryMatchDto.EntryMatchResponse entryMatchResponse = new EntryMatchDto.EntryMatchResponse();
-
         TopicPlayRecord topicPlayRecord = topicPlayRecordRepository.findById(playRecordId).orElseThrow(
                 () -> new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND));
 
         PlayStatus playStatus = topicPlayRecord.getStatus();
 
-        entryMatchResponse.setPlayStatus(topicPlayRecord.getStatus());
+        EntryMatchDto.EntryMatchResponse entryMatchResponse = EntryMatchDto.EntryMatchResponse.builder()
+                .playStatus(playStatus)
+                .build();
 
         if( PlayStatus.IN_PROGRESS == playStatus){
             entryMatchResponse.setCurrentTournament(TournamentStage.findStageNameByStage(topicPlayRecord.getCurrentTournamentStage()));
             EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
             EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
             entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
-            entryMatchResponse.setEntryMatch( new EntryMatchDto.EntryMatch());
-            entryMatchResponse.getEntryMatch()
-                    .setEntryA(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryA()));
-            entryMatchResponse.getEntryMatch()
-                    .setEntryB(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryB()));
+            entryMatchResponse.setEntryMatch(EntryMatchDto.EntryMatch.builder()
+                    .entryA(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryA()))
+                    .entryB(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryB()))
+                    .build());
         }
 
         return entryMatchResponse;
