@@ -1,6 +1,8 @@
 package com.buck.vsplay.domain.vstopic.dto;
 
 
+import com.buck.vsplay.global.constants.PlayStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -14,10 +16,12 @@ public class EntryMatchDto {
     }
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class EntryMatchResponse{
         Long matchId;
         String currentTournament;
-        EntryMatch entryMatch = new EntryMatch();
+        PlayStatus playStatus;
+        EntryMatch entryMatch;
     }
 
     @Data
