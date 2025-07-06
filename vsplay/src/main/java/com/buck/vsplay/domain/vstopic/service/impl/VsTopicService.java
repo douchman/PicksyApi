@@ -128,24 +128,25 @@ public class VsTopicService implements IVsTopicService {
     @Override
     public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
         Optional<Member> authUser = authUserService.getAuthUserOptional();
-        VsTopicDto.VsTopicDetailWithTournamentsResponse topicDetailWithTournamentsResponse = new VsTopicDto.VsTopicDetailWithTournamentsResponse();
 
         VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
         TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
 
+        List<VsTopicDto.Tournament> tournamentList = new ArrayList<>();
         List<TopicTournament> topicTournaments = tournamentRepository.findByVsTopicIdAndActiveTrue(vsTopic.getId());
-        topicDetailWithTournamentsResponse.setTopic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic, s3Util));
 
         if ( topicTournaments != null && !topicTournaments.isEmpty() ) {
             for (TopicTournament tournament : topicTournaments) {
-                topicDetailWithTournamentsResponse.getTournamentList()
-                        .add(tournamentMapper.toTournamentDtoFromEntityWithoutId(tournament));
+                tournamentList.add(tournamentMapper.toTournamentDtoFromEntityWithoutId(tournament));
             }
         }
 
-        return topicDetailWithTournamentsResponse;
+        return VsTopicDto.VsTopicDetailWithTournamentsResponse.builder()
+                .topic(vsTopicMapper.toVsTopicDtoFromEntityWithModeration(vsTopic, s3Util))
+                .tournamentList(tournamentList)
+                .build();
     }
 
     @Override
