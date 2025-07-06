@@ -47,12 +47,12 @@ public class EntryService implements IEntryService {
 
     @Override
     public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
-        EntryDto.EntryList entryList = new EntryDto.EntryList();
 
         if(!topicRepository.existsByIdAndDeletedFalse(topicId)) {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
+        List<EntryDto.Entry> entryList = new ArrayList<>();
         List<TopicEntry> createdEntries = entryRepository.findByTopicIdAndDeletedFalse(topicId);
 
         if( createdEntries != null && !createdEntries.isEmpty()){
@@ -60,7 +60,7 @@ public class EntryService implements IEntryService {
 
                 boolean isYoutube = MediaType.YOUTUBE == createdEntry.getMediaType();
 
-                entryList.getEntries().add(
+                entryList.add(
                         isYoutube ?
                                 topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(createdEntry, s3Util)
                                 : topicEntryMapper.toEntryDtoFromEntity(createdEntry, s3Util)
@@ -68,7 +68,9 @@ public class EntryService implements IEntryService {
             }
         }
 
-        return entryList;
+        return EntryDto.EntryList.builder()
+                .entries(entryList)
+                .build();
     }
 
     @Override
