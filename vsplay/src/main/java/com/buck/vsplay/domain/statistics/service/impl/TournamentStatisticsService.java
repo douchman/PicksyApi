@@ -61,8 +61,8 @@ public class TournamentStatisticsService implements ITournamentStatisticsService
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
         }
 
-        return new TournamentStatisticsDto.TournamentStatisticsResponse(
-                tournamentStatisticsMapper.toTournamentStatisticsDtoList(
-                        tournamentStatisticsRepository.findByTopicId(topicId)));
+        return TournamentStatisticsDto.TournamentStatisticsResponse.builder()
+                .tournamentStatistics(tournamentStatisticsMapper.toTournamentStatisticsDtoList(tournamentStatisticsRepository.findByTopicId(topicId)))
+                .build();
     }
 }
