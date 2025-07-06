@@ -106,14 +106,24 @@ import java.util.*;
                 .playStatus(playStatus)
                 .build();
 
-        if( PlayStatus.IN_PROGRESS == playStatus){
-            entryMatchResponse.setCurrentTournament(TournamentStage.findStageNameByStage(topicPlayRecord.getCurrentTournamentStage()));
+        entryMatchResponse.setCurrentTournament(TournamentStage.findStageNameByStage(topicPlayRecord.getCurrentTournamentStage()));
+
+        if( PlayStatus.IN_PROGRESS == playStatus){ // 진행 중인 대결
             EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
             EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
             entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
             entryMatchResponse.setEntryMatch(EntryMatchDto.EntryMatch.builder()
                     .entryA(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryA()))
                     .entryB(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryB()))
+                    .build());
+        } else { // 완료 된 대결
+            EntryMatch completedEntryMatch = entryMatchRepository.findByTopicPlayRecordIdAndTournamentRound(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
+            entryMatchResponse.setMatchId(completedEntryMatch.getId());
+            entryMatchResponse.setWinnerEntryId(completedEntryMatch.getWinnerEntry().getId());
+
+            entryMatchResponse.setEntryMatch(EntryMatchDto.EntryMatch.builder()
+                    .entryA(mappingTopicEntryToEntryDto(completedEntryMatch.getEntryA()))
+                    .entryB(mappingTopicEntryToEntryDto(completedEntryMatch.getEntryB()))
                     .build());
         }
 
