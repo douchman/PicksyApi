@@ -105,7 +105,7 @@ public class TopicStatisticsService implements ITopicStatisticsService {
         TopicStatistics topicStatisticsEntity = topicStatisticsRepository.findByVsTopic(topicId);
         TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(topicStatisticsEntity);
         topicStatistics.setEntryCount(entryRepository.countAvailableEntriesByTopicId(topicId).intValue());
-        VsTopicDto.VsTopic vsTopic = vsTopicMapper.toVsTopicDtoFromEntityWithThumbnail(topicStatisticsEntity.getVsTopic(), s3Util);
+        VsTopicDto.VsTopic vsTopic = vsTopicMapper.toVsTopicDtoFromEntityWithPreSignedUrl(topicStatisticsEntity.getVsTopic(), s3Util);
         List<TournamentStatisticsDto.TournamentStatistics> tournamentStatistics = tournamentStatisticsMapper.toTournamentStatisticsDtoList(
                 tournamentStatisticsRepository.findByTopicId(topicId));
 
