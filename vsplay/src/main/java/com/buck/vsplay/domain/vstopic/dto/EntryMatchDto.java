@@ -24,6 +24,7 @@ public class EntryMatchDto {
     public static class EntryMatchResponse{
         Long matchId;
         String currentTournament;
+        Long winnerEntryId;
         PlayStatus playStatus;
         EntryMatch entryMatch;
     }
