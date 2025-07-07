@@ -5,18 +5,18 @@ import com.buck.vsplay.domain.statistics.dto.TopicStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.TopicStatistics;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.mapper.TopicStatisticsMapper;
+import com.buck.vsplay.domain.statistics.mapper.TournamentStatisticsMapper;
 import com.buck.vsplay.domain.statistics.projection.MostPopularEntry;
 import com.buck.vsplay.domain.statistics.repository.TopicStatisticsRepository;
+import com.buck.vsplay.domain.statistics.repository.TournamentStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.ITopicStatisticsService;
-import com.buck.vsplay.domain.vstopic.dto.EntryDto;
-import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
+import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
-import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +33,11 @@ import java.util.Optional;
 public class TopicStatisticsService implements ITopicStatisticsService {
 
     private final TopicStatisticsRepository topicStatisticsRepository;
+    private final TournamentStatisticsRepository tournamentStatisticsRepository;
+    private final EntryRepository entryRepository;
     private final VsTopicRepository vsTopicRepository;
     private final TopicStatisticsMapper topicStatisticsMapper;
+    private final TournamentStatisticsMapper tournamentStatisticsMapper;
     private final VsTopicMapper vsTopicMapper;
     private final S3Util s3Util;
     private final AuthUserService authUserService;
@@ -92,26 +95,17 @@ public class TopicStatisticsService implements ITopicStatisticsService {
 
         Optional<Member> authUser = authUserService.getAuthUserOptional();
 
-        VsTopic targetTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
+        VsTopic topic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-        TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
+        TopicAccessGuard.validateTopicAccess(topic, authUser.orElse(null));
 
-        TopicStatistics topicStatisticsEntity = topicStatisticsRepository.findByVsTopic(topicId);
-        TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(topicStatisticsEntity);
-        VsTopicDto.VsTopic vsTopic = vsTopicMapper.toVsTopicDtoFromEntity(topicStatisticsEntity.getVsTopic());
-
-        EntryDto.Entry mostPopularEntry = topicStatistics.getMostPopularEntry();
-        if( mostPopularEntry != null ) {
-            boolean isMediaTypeYoutube = MediaType.YOUTUBE == mostPopularEntry.getMediaType();
-
-            if( !isMediaTypeYoutube ){ // 유튜브인 경우 signedUrl 변환 없음
-                mostPopularEntry.setMediaUrl(s3Util.getUploadedObjectUrl(mostPopularEntry.getMediaUrl()));
-            }
-        }
+        TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(topicStatisticsRepository.findByVsTopic(topicId));
+        topicStatistics.setEntryCount(entryRepository.countAvailableEntriesByTopicId(topicId).intValue());
 
         return TopicStatisticsDto.TopicStatisticsResponse.builder()
-                .topic(vsTopic)
+                .topic(vsTopicMapper.toVsTopicDtoFromEntityWithPreSignedUrl(topic, s3Util))
+                .tournamentStatistics(tournamentStatisticsMapper.toTournamentStatisticsDtoList(tournamentStatisticsRepository.findByTopicId(topicId)))
                 .topicStatistics(topicStatistics)
                 .build();
     }

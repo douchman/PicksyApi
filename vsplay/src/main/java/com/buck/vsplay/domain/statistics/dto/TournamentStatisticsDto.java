@@ -17,7 +17,7 @@ public class TournamentStatisticsDto {
 
     @Getter
     @Setter
-    @AllArgsConstructor
+    @Builder
     public static class TournamentStatisticsResponse{
         List<TournamentStatistics> tournamentStatistics;
     }

@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
+import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
@@ -16,11 +17,14 @@ import com.buck.vsplay.domain.vstopic.exception.tournament.TournamentExceptionCo
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
+import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.*;
 import com.buck.vsplay.domain.vstopic.service.IMatchService;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.PlayStatus;
 import com.buck.vsplay.global.constants.TournamentStage;
+import com.buck.vsplay.global.constants.Visibility;
+import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +41,7 @@ import java.util.*;
 @Transactional
  public class MatchService implements IMatchService {
 
+    private final AuthUserService authUserService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final VsTopicRepository vsTopicRepository;
     private final EntryRepository entryRepository;
@@ -48,9 +53,18 @@ import java.util.*;
 
     @Override
     public TopicPlayRecordDto.PlayRecordResponse createTopicPlayRecord(Long topicId, TopicPlayRecordDto.PlayRecordRequest playRecordRequest) {
+
+        Optional<Member> authUser = authUserService.getAuthUserOptional();
+
         try {
             VsTopic topic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                     () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+
+            TopicAccessGuard.validateTopicAccess(topic, authUser.orElse(null));
+
+            if(isPasswordTopic(topic.getVisibility()) && !isTopicAccessCodeValid(topic.getAccessCode(), playRecordRequest.getAccessCode())){
+                throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_INVALID);
+            }
 
             TopicTournament topicTournament = tournamentRepository.findByTopicIdAndTournamentStage(topicId, playRecordRequest.getTournamentStage());
 
@@ -70,7 +84,9 @@ import java.util.*;
             applicationEventPublisher.publishEvent(new TopicEvent.PlayEvent(topic));
             applicationEventPublisher.publishEvent(new TournamentEvent.PlayEvent(topicTournament));
 
-            return new TopicPlayRecordDto.PlayRecordResponse(savedTopicPlayRecord.getId());
+            return TopicPlayRecordDto.PlayRecordResponse.builder()
+                    .playRecordId(savedTopicPlayRecord.getId())
+                    .build();
 
         }catch (PlayRecordException e) {
             log.error("토너먼트 대진표 초기화 중 오류가 발생했습니다", e);
@@ -81,24 +97,35 @@ import java.util.*;
     @Override
     public EntryMatchDto.EntryMatchResponse getEntryMatch(Long playRecordId) {
 
-        EntryMatchDto.EntryMatchResponse entryMatchResponse = new EntryMatchDto.EntryMatchResponse();
-
         TopicPlayRecord topicPlayRecord = topicPlayRecordRepository.findById(playRecordId).orElseThrow(
                 () -> new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND));
 
-        if(topicPlayRecord.getStatus().equals(PlayStatus.COMPLETED)){
-            throw new PlayRecordException(PlayRecordExceptionCode.PLAY_RECORD_ALREADY_COMPLETED);
-        }
+        PlayStatus playStatus = topicPlayRecord.getStatus();
 
-        EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
-        EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
+        EntryMatchDto.EntryMatchResponse entryMatchResponse = EntryMatchDto.EntryMatchResponse.builder()
+                .playStatus(playStatus)
+                .build();
 
-        entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
         entryMatchResponse.setCurrentTournament(TournamentStage.findStageNameByStage(topicPlayRecord.getCurrentTournamentStage()));
-        entryMatchResponse.getEntryMatch()
-                .setEntryA(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryA()));
-        entryMatchResponse.getEntryMatch()
-                .setEntryB(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryB()));
+
+        if( PlayStatus.IN_PROGRESS == playStatus){ // 진행 중인 대결
+            EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
+            EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
+            entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
+            entryMatchResponse.setEntryMatch(EntryMatchDto.EntryMatch.builder()
+                    .entryA(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryA()))
+                    .entryB(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryB()))
+                    .build());
+        } else { // 완료 된 대결
+            EntryMatch completedEntryMatch = entryMatchRepository.findByTopicPlayRecordIdAndTournamentRound(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
+            entryMatchResponse.setMatchId(completedEntryMatch.getId());
+            entryMatchResponse.setWinnerEntryId(completedEntryMatch.getWinnerEntry().getId());
+
+            entryMatchResponse.setEntryMatch(EntryMatchDto.EntryMatch.builder()
+                    .entryA(mappingTopicEntryToEntryDto(completedEntryMatch.getEntryA()))
+                    .entryB(mappingTopicEntryToEntryDto(completedEntryMatch.getEntryB()))
+                    .build());
+        }
 
         return entryMatchResponse;
     }
@@ -258,4 +285,13 @@ import java.util.*;
             return topicEntryMapper.toEntryDtoFromEntity(topicEntry, s3Util);
         }
     }
+
+    private boolean isPasswordTopic(Visibility visibility){
+        return visibility.equals(Visibility.PASSWORD);
+    }
+
+    private boolean isTopicAccessCodeValid(String topicAccessCode, String inputAccessCode){
+        return Objects.equals(topicAccessCode, inputAccessCode);
+    }
+
 }

@@ -1,26 +1,36 @@
 package com.buck.vsplay.domain.vstopic.dto;
 
 
+import com.buck.vsplay.global.constants.PlayStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EntryMatchDto {
 
-    @Data
+    @Getter
+    @Setter
+    @Builder
     public static class EntryMatch{
         EntryDto.Entry entryA;
         EntryDto.Entry entryB;
     }
 
-    @Data
+    @Getter
+    @Setter
+    @Builder
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class EntryMatchResponse{
         Long matchId;
         String currentTournament;
-        EntryMatch entryMatch = new EntryMatch();
+        Long winnerEntryId;
+        PlayStatus playStatus;
+        EntryMatch entryMatch;
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class EntryMatchResultRequest{
         @NotNull(message = "승리 엔트리 비었습니다.")
         Long winnerEntryId;
@@ -29,10 +39,9 @@ public class EntryMatchDto {
         Long loserEntryId;
     }
 
-    @Data
+    @Getter
+    @Setter
     @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
     public static class UpdateEntryMatchResultResponse{
         String message;
         boolean isAllMatchedCompleted;

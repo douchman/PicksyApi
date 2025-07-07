@@ -3,10 +3,7 @@ package com.buck.vsplay.domain.member.entity;
 import com.buck.vsplay.domain.member.role.Role;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 
@@ -17,6 +14,8 @@ import org.hibernate.annotations.Comment;
 @ToString(exclude = "password")
 @SequenceGenerator( name = "MEMBER_SEQ_GENERATOR" , sequenceName = "MEMBER_SEQ")
 @Table(name = "MEMBER")
+@Builder
+@AllArgsConstructor
 public class Member extends Timestamp {
 
     @Id

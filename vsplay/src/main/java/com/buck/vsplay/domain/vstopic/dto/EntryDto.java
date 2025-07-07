@@ -4,7 +4,6 @@ package com.buck.vsplay.domain.vstopic.dto;
 import com.buck.vsplay.global.constants.MediaType;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -12,7 +11,9 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EntryDto {
 
-    @Data
+    @Getter
+    @Setter
+    @Builder
     public static class Entry{
         private Long id;
         private String entryName;
@@ -22,7 +23,9 @@ public class EntryDto {
         private String thumbnail;
     }
 
-    @Data
+    @Getter
+    @Setter
+    @Builder
     public static class CreateEntry{
         private String entryName;
         private String description;
@@ -31,7 +34,9 @@ public class EntryDto {
         private MediaType mediaType;
     }
 
-    @Data
+    @Getter
+    @Setter
+    @Builder
     public static class UpdateEntry{
         private Long id;
         private String entryName;
@@ -39,20 +44,24 @@ public class EntryDto {
         private String mediaUrl;
         private String thumbnail;
         private MediaType mediaType;
-        private boolean delete = false;
+        private boolean delete;
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class CreateEntriesRequest{
         List<CreateEntry> entriesToCreate;
     }
 
-    @Data
+    @Getter
+    @Setter
+    @Builder
     public static class EntryList{
-        List<Entry> entries = new ArrayList<>();
+        List<Entry> entries;
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class UpdateEntryRequest{
         List<UpdateEntry> entriesToUpdate;
     }

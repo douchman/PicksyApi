@@ -4,14 +4,13 @@ package com.buck.vsplay.domain.member.dto;
 import com.buck.vsplay.domain.member.role.Role;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MemberDto {
 
-    @Data
+    @Getter
+    @Setter
     public static class CreateMemberRequest{
         @NotNull(message = "아이디는 필수 입력 항목 입니다.")
         private String loginId;
@@ -24,7 +23,8 @@ public class MemberDto {
         private String password;
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class UpdateMemberRequest{
 
         @NotNull(message = "이름이 비었습니다.")
@@ -36,7 +36,8 @@ public class MemberDto {
 
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class MemberInfo{
         private Integer id;
         private String loginId;

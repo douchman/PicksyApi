@@ -13,10 +13,8 @@ public interface VsTopicMapper {
 
     VsTopic toEntityFromVstopicCreateRequestDtoWithoutThumbnail(VsTopicDto.VsTopicCreateRequest vsTopicCreateRequest);
 
-    VsTopicDto.VsTopic toVsTopicDtoFromEntity(VsTopic vsTopic);
-
     @Mapping(target = "thumbnail", expression = "java(s3Util.getUploadedObjectUrl(vsTopic.getThumbnail()))")
-    VsTopicDto.VsTopicWithThumbnail toVsTopicDtoFromEntityWithThumbnail(VsTopic vsTopic, S3Util s3Util);
+    VsTopicDto.VsTopic toVsTopicDtoFromEntityWithPreSignedUrl(VsTopic vsTopic, S3Util s3Util);
 
     @Mapping(target = "thumbnail", expression = "java(s3Util.getUploadedObjectUrl(vsTopic.getThumbnail()))")
     VsTopicDto.VsTopicWithModeration toVsTopicDtoFromEntityWithModeration(VsTopic vsTopic, S3Util s3Util);
@@ -24,9 +22,9 @@ public interface VsTopicMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void toUpdateVsTopicFromUpdateRequest(VsTopicDto.VsTopicUpdateRequest vsTopicUpdateRequest, @MappingTarget VsTopic vsTopic);
 
-    default List<VsTopicDto.VsTopicWithThumbnail> toVsTopicDtoWithThumbnailListFromEntityList(List<VsTopic> vsTopics, S3Util s3Util) {
+    default List<VsTopicDto.VsTopic> toVsTopicDtoWithThumbnailListFromEntityList(List<VsTopic> vsTopics, S3Util s3Util) {
         return vsTopics.stream()
-                .map(v -> toVsTopicDtoFromEntityWithThumbnail(v, s3Util))
+                .map(v -> toVsTopicDtoFromEntityWithPreSignedUrl(v, s3Util))
                 .toList();
     }
 
