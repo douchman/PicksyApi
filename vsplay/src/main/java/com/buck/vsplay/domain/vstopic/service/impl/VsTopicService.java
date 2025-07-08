@@ -126,6 +126,20 @@ public class VsTopicService implements IVsTopicService {
     }
 
     @Override
+    public VsTopicDto.VsTopicDetailWithAccessCodeResponse getVsTopicDetailWithAccessCode(Long topicId) {
+        Optional<Member> authUser = authUserService.getAuthUserOptional();
+
+        VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
+                new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+
+        TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
+
+        return VsTopicDto.VsTopicDetailWithAccessCodeResponse.builder()
+                .topic(vsTopicMapper.toVsTopicDtoFromEntityWithAccessCode(vsTopic, s3Util))
+                .build();
+    }
+
+    @Override
     public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
         Optional<Member> authUser = authUserService.getAuthUserOptional();
 
