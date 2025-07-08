@@ -46,10 +46,17 @@ public class VsTopicController {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()),HttpStatus.OK );
     }
 
-    @GetMapping("{id}")
+    @GetMapping("{id}/tournaments")
     public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicDetailWithTournamentsResponse>> getTopicDetailWithTournaments (
             @PathVariable("id") Long topicId
     ) {
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailWithTournaments(topicId)),HttpStatus.OK );
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<SingleResponseDto<VsTopicDto.VsTopicDetailWithAccessCodeResponse>> getTopicDetailWithAccessCode (
+            @PathVariable("id") Long topicId
+    ) {
+        return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value(), vsTopicService.getVsTopicDetailWithAccessCode(topicId)),HttpStatus.OK );
     }
 }

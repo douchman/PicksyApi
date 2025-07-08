@@ -17,6 +17,9 @@ public interface VsTopicMapper {
     VsTopicDto.VsTopic toVsTopicDtoFromEntityWithPreSignedUrl(VsTopic vsTopic, S3Util s3Util);
 
     @Mapping(target = "thumbnail", expression = "java(s3Util.getUploadedObjectUrl(vsTopic.getThumbnail()))")
+    VsTopicDto.VsTopicWithAccessCode toVsTopicDtoFromEntityWithAccessCode(VsTopic vsTopic, S3Util s3Util);
+
+    @Mapping(target = "thumbnail", expression = "java(s3Util.getUploadedObjectUrl(vsTopic.getThumbnail()))")
     VsTopicDto.VsTopicWithModeration toVsTopicDtoFromEntityWithModeration(VsTopic vsTopic, S3Util s3Util);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
