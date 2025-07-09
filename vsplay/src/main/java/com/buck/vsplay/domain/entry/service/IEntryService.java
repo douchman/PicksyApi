@@ -1,6 +1,6 @@
-package com.buck.vsplay.domain.vstopic.service;
+package com.buck.vsplay.domain.entry.service;
 
-import com.buck.vsplay.domain.vstopic.dto.EntryDto;
+import com.buck.vsplay.domain.entry.dto.EntryDto;
 
 public interface IEntryService {
     EntryDto.EntryList getEntriesByTopicId(Long topicId);

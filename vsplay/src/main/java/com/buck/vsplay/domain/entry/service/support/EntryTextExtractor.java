@@ -1,6 +1,7 @@
-package com.buck.vsplay.domain.vstopic.service.support;
+package com.buck.vsplay.domain.entry.service.support;
 
-import com.buck.vsplay.domain.vstopic.dto.EntryDto;
+import com.buck.vsplay.domain.entry.dto.EntryDto;
+import com.buck.vsplay.domain.vstopic.service.support.FilterTextListBuilder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

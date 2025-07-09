@@ -1,6 +1,7 @@
-package com.buck.vsplay.domain.vstopic.entity;
+package com.buck.vsplay.domain.entry.entiity;
 
 
+import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.entity.Timestamp;

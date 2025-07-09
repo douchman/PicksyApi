@@ -1,8 +1,8 @@
-package com.buck.vsplay.domain.vstopic.mapper;
+package com.buck.vsplay.domain.entry.mapper;
 
 
-import com.buck.vsplay.domain.vstopic.dto.EntryDto;
-import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
+import com.buck.vsplay.domain.entry.dto.EntryDto;
+import com.buck.vsplay.domain.entry.entiity.TopicEntry;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import org.mapstruct.*;
 

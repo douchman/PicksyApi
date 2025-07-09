@@ -1,8 +1,8 @@
-package com.buck.vsplay.domain.vstopic.controller;
+package com.buck.vsplay.domain.entry.controller;
 
 
-import com.buck.vsplay.domain.vstopic.dto.EntryDto;
-import com.buck.vsplay.domain.vstopic.service.impl.EntryService;
+import com.buck.vsplay.domain.entry.dto.EntryDto;
+import com.buck.vsplay.domain.entry.service.impl.EntryService;
 import com.buck.vsplay.global.dto.SingleResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.exception.entry;
+package com.buck.vsplay.domain.entry.exception;
 
 import com.buck.vsplay.global.exception.BaseException;
 
