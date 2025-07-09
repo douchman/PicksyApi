@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.controller;
+package com.buck.vsplay.domain.entry.controller;
 
 
 import com.buck.vsplay.domain.entry.dto.EntryDto;
