@@ -78,7 +78,6 @@ public class EntryService implements IEntryService {
 
         VsTopic vsTopic = topicFinder.findExistingById(topicId);
         TopicAccessGuard.validateTopicAccess(vsTopic, member);
-
         entryRequestChecker.checkEntryCreateRequest(request);
 
         List<TopicEntry> topicEntries = new ArrayList<>();
@@ -98,37 +97,38 @@ public class EntryService implements IEntryService {
     public void updateEntries(Long topicId, EntryDto.UpdateEntryRequest updatedRequest) {
         Member member = authUserService.getAuthUser();
 
-
         VsTopic vsTopic = topicFinder.findExistingById(topicId);
         TopicAccessGuard.validateTopicAccess(vsTopic, member);
 
+
         List<EntryDto.UpdateEntry> entriesToUpdate = Optional
                 .ofNullable(updatedRequest.getEntriesToUpdate())
-                .orElse(Collections.emptyList());
+                .orElse(Collections.emptyList()); // null safe 하게 리스트 재구성
 
-        if( entriesToUpdate.isEmpty() ) return;
+        if( entriesToUpdate.isEmpty() ) return; // early return
+
 
         List<Long> updateTargetEntryIds = entriesToUpdate.stream()
                 .map(EntryDto.UpdateEntry::getId)
-                .toList();
+                .toList(); // 업데이트 대상 entry id 추출
 
-        entryRequestChecker.filterEntriesContentTexts(entryTextExtractor.extractTextFromUpdateEntryList(entriesToUpdate));
+        entryRequestChecker.filterEntriesContentTexts(entryTextExtractor.extractTextFromUpdateEntryList(entriesToUpdate)); // 텍스트 컨텐츠 추출 후 비속어 필터링 ( 삭제 대상 제외 )
 
-        List<TopicEntry> existingEntries = entryRepository.findByTopicIdAndIdIn(topicId, updateTargetEntryIds);
+        List<TopicEntry> existingEntries = entryRepository.findByTopicIdAndIdIn(topicId, updateTargetEntryIds); // entity 조회
 
         Map<Long, TopicEntry> entryMap = existingEntries.stream()
-                .collect(Collectors.toMap(TopicEntry::getId, Function.identity()));
+                .collect(Collectors.toMap(TopicEntry::getId, Function.identity())); // 리스트 순회 처리에 용이하도록 Map 으로 Structure 재구성
 
         for (EntryDto.UpdateEntry updateRequestEntry : entriesToUpdate) {
             Optional.ofNullable(entryMap.get(updateRequestEntry.getId()))
                     .ifPresent(existingEntry -> {
-                        if (updateRequestEntry.isDelete()) {
+                        if (updateRequestEntry.isDelete()) { // 삭제
                             entryUpdateHandler.handleDeleteEntry(existingEntry);
-                        } else {
+                        } else { // 업데이트
                             entryUpdateHandler.handleUpdateEntry(existingEntry, updateRequestEntry);
                         }
                     });
         }
-        tournamentHandler.handleTournament(vsTopic);
+        tournamentHandler.handleTournament(vsTopic); // 갱신된 엔트리를 기준으로 토너먼트 재구성
     }
 }
