@@ -7,12 +7,11 @@ import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
-import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
-import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
+import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
-import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IEntryService;
+import com.buck.vsplay.domain.vstopic.service.finder.TopicFinder;
 import com.buck.vsplay.domain.vstopic.service.handler.EntryUpdateHandler;
 import com.buck.vsplay.domain.vstopic.service.support.TournamentHandler;
 import com.buck.vsplay.global.constants.MediaType;
@@ -37,7 +36,6 @@ import java.util.stream.Collectors;
 @Transactional
 public class EntryService implements IEntryService {
 
-    private final VsTopicRepository topicRepository;
     private final TopicEntryMapper topicEntryMapper;
     private final AuthUserService authUserService;
     private final EntryRepository entryRepository;
@@ -46,13 +44,12 @@ public class EntryService implements IEntryService {
     private final TournamentHandler tournamentHandler;
     private final S3Util s3Util;
     private final EntryUpdateHandler entryUpdateHandler;
+    private final TopicFinder topicFinder;
 
     @Override
     public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
 
-        if(!topicRepository.existsByIdAndDeletedFalse(topicId)) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
+        topicFinder.validateTopicExists(topicId);
 
         List<EntryDto.Entry> entryList = new ArrayList<>();
         List<TopicEntry> createdEntries = entryRepository.findByTopicIdAndDeletedFalse(topicId);
@@ -77,14 +74,10 @@ public class EntryService implements IEntryService {
 
     @Override
     public void createEntries(Long topicId, EntryDto.CreateEntriesRequest request) {
-        Member authUser = authUserService.getAuthUser();
+        Member member = authUserService.getAuthUser();
 
-        VsTopic vsTopic = topicRepository.findById(topicId).orElseThrow(() ->
-                new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
-
-        if(!vsTopic.getMember().getId().equals(authUser.getId())){
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
-        }
+        VsTopic vsTopic = topicFinder.findExistingById(topicId);
+        TopicAccessGuard.validateTopicAccess(vsTopic, member);
 
         List<EntryDto.CreateEntry> entries = request.getEntriesToCreate();
 
@@ -114,15 +107,11 @@ public class EntryService implements IEntryService {
 
     @Override
     public void updateEntries(Long topicId, EntryDto.UpdateEntryRequest updatedRequest) {
-        Member authUser = authUserService.getAuthUser();
+        Member member = authUserService.getAuthUser();
 
-        VsTopic topic = topicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
-            new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND)
-        );
 
-        if(!topic.getMember().getId().equals(authUser.getId())){
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
-        }
+        VsTopic vsTopic = topicFinder.findExistingById(topicId);
+        TopicAccessGuard.validateTopicAccess(vsTopic, member);
 
         List<EntryDto.UpdateEntry> entriesToUpdate = Optional
                 .ofNullable(updatedRequest.getEntriesToUpdate())
@@ -160,7 +149,7 @@ public class EntryService implements IEntryService {
                         }
                     });
         }
-        tournamentHandler.handleTournament(topic);
+        tournamentHandler.handleTournament(vsTopic);
     }
 
 
