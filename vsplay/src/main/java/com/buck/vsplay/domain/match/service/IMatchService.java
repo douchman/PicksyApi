@@ -1,8 +1,8 @@
-package com.buck.vsplay.domain.vstopic.service;
+package com.buck.vsplay.domain.match.service;
 
 
-import com.buck.vsplay.domain.vstopic.dto.EntryMatchDto;
-import com.buck.vsplay.domain.vstopic.dto.TopicPlayRecordDto;
+import com.buck.vsplay.domain.match.dto.EntryMatchDto;
+import com.buck.vsplay.domain.match.dto.TopicPlayRecordDto;
 
 public interface IMatchService {
 

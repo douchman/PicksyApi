@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.entity;
+package com.buck.vsplay.domain.match.entity;
 
 import com.buck.vsplay.domain.entry.entiity.TopicEntry;
 import com.buck.vsplay.global.constants.PlayStatus;

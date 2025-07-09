@@ -8,7 +8,7 @@ import com.buck.vsplay.domain.statistics.mapper.EntryStatisticsMapper;
 import com.buck.vsplay.domain.statistics.repository.EntryStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryStatisticsService;
 import com.buck.vsplay.domain.entry.dto.EntryDto;
-import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
+import com.buck.vsplay.domain.match.entity.EntryMatch;
 import com.buck.vsplay.domain.entry.entiity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.entry.exception.EntryException;

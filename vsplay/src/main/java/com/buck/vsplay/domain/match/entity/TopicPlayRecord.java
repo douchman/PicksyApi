@@ -1,7 +1,8 @@
-package com.buck.vsplay.domain.vstopic.entity;
+package com.buck.vsplay.domain.match.entity;
 
 
 import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.global.constants.PlayStatus;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
