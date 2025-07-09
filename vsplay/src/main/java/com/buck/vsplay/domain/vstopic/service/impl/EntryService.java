@@ -5,20 +5,19 @@ import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
-import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
-import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.service.IEntryService;
+import com.buck.vsplay.domain.vstopic.service.checker.EntryRequestChecker;
 import com.buck.vsplay.domain.vstopic.service.finder.TopicFinder;
 import com.buck.vsplay.domain.vstopic.service.handler.EntryUpdateHandler;
+import com.buck.vsplay.domain.vstopic.service.support.EntryTextExtractor;
 import com.buck.vsplay.domain.vstopic.service.support.TournamentHandler;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
-import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -40,11 +39,12 @@ public class EntryService implements IEntryService {
     private final AuthUserService authUserService;
     private final EntryRepository entryRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final BadWordFilter badWordFilter;
     private final TournamentHandler tournamentHandler;
     private final S3Util s3Util;
     private final EntryUpdateHandler entryUpdateHandler;
     private final TopicFinder topicFinder;
+    private final EntryRequestChecker entryRequestChecker;
+    private final EntryTextExtractor entryTextExtractor;
 
     @Override
     public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
@@ -79,21 +79,10 @@ public class EntryService implements IEntryService {
         VsTopic vsTopic = topicFinder.findExistingById(topicId);
         TopicAccessGuard.validateTopicAccess(vsTopic, member);
 
-        List<EntryDto.CreateEntry> entries = request.getEntriesToCreate();
-
-        List<String> textsForBadWordFilter = new ArrayList<>();
-        for(EntryDto.CreateEntry entry : entries){
-            textsForBadWordFilter.addAll(buildStringList(entry.getEntryName(), entry.getDescription()));
-        }
-
-        boolean hasBadWord = badWordFilter.containsBadWords(textsForBadWordFilter);
-        if(hasBadWord){
-            throw new EntryException(EntryExceptionCode.BAD_WORD_DETECTED);
-        }
+        entryRequestChecker.checkEntryCreateRequest(request);
 
         List<TopicEntry> topicEntries = new ArrayList<>();
-
-        for (EntryDto.CreateEntry entry : entries) {
+        for (EntryDto.CreateEntry entry : request.getEntriesToCreate()) {
             TopicEntry topicEntry = topicEntryMapper.toEntityFromCreatedEntryDto(entry);
             topicEntry.setTopic(vsTopic);
             topicEntry.setModerationStatus(ModerationStatus.PASSED);
@@ -123,16 +112,7 @@ public class EntryService implements IEntryService {
                 .map(EntryDto.UpdateEntry::getId)
                 .toList();
 
-        List<String> textsForBadWordFilter = new ArrayList<>();
-        for(EntryDto.UpdateEntry entry : entriesToUpdate){
-            if( !entry.isDelete())
-                textsForBadWordFilter.addAll(buildStringList(entry.getEntryName(), entry.getDescription()));
-        }
-
-        boolean hasBadWord = badWordFilter.containsBadWords(textsForBadWordFilter);
-        if(hasBadWord){
-            throw new EntryException(EntryExceptionCode.BAD_WORD_DETECTED);
-        }
+        entryRequestChecker.filterEntriesContentTexts(entryTextExtractor.extractTextFromUpdateEntryList(entriesToUpdate));
 
         List<TopicEntry> existingEntries = entryRepository.findByTopicIdAndIdIn(topicId, updateTargetEntryIds);
 
@@ -151,12 +131,4 @@ public class EntryService implements IEntryService {
         }
         tournamentHandler.handleTournament(vsTopic);
     }
-
-
-    private List<String> buildStringList(String ... strings) {
-        return Arrays.stream(strings)
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
 }
