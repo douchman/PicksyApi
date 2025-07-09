@@ -13,6 +13,7 @@ import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.TournamentRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
+import com.buck.vsplay.domain.vstopic.service.support.TopicServiceHelper;
 import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.constants.SortBy;
 import com.buck.vsplay.global.constants.Visibility;
@@ -53,7 +54,7 @@ public class VsTopicService implements IVsTopicService {
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
 
-        if(isMissingPasswordForProtectedTopic(createVsTopicRequest.getVisibility(), createVsTopicRequest.getAccessCode())){
+        if(TopicServiceHelper.isMissingPasswordForProtectedTopic(createVsTopicRequest.getVisibility(), createVsTopicRequest.getAccessCode())){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_REQUIRE);
         }
 
@@ -99,7 +100,7 @@ public class VsTopicService implements IVsTopicService {
         }
 
 
-        if(isMissingPasswordForProtectedTopic(updateVsTopicRequest.getVisibility(), updateVsTopicRequest.getAccessCode())){
+        if(TopicServiceHelper.isMissingPasswordForProtectedTopic(updateVsTopicRequest.getVisibility(), updateVsTopicRequest.getAccessCode())){
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_REQUIRE);
         }
 
@@ -116,7 +117,7 @@ public class VsTopicService implements IVsTopicService {
 
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
 
-        if(isThumbnailUpdated(updateVsTopicRequest.getThumbnail())){ // 썸네일 존재 시 업데이트
+        if(TopicServiceHelper.isThumbnailUpdated(updateVsTopicRequest.getThumbnail())){ // 썸네일 존재 시 업데이트
             vsTopic.setThumbnail(updateVsTopicRequest.getThumbnail());
         }
 
@@ -225,13 +226,5 @@ public class VsTopicService implements IVsTopicService {
 
     private List<String> buildStringList(String ... strings){
         return List.of(strings);
-    }
-
-    private boolean isThumbnailUpdated(String thumbnail){
-        return thumbnail != null && !thumbnail.isEmpty();
-    }
-
-    private boolean isMissingPasswordForProtectedTopic(Visibility visibility, String accessCode){
-        return visibility == Visibility.PASSWORD && (accessCode == null || accessCode.isBlank());
     }
 }
