@@ -5,8 +5,6 @@ import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
-import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
-import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.vstopic.mapper.TournamentMapper;
 import com.buck.vsplay.domain.vstopic.mapper.VsTopicMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
@@ -14,6 +12,7 @@ import com.buck.vsplay.domain.vstopic.repository.TournamentRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
 import com.buck.vsplay.domain.vstopic.service.checker.TopicRequestChecker;
+import com.buck.vsplay.domain.vstopic.service.finder.TopicFinder;
 import com.buck.vsplay.domain.vstopic.service.support.TopicServiceHelper;
 import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.constants.SortBy;
@@ -49,6 +48,7 @@ public class VsTopicService implements IVsTopicService {
     private final EntityManager entityManager;
     private final S3Util s3Util;
     private final TopicRequestChecker topicRequestChecker;
+    private final TopicFinder topicFinder;
 
     @Override
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
@@ -77,12 +77,10 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public void updateVsTopic(Long topicId, VsTopicDto.VsTopicUpdateRequest updateVsTopicRequest) {
-        Member existMember = authUserService.getAuthUser();
+        Member member = authUserService.getAuthUser();
 
-        VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
-                () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
-
-        TopicAccessGuard.validateTopicAccess(vsTopic, existMember);
+        VsTopic vsTopic = topicFinder.findExistingById(topicId);
+        TopicAccessGuard.validateTopicAccess(vsTopic, member);
         topicRequestChecker.checkTopicUpdateRequest(updateVsTopicRequest);
 
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
@@ -100,9 +98,7 @@ public class VsTopicService implements IVsTopicService {
     public VsTopicDto.VsTopicDetailWithAccessCodeResponse getVsTopicDetailWithAccessCode(Long topicId) {
         Optional<Member> authUser = authUserService.getAuthUserOptional();
 
-        VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
-                new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
-
+        VsTopic vsTopic = topicFinder.findExistingById(topicId);
         TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
 
         return VsTopicDto.VsTopicDetailWithAccessCodeResponse.builder()
@@ -114,9 +110,7 @@ public class VsTopicService implements IVsTopicService {
     public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
         Optional<Member> authUser = authUserService.getAuthUserOptional();
 
-        VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
-                new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
-
+        VsTopic vsTopic = topicFinder.findExistingById(topicId);
         TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
 
         List<VsTopicDto.Tournament> tournamentList = new ArrayList<>();
