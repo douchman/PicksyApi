@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.service.impl;
+package com.buck.vsplay.domain.entry.service.impl;
 
 import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
@@ -8,12 +8,12 @@ import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.entry.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.entry.repository.EntryRepository;
-import com.buck.vsplay.domain.vstopic.service.IEntryService;
-import com.buck.vsplay.domain.vstopic.service.checker.EntryRequestChecker;
+import com.buck.vsplay.domain.entry.service.IEntryService;
+import com.buck.vsplay.domain.entry.service.checker.EntryRequestChecker;
 import com.buck.vsplay.domain.vstopic.service.finder.TopicFinder;
-import com.buck.vsplay.domain.vstopic.service.handler.EntryUpdateHandler;
-import com.buck.vsplay.domain.vstopic.service.support.EntryTextExtractor;
-import com.buck.vsplay.domain.vstopic.service.support.TournamentHandler;
+import com.buck.vsplay.domain.entry.service.handler.EntryUpdateHandler;
+import com.buck.vsplay.domain.entry.service.support.EntryTextExtractor;
+import com.buck.vsplay.domain.entry.service.support.TournamentHandler;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;

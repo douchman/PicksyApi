@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.service.handler;
+package com.buck.vsplay.domain.entry.service.handler;
 
 import com.buck.vsplay.domain.entry.dto.EntryDto;
 import com.buck.vsplay.domain.entry.entiity.TopicEntry;

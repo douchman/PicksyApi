@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.service.checker;
+package com.buck.vsplay.domain.entry.service.checker;
 
 
 import com.buck.vsplay.domain.entry.dto.EntryDto;

@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.service.support;
+package com.buck.vsplay.domain.entry.service.support;
 
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
 import com.buck.vsplay.domain.entry.entiity.TopicEntry;
