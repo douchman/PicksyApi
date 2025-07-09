@@ -16,4 +16,10 @@ public class TopicFinder {
         return vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
     }
+
+    public void validateTopicExists(Long topicId){
+        if(!vsTopicRepository.existsByIdAndDeletedFalse(topicId)) {
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
+        }
+    }
 }
