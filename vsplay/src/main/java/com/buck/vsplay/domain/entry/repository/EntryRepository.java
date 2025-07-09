@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.repository;
+package com.buck.vsplay.domain.entry.repository;
 
 import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import org.springframework.data.jpa.repository.JpaRepository;

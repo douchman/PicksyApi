@@ -7,7 +7,7 @@ import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
-import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
+import com.buck.vsplay.domain.entry.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.service.IEntryService;
 import com.buck.vsplay.domain.vstopic.service.checker.EntryRequestChecker;
 import com.buck.vsplay.domain.vstopic.service.finder.TopicFinder;
