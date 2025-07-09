@@ -13,7 +13,7 @@ import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
-import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
+import com.buck.vsplay.domain.entry.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.entry.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;

@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.mapper;
+package com.buck.vsplay.domain.entry.mapper;
 
 
 import com.buck.vsplay.domain.vstopic.dto.EntryDto;

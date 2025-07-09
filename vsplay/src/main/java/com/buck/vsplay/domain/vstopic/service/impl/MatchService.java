@@ -17,7 +17,7 @@ import com.buck.vsplay.domain.vstopic.exception.tournament.TournamentException;
 import com.buck.vsplay.domain.vstopic.exception.tournament.TournamentExceptionCode;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
-import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
+import com.buck.vsplay.domain.entry.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.*;
 import com.buck.vsplay.domain.vstopic.service.IMatchService;
