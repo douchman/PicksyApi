@@ -13,6 +13,7 @@ import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.TournamentRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
+import com.buck.vsplay.domain.vstopic.service.support.FilterTextListBuilder;
 import com.buck.vsplay.domain.vstopic.service.support.TopicServiceHelper;
 import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.constants.SortBy;
@@ -58,7 +59,7 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_REQUIRE);
         }
 
-        List<String> stringList = buildStringList(
+        List<String> stringList = FilterTextListBuilder.buildStringList(
                 createVsTopicRequest.getTitle(),
                 createVsTopicRequest.getSubject(),
                 createVsTopicRequest.getDescription());
@@ -104,7 +105,7 @@ public class VsTopicService implements IVsTopicService {
             throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_REQUIRE);
         }
 
-        List<String> stringList = buildStringList(
+        List<String> stringList = FilterTextListBuilder.buildStringList(
                 updateVsTopicRequest.getTitle(),
                 updateVsTopicRequest.getSubject(),
                 updateVsTopicRequest.getDescription());
@@ -222,9 +223,5 @@ public class VsTopicService implements IVsTopicService {
                         .pageSize(topicsWithPage.getSize())
                         .build())
                 .build();
-    }
-
-    private List<String> buildStringList(String ... strings){
-        return List.of(strings);
     }
 }
