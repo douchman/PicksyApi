@@ -13,6 +13,7 @@ import com.buck.vsplay.domain.vstopic.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IEntryService;
+import com.buck.vsplay.domain.vstopic.service.handler.EntryUpdateHandler;
 import com.buck.vsplay.domain.vstopic.service.support.TournamentHandler;
 import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.ModerationStatus;
@@ -44,6 +45,7 @@ public class EntryService implements IEntryService {
     private final BadWordFilter badWordFilter;
     private final TournamentHandler tournamentHandler;
     private final S3Util s3Util;
+    private final EntryUpdateHandler entryUpdateHandler;
 
     @Override
     public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
@@ -152,9 +154,9 @@ public class EntryService implements IEntryService {
             Optional.ofNullable(entryMap.get(updateRequestEntry.getId()))
                     .ifPresent(existingEntry -> {
                         if (updateRequestEntry.isDelete()) {
-                            handleDeleteEntry(existingEntry);
+                            entryUpdateHandler.handleDeleteEntry(existingEntry);
                         } else {
-                            handleUpdateEntry(existingEntry, updateRequestEntry);
+                            entryUpdateHandler.handleUpdateEntry(existingEntry, updateRequestEntry);
                         }
                     });
         }
@@ -162,41 +164,10 @@ public class EntryService implements IEntryService {
     }
 
 
-    private void handleDeleteEntry(TopicEntry existingEntry) {
-        existingEntry.setDeleted(true);
-    }
-
-    private void handleUpdateEntry(TopicEntry existingEntry, EntryDto.UpdateEntry updateRequestEntry) {
-
-        if( updateRequestEntry.getEntryName() != null ){
-            existingEntry.setEntryName(updateRequestEntry.getEntryName());
-        }
-
-        if( updateRequestEntry.getDescription() != null ){
-            existingEntry.setDescription(updateRequestEntry.getDescription());
-        }
-
-        if( isEntryMediaUpdated(updateRequestEntry.getMediaUrl())){
-            existingEntry.setMediaType(updateRequestEntry.getMediaType());
-            existingEntry.setMediaUrl(updateRequestEntry.getMediaUrl());
-        }
-
-        if(isThumbnailUpdated(updateRequestEntry.getThumbnail())){
-            existingEntry.setThumbnail(updateRequestEntry.getThumbnail());
-        }
-    }
-
     private List<String> buildStringList(String ... strings) {
         return Arrays.stream(strings)
                 .filter(Objects::nonNull)
                 .toList();
     }
 
-    private boolean isEntryMediaUpdated(String mediaUrl){
-        return mediaUrl != null && !mediaUrl.isEmpty();
-    }
-
-    private boolean isThumbnailUpdated(String thumbnail){
-        return thumbnail != null && !thumbnail.isEmpty();
-    }
 }
