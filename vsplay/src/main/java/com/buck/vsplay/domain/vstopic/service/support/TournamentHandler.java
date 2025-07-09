@@ -1,7 +1,7 @@
 package com.buck.vsplay.domain.vstopic.service.support;
 
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
-import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
+import com.buck.vsplay.domain.entry.entiity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.entry.repository.EntryRepository;
