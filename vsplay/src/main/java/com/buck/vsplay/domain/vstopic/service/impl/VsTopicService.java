@@ -13,7 +13,7 @@ import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.TournamentRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.vstopic.service.IVsTopicService;
-import com.buck.vsplay.domain.vstopic.service.support.FilterTextListBuilder;
+import com.buck.vsplay.domain.vstopic.service.checker.TopicRequestChecker;
 import com.buck.vsplay.domain.vstopic.service.support.TopicServiceHelper;
 import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.constants.SortBy;
@@ -21,7 +21,6 @@ import com.buck.vsplay.global.constants.Visibility;
 import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
-import com.buck.vsplay.global.util.gpt.client.BadWordFilter;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,27 +47,14 @@ public class VsTopicService implements IVsTopicService {
     private final TournamentMapper tournamentMapper;
     private final AuthUserService authUserService;
     private final EntityManager entityManager;
-    private final BadWordFilter badWordFilter;
     private final S3Util s3Util;
+    private final TopicRequestChecker topicRequestChecker;
 
     @Override
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
         Member existMember = authUserService.getAuthUser();
 
-        if(TopicServiceHelper.isMissingPasswordForProtectedTopic(createVsTopicRequest.getVisibility(), createVsTopicRequest.getAccessCode())){
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_REQUIRE);
-        }
-
-        List<String> stringList = FilterTextListBuilder.buildStringList(
-                createVsTopicRequest.getTitle(),
-                createVsTopicRequest.getSubject(),
-                createVsTopicRequest.getDescription());
-
-        boolean hasBadWord = badWordFilter.containsBadWords(stringList);
-
-        if( hasBadWord ){
-            throw new VsTopicException(VsTopicExceptionCode.BAD_WORD_DETECTED);
-        }
+        topicRequestChecker.checkTopicCreateRequest(createVsTopicRequest);
 
         VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
         vsTopic.setMember(existMember);
@@ -96,25 +82,8 @@ public class VsTopicService implements IVsTopicService {
         VsTopic vsTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                 () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-        if(!vsTopic.getMember().getId().equals(existMember.getId())){
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_CREATOR_ONLY);
-        }
-
-
-        if(TopicServiceHelper.isMissingPasswordForProtectedTopic(updateVsTopicRequest.getVisibility(), updateVsTopicRequest.getAccessCode())){
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_REQUIRE);
-        }
-
-        List<String> stringList = FilterTextListBuilder.buildStringList(
-                updateVsTopicRequest.getTitle(),
-                updateVsTopicRequest.getSubject(),
-                updateVsTopicRequest.getDescription());
-
-        boolean hasBadWord = badWordFilter.containsBadWords(stringList);
-
-        if( hasBadWord ){
-            throw new VsTopicException(VsTopicExceptionCode.BAD_WORD_DETECTED);
-        }
+        TopicAccessGuard.validateTopicAccess(vsTopic, existMember);
+        topicRequestChecker.checkTopicUpdateRequest(updateVsTopicRequest);
 
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
 
