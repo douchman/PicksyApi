@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.dto;
 
 
+import com.buck.vsplay.domain.entry.dto.EntryDto;
 import com.buck.vsplay.global.constants.PlayStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;

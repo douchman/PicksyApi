@@ -1,6 +1,6 @@
 package com.buck.vsplay.domain.vstopic.service.support;
 
-import com.buck.vsplay.domain.vstopic.dto.EntryDto;
+import com.buck.vsplay.domain.entry.dto.EntryDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

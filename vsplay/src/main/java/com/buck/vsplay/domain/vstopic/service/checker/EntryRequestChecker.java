@@ -1,7 +1,7 @@
 package com.buck.vsplay.domain.vstopic.service.checker;
 
 
-import com.buck.vsplay.domain.vstopic.dto.EntryDto;
+import com.buck.vsplay.domain.entry.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryException;
 import com.buck.vsplay.domain.vstopic.exception.entry.EntryExceptionCode;
 import com.buck.vsplay.domain.vstopic.service.support.FilterTextListBuilder;

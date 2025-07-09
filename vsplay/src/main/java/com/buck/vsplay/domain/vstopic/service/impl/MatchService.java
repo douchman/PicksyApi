@@ -5,7 +5,7 @@ import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
-import com.buck.vsplay.domain.vstopic.dto.EntryDto;
+import com.buck.vsplay.domain.entry.dto.EntryDto;
 import com.buck.vsplay.domain.vstopic.dto.EntryMatchDto;
 import com.buck.vsplay.domain.vstopic.dto.TopicPlayRecordDto;
 import com.buck.vsplay.domain.vstopic.entity.*;
