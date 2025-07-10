@@ -1,6 +1,6 @@
-package com.buck.vsplay.domain.vstopic.service;
+package com.buck.vsplay.domain.comment.service;
 
-import com.buck.vsplay.domain.vstopic.dto.TopicCommentDto;
+import com.buck.vsplay.domain.comment.dto.TopicCommentDto;
 
 public interface ITopicCommentService {
     TopicCommentDto.CommentCreateResponse createTopicComment(Long topicId, TopicCommentDto.CommentCreateRequest commentCreateRequest);

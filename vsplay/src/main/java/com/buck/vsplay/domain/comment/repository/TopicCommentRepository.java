@@ -1,7 +1,7 @@
-package com.buck.vsplay.domain.vstopic.repository;
+package com.buck.vsplay.domain.comment.repository;
 
 
-import com.buck.vsplay.domain.vstopic.entity.TopicComment;
+import com.buck.vsplay.domain.comment.entity.TopicComment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

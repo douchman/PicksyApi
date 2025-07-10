@@ -1,6 +1,6 @@
-package com.buck.vsplay.domain.vstopic.specification;
+package com.buck.vsplay.domain.comment.specification;
 
-import com.buck.vsplay.domain.vstopic.entity.TopicComment;
+import com.buck.vsplay.domain.comment.entity.TopicComment;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;

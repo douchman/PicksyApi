@@ -1,8 +1,8 @@
-package com.buck.vsplay.domain.vstopic.controller;
+package com.buck.vsplay.domain.comment.controller;
 
 
-import com.buck.vsplay.domain.vstopic.dto.TopicCommentDto;
-import com.buck.vsplay.domain.vstopic.service.impl.TopicCommentService;
+import com.buck.vsplay.domain.comment.dto.TopicCommentDto;
+import com.buck.vsplay.domain.comment.service.impl.TopicCommentService;
 import com.buck.vsplay.global.dto.SingleResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,14 +1,14 @@
-package com.buck.vsplay.domain.vstopic.service.impl;
+package com.buck.vsplay.domain.comment.service.impl;
 
-import com.buck.vsplay.domain.vstopic.dto.TopicCommentDto;
-import com.buck.vsplay.domain.vstopic.entity.TopicComment;
+import com.buck.vsplay.domain.comment.dto.TopicCommentDto;
+import com.buck.vsplay.domain.comment.entity.TopicComment;
+import com.buck.vsplay.domain.comment.service.ITopicCommentService;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
-import com.buck.vsplay.domain.vstopic.repository.TopicCommentRepository;
+import com.buck.vsplay.domain.comment.repository.TopicCommentRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
-import com.buck.vsplay.domain.vstopic.service.ITopicCommentService;
-import com.buck.vsplay.domain.vstopic.specification.TopicCommentSpecification;
+import com.buck.vsplay.domain.comment.specification.TopicCommentSpecification;
 import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.DateTimeUtil;
