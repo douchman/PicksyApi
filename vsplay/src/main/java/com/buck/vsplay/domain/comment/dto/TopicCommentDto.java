@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.dto;
+package com.buck.vsplay.domain.comment.dto;
 
 
 import com.buck.vsplay.global.dto.Pagination;
