@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.exception.playrecord;
+package com.buck.vsplay.domain.match.exception;
 
 import com.buck.vsplay.global.exception.BaseExceptionCode;
 import lombok.Getter;

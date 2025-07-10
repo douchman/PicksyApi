@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.vstopic.dto;
+package com.buck.vsplay.domain.match.dto;
 
 
 import lombok.*;

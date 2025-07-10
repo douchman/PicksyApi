@@ -6,7 +6,7 @@ import com.buck.vsplay.domain.statistics.entity.EntryVersusStatistics;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.repository.EntryVersusStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryVersusStatisticsService;
-import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
+import com.buck.vsplay.domain.match.entity.EntryMatch;
 import com.buck.vsplay.domain.entry.entiity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.entry.exception.EntryException;

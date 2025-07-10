@@ -1,8 +1,8 @@
-package com.buck.vsplay.domain.vstopic.controller;
+package com.buck.vsplay.domain.match.controller;
 
-import com.buck.vsplay.domain.vstopic.dto.EntryMatchDto;
-import com.buck.vsplay.domain.vstopic.dto.TopicPlayRecordDto;
-import com.buck.vsplay.domain.vstopic.service.impl.MatchService;
+import com.buck.vsplay.domain.match.dto.EntryMatchDto;
+import com.buck.vsplay.domain.match.dto.TopicPlayRecordDto;
+import com.buck.vsplay.domain.match.service.impl.MatchService;
 import com.buck.vsplay.global.dto.SingleResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

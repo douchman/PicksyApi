@@ -2,7 +2,7 @@ package com.buck.vsplay.domain.statistics.service;
 
 import com.buck.vsplay.domain.statistics.dto.EntryVersusStatisticsDto;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
-import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
+import com.buck.vsplay.domain.match.entity.EntryMatch;
 
 public interface IEntryVersusStatisticsService {
     void handleEntryMatchCompletedEventForVersusStats(EntryEvent.VersusStatisticsEvent matchCompleteEvent);
