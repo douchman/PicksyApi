@@ -38,12 +38,9 @@ public class TopicCommentService implements ITopicCommentService {
         VsTopic vsTopic = topicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-        TopicComment savedComment = topicCommentRepository.save(TopicComment.builder()
-                .topic(vsTopic)
-                .member(authUserService.getAuthUserOptional().orElse(null))
-                .author(commentCreateRequest.getAuthor())
-                .content(commentCreateRequest.getContent())
-                .build());
+        TopicComment savedComment = topicCommentRepository.save(
+                commentMapper.toEntityFromCommentCreateRequest(
+                        vsTopic,authUserService.getAuthUserOptional().orElse(null) , commentCreateRequest));
 
         return TopicCommentDto.CommentCreateResponse.builder()
                 .author(savedComment.getAuthor())
