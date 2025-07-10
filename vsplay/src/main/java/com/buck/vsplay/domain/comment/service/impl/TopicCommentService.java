@@ -9,6 +9,7 @@ import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
 import com.buck.vsplay.domain.comment.repository.TopicCommentRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.domain.comment.specification.TopicCommentSpecification;
+import com.buck.vsplay.domain.vstopic.service.finder.TopicFinder;
 import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.DateTimeUtil;
@@ -32,7 +33,7 @@ public class TopicCommentService implements ITopicCommentService {
     private final AuthUserService authUserService;
     private final VsTopicRepository topicRepository;
     private final TopicCommentRepository topicCommentRepository;
-
+    private final TopicFinder topicFinder;
 
     @Override
     public TopicCommentDto.CommentCreateResponse createTopicComment(Long topicId, TopicCommentDto.CommentCreateRequest commentCreateRequest) {
@@ -58,9 +59,8 @@ public class TopicCommentService implements ITopicCommentService {
     public TopicCommentDto.CommentSearchResponse searchTopicCommentList(Long topicId, TopicCommentDto.CommentSearchRequest commentSearchRequest) {
 
         int page = Math.max(commentSearchRequest.getPage() - 1, 0) ;
-        if( !topicRepository.existsById(topicId) ) {
-            throw new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND);
-        }
+
+        topicFinder.findExistingById(topicId);
 
         Page<TopicComment> topicCommentPage = topicCommentRepository.findAll(
                 TopicCommentSpecification.withAllFilters(topicId, commentSearchRequest.getKeyword(), false),
