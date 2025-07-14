@@ -46,6 +46,13 @@ public class VsTopicDto {
     public static class VsTopicWithModeration extends VsTopic{
         private ModerationStatus moderationStatus;
     }
+    @Getter
+    @Setter
+    @SuperBuilder
+    @EqualsAndHashCode(callSuper = true)
+    public static class VsTopicWithAccessCode extends VsTopic{
+        private String accessCode;
+    }
 
     @Getter
     @Setter
@@ -92,6 +99,14 @@ public class VsTopicDto {
     public static class Tournament{
         Integer tournamentStage;
         String tournamentName;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @ToString
+    public static class VsTopicDetailWithAccessCodeResponse{
+        VsTopicWithAccessCode topic;
     }
 
     @Getter

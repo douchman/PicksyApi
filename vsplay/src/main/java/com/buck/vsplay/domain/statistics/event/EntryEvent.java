@@ -1,7 +1,7 @@
 package com.buck.vsplay.domain.statistics.event;
 
-import com.buck.vsplay.domain.vstopic.entity.EntryMatch;
-import com.buck.vsplay.domain.vstopic.entity.TopicEntry;
+import com.buck.vsplay.domain.match.entity.EntryMatch;
+import com.buck.vsplay.domain.entry.entiity.TopicEntry;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;

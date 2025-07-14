@@ -1,7 +1,7 @@
 package com.buck.vsplay.domain.statistics.dto;
 
 
-import com.buck.vsplay.domain.vstopic.dto.EntryDto;
+import com.buck.vsplay.domain.entry.dto.EntryDto;
 import com.buck.vsplay.global.constants.OrderType;
 import com.buck.vsplay.global.dto.Pagination;
 import lombok.*;

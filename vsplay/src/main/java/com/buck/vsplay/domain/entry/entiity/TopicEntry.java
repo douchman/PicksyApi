@@ -1,0 +1,61 @@
+package com.buck.vsplay.domain.entry.entiity;
+
+
+import com.buck.vsplay.domain.vstopic.entity.VsTopic;
+import com.buck.vsplay.global.constants.MediaType;
+import com.buck.vsplay.global.constants.ModerationStatus;
+import com.buck.vsplay.global.entity.Timestamp;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.Comment;
+
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Getter
+@Setter
+@Table(name = "TOPIC_ENTRY")
+@SequenceGenerator(name ="ENTRY_SEQ_GENERATOR", sequenceName = "ENTRY_SEQ")
+@Comment("주제에 소속되는 대결 아이템(엔트리)")
+public class TopicEntry extends Timestamp {
+
+    @Id
+    @Column(name = "entry_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ENTRY_SEQ_GENERATOR")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "topic_id")
+    private VsTopic topic;
+
+    @Column(name = "entry_name", nullable = false, length = 30)
+    @Comment("엔트리 이름")
+    private String entryName;
+
+    @Column(name = "description", nullable = false, length = 200)
+    @Comment("엔트리 설명")
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "media_type", nullable = false)
+    @Comment("엔트리 미디어 타입 (사진, 영상링크 등 )")
+    private MediaType mediaType = MediaType.IMAGE;
+
+    @Column(name = "media_url")
+    @Comment("엔트리 미디어 주소")
+    private String mediaUrl;
+
+    @Column(name = "thumbnail")
+    @Comment("엔트리 썸네일")
+    private String thumbnail;
+
+    @Column(name = "is_delete", columnDefinition = "boolean default false")
+    @Comment("삭제 여부")
+    private boolean deleted;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moderation_status")
+    @Comment("비속어 필터 검토 상태")
+    private ModerationStatus moderationStatus = ModerationStatus.WAITING;
+}
