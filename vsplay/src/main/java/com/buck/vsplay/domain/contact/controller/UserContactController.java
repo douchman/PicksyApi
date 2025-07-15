@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,7 +20,8 @@ public class UserContactController {
     private final IUserContactService userContactService;
 
     @PostMapping()
-    public ResponseEntity<SingleResponseDto<Integer>> createUserContact(UserContactDto.ContactCreateRequest request) {
+    public ResponseEntity<SingleResponseDto<Integer>> createUserContact(
+            @RequestBody  UserContactDto.ContactCreateRequest request) {
         userContactService.createUserContact(request);
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
     }
