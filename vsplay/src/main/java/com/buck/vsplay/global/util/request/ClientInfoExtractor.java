@@ -20,7 +20,7 @@ public class ClientInfoExtractor {
             return ip.split(",")[0].trim();
         }
 
-        return ip;
+        return request.getRemoteAddr();
     }
 
     public static String extractUserAgentFromRequest( ) {
