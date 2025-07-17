@@ -5,6 +5,7 @@ import com.buck.vsplay.domain.inquiry.constants.InquiryType;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,8 @@ public class Inquiry extends Timestamp {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INQUIRY_SEQ_GENERATOR")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'ETC'")
     @Column(name = "inquiry_type")
     @Comment("문의 유형")
     private InquiryType inquiryType;
@@ -45,6 +48,8 @@ public class Inquiry extends Timestamp {
     @Comment("문의 내용")
     private String content;
 
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'UNREAD'")
     @Column(name = "status")
     @Comment("문의 상태( 미확인, 확인, 답변완료")
     private InquiryStatus status;
