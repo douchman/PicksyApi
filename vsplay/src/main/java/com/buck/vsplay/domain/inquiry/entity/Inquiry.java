@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.inquiry.entity;
 
 import com.buck.vsplay.domain.inquiry.constants.InquiryStatus;
+import com.buck.vsplay.domain.inquiry.constants.InquiryType;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,6 +24,10 @@ public class Inquiry extends Timestamp {
     @Column(name = "inquiry_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INQUIRY_SEQ_GENERATOR")
     private Long id;
+
+    @Column(name = "inquiry_type")
+    @Comment("문의 유형")
+    private InquiryType inquiryType;
 
     @Column(name = "author", length = 50)
     @Comment("작성자 명")
