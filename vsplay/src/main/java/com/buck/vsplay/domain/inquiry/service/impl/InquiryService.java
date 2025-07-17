@@ -36,14 +36,14 @@ public class InquiryService implements IinquiryService {
 
         // 알림 메일 전송
         try {
-            inquiryEmail.sendInquiryMail(request.getAuthor(), request.getEmail(), request.getTitle(), request.getContent());
+            inquiryEmail.sendInquiryMail(request);
         } catch (Exception e) {
             log.warn("문의 등록 알림 메일 전송에 실패했습니다.[ author: {}, email: {}] -{} ", request.getAuthor(), request.getEmail(), e.getMessage(), e);
         }
 
         // Slack 알림 메시지 전송
         try {
-            inquirySlack.sendInquiryCreatedSlackMessage(request.getAuthor(), request.getEmail(), request.getTitle(), request.getContent());
+            inquirySlack.sendInquiryCreatedSlackMessage(request);
         } catch (Exception e) {
             log.warn("문의 등록 Slack 메시지 전송에 실패했습니다.[ author: {}, email: {}] -{} ", request.getAuthor(), request.getEmail(), e.getMessage(), e);
         }
