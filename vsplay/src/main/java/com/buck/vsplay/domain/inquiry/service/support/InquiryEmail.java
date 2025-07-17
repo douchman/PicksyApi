@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.contact.service.support;
+package com.buck.vsplay.domain.inquiry.service.support;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;

@@ -1,4 +1,4 @@
-package com.buck.vsplay.domain.contact.service.support;
+package com.buck.vsplay.domain.inquiry.service.support;
 
 import com.slack.api.Slack;
 import com.slack.api.webhook.Payload;

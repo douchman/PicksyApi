@@ -1,6 +1,6 @@
-package com.buck.vsplay.domain.contact.entity;
+package com.buck.vsplay.domain.inquiry.entity;
 
-import com.buck.vsplay.domain.contact.constants.UserContactStatus;
+import com.buck.vsplay.domain.inquiry.constants.InquiryStatus;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,14 +14,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@SequenceGenerator(name = "CONTACT_SEQ_GENERATOR", sequenceName = "CONTACT_SEQ")
-@Table(name = "USER_CONTACT")
+@SequenceGenerator(name = "INQUIRY_SEQ_GENERATOR", sequenceName = "INQUIRY_SEQ")
+@Table(name = "INQUIRY")
 @Comment("유저 문의")
-public class UserContact extends Timestamp {
+public class Inquiry extends Timestamp {
 
     @Id
-    @Column(name = "contact_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CONTACT_SEQ_GENERATOR")
+    @Column(name = "inquiry_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INQUIRY_SEQ_GENERATOR")
     private Long id;
 
     @Column(name = "author", length = 50)
@@ -42,7 +42,7 @@ public class UserContact extends Timestamp {
 
     @Column(name = "status")
     @Comment("문의 상태( 미확인, 확인, 답변완료")
-    private UserContactStatus status;
+    private InquiryStatus status;
 
     @Column(name = "answered_at")
     @Comment("답변 일시")
