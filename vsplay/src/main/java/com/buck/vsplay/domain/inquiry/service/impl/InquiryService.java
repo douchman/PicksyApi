@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.inquiry.service.impl;
 
+import com.buck.vsplay.domain.inquiry.constants.InquiryStatus;
 import com.buck.vsplay.domain.inquiry.dto.InquiryDto;
 import com.buck.vsplay.domain.inquiry.entity.Inquiry;
 import com.buck.vsplay.domain.inquiry.mapper.InquiryMapper;
@@ -28,6 +29,7 @@ public class InquiryService implements IinquiryService {
     public void createInquiry(InquiryDto.InquiryCreateRequest request) {
         Inquiry userContact = inquiryMapper.toEntityFromCreateRequestDto(request);
 
+        userContact.setStatus(InquiryStatus.UNREAD);
         userContact.setIpAddress(ClientInfoExtractor.extractIpFromRequest());
         userContact.setUserAgent(ClientInfoExtractor.extractUserAgentFromRequest());
         inquiryRepository.save(userContact);
@@ -45,6 +47,5 @@ public class InquiryService implements IinquiryService {
         } catch (Exception e) {
             log.warn("문의 등록 Slack 메시지 전송에 실패했습니다.[ author: {}, email: {}] -{} ", request.getAuthor(), request.getEmail(), e.getMessage(), e);
         }
-
     }
 }
