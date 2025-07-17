@@ -1,16 +1,19 @@
-package com.buck.vsplay.domain.contact.dto;
+package com.buck.vsplay.domain.inquiry.dto;
 
 
+import com.buck.vsplay.domain.inquiry.constants.InquiryType;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserContactDto {
+public class InquiryDto {
 
     @Getter
     @Setter
     @Builder
-    public static class ContactCreateRequest{
+    public static class InquiryCreateRequest{
+        private InquiryType inquiryType;
+
         private String author;
 
         @NotNull(message = "이메일은 필수 입력 항목 입니다.")

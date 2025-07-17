@@ -1,8 +1,8 @@
-package com.buck.vsplay.domain.contact.controller;
+package com.buck.vsplay.domain.inquiry.controller;
 
 
-import com.buck.vsplay.domain.contact.dto.UserContactDto;
-import com.buck.vsplay.domain.contact.service.IUserContactService;
+import com.buck.vsplay.domain.inquiry.dto.InquiryDto;
+import com.buck.vsplay.domain.inquiry.service.IinquiryService;
 import com.buck.vsplay.global.dto.SingleResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("contact")
-public class UserContactController {
+@RequestMapping("inquiry")
+public class InquiryContactController {
 
-    private final IUserContactService userContactService;
+    private final IinquiryService userContactService;
 
     @PostMapping()
-    public ResponseEntity<SingleResponseDto<Integer>> createUserContact(
-            @RequestBody  UserContactDto.ContactCreateRequest request) {
-        userContactService.createUserContact(request);
+    public ResponseEntity<SingleResponseDto<Integer>> createInquiry(
+            @RequestBody  InquiryDto.InquiryCreateRequest request) {
+        userContactService.createInquiry(request);
         return new ResponseEntity<>(new SingleResponseDto<>(HttpStatus.OK.value()), HttpStatus.OK);
     }
 }

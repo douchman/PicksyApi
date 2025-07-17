@@ -1,9 +1,11 @@
-package com.buck.vsplay.domain.contact.entity;
+package com.buck.vsplay.domain.inquiry.entity;
 
-import com.buck.vsplay.domain.contact.constants.UserContactStatus;
+import com.buck.vsplay.domain.inquiry.constants.InquiryStatus;
+import com.buck.vsplay.domain.inquiry.constants.InquiryType;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
 import java.time.LocalDateTime;
@@ -14,15 +16,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@SequenceGenerator(name = "CONTACT_SEQ_GENERATOR", sequenceName = "CONTACT_SEQ")
-@Table(name = "USER_CONTACT")
+@SequenceGenerator(name = "INQUIRY_SEQ_GENERATOR", sequenceName = "INQUIRY_SEQ")
+@Table(name = "INQUIRY")
 @Comment("유저 문의")
-public class UserContact extends Timestamp {
+public class Inquiry extends Timestamp {
 
     @Id
-    @Column(name = "contact_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CONTACT_SEQ_GENERATOR")
+    @Column(name = "inquiry_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INQUIRY_SEQ_GENERATOR")
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'ETC'")
+    @Column(name = "inquiry_type")
+    @Comment("문의 유형")
+    private InquiryType inquiryType;
 
     @Column(name = "author", length = 50)
     @Comment("작성자 명")
@@ -40,9 +48,11 @@ public class UserContact extends Timestamp {
     @Comment("문의 내용")
     private String content;
 
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'UNREAD'")
     @Column(name = "status")
     @Comment("문의 상태( 미확인, 확인, 답변완료")
-    private UserContactStatus status;
+    private InquiryStatus status;
 
     @Column(name = "answered_at")
     @Comment("답변 일시")
