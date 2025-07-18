@@ -4,7 +4,9 @@ spring:
   profiles:
     active: ${SPRING_PROFILE_ACTIVE}
   config:
-    import: "optional:classpath:application-${spring.profiles.active}.yml"  # ✅ 프로파일을 자동으로 감지
+    import:
+      - "optional:classpath:application-${spring.profiles.active}.yml"  # ✅ 프로파일을 자동으로 감지
+      - "classpath:email.yml"
 
 logging:
   config: classpath:logback-spring.xml
