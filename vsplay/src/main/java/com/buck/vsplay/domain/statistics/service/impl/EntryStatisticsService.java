@@ -1,6 +1,6 @@
 package com.buck.vsplay.domain.statistics.service.impl;
 
-import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
 import com.buck.vsplay.domain.statistics.dto.EntryStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.EntryStatistics;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
@@ -112,11 +112,11 @@ public class EntryStatisticsService implements IEntryStatisticsService {
     @Override
     public EntryStatisticsDto.EntryStatSearchResponse getEntryStatisticsWithEntryInfo(Long topicId, EntryStatisticsDto.EntryStatSearchRequest entryStatSearchRequest) {
 
-        Optional<Member> authUser = authUserService.getAuthUserOptional();
+        Optional<CachedMemberDto> cachedMemberOpt = authUserService.getCachedMemberOptional();
         VsTopic targetTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-        TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
+        TopicAccessGuard.validateTopicAccess(targetTopic, cachedMemberOpt.orElse(null));
 
         List<EntryStatisticsDto.EntryStatWithEntryInfo> entriesStatistics = new ArrayList<>();
         int page = Math.max(entryStatSearchRequest.getPage() - 1 , 0); // index 조정
@@ -178,12 +178,12 @@ public class EntryStatisticsService implements IEntryStatisticsService {
 
     @Override
     public EntryStatisticsDto.SingleEntryStatsResponse getSingleEntryStatistics(Long topicId, Long entryId) {
-        Optional<Member> authUser = authUserService.getAuthUserOptional();
+        Optional<CachedMemberDto> cachedMemberOpt = authUserService.getCachedMemberOptional();
         VsTopic targetTopic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
 
-        TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
+        TopicAccessGuard.validateTopicAccess(targetTopic, cachedMemberOpt.orElse(null));
 
         EntryStatistics entryStatistics= entryStatisticsRepository.findByTopicEntryIdAndDeletedFalse(entryId).orElseThrow(
                 () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND)
