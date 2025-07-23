@@ -29,6 +29,11 @@ spring:
       initialize-schema: always
     job:
       enabled: false
+  data:
+    redis:
+      port: 6379
+      host: ${REDIS_HOST}
+      timeout: 5000
 jwt:
   key: ${VSPLAY_JWT_KEY}
   issuer : ${VSPLAY_ISSUER}
