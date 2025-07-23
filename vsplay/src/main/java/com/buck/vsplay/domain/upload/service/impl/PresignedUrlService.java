@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.upload.service.impl;
 
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
 import com.buck.vsplay.domain.upload.dto.PresignedUrlDto;
 import com.buck.vsplay.domain.upload.service.IPresignedUrlService;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
@@ -22,11 +23,11 @@ public class PresignedUrlService implements IPresignedUrlService {
 
     @Override
     public PresignedUrlDto.GeneratePresignedUrlResponse generateClientUploadUrl(PresignedUrlDto.GeneratePresignedUrlRequest generatePresignedUrlRequest) {
-        Long memberId = authUserService.getAuthUser().getId();
+        CachedMemberDto cachedMemberDto = authUserService.getCachedMember();
 
         List<PresignedUrlDto.PresignedFile> presignedFiles = generatePresignedUrlRequest.getRequestFiles().stream()
                 .map( file -> {
-                    String objectKey = generateObjectKey(memberId, file.getOriginalFileName());
+                    String objectKey = generateObjectKey(cachedMemberDto.getId(), file.getOriginalFileName());
                     String presignedUploadUrl = s3Util.generatePreSignedUploadUrl(
                             objectKey,
                             file.getContentType(),
