@@ -1,11 +1,14 @@
 package com.buck.vsplay.global.security.jwt;
 
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
+import com.buck.vsplay.domain.member.service.impl.MemberCacheService;
 import com.buck.vsplay.global.security.jwt.exception.JwtException;
 import com.buck.vsplay.global.security.jwt.exception.JwtExceptionCode;
 import com.buck.vsplay.global.security.user.CustomUserDetail;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 @Slf4j
 public class JwtService{
@@ -31,6 +35,8 @@ public class JwtService{
 
     @Value("${jwt.issuer}")
     private String issuer;
+
+    private final MemberCacheService memberCacheService;
 
     public String generateAccessToken(CustomUserDetail customUserDetail) {
         Key key = getKeyFromSecretKey(secretKey);
@@ -112,6 +118,10 @@ public class JwtService{
         Long userId = extractUserId(token); // JWT에서 사용자 ID 추출
         List<GrantedAuthority> authorities = extractAuthorities(token); // JWT에서 권한 추출
 
-        return new UsernamePasswordAuthenticationToken(userId, null, authorities);
+        CachedMemberDto cachedMemberDto = memberCacheService.getMember(userId);
+
+        CustomUserDetail userDetail = new CustomUserDetail(cachedMemberDto, authorities);
+
+        return new UsernamePasswordAuthenticationToken(userDetail, null, authorities);
     }
 }

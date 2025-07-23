@@ -1,5 +1,6 @@
 package com.buck.vsplay.domain.member.service.impl;
 
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
 import com.buck.vsplay.domain.member.dto.MemberDto;
 import com.buck.vsplay.domain.member.entity.Member;
 import com.buck.vsplay.domain.member.exception.MemberException;
@@ -28,9 +29,9 @@ public class MemberService implements IMemberService {
 
     @Override
     public MemberDto.MemberInfo getMemberInfo() {
-        Member authMember = authUserService.getAuthUser();
+        CachedMemberDto cachedMemberDto = authUserService.getCachedMember();
 
-        Member member = memberRepository.findById(authMember.getId()).orElseThrow(
+        Member member = memberRepository.findById(cachedMemberDto.getId()).orElseThrow(
                 () -> new MemberException(MemberExceptionCode.MEMBER_NOT_FOUND)
         );
 

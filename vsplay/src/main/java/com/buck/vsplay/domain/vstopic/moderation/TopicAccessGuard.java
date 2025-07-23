@@ -1,6 +1,6 @@
 package com.buck.vsplay.domain.vstopic.moderation;
 
-import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TopicAccessGuard {
-    public static void validateTopicAccess(VsTopic topic, Member member){
+    public static void validateTopicAccess(VsTopic topic, CachedMemberDto cachedMemberDto){
 
         boolean isPrivate = isPrivateTopic(topic.getVisibility());
-        boolean isNotOwner = member == null || !topic.getMember().getId().equals(member.getId());
+        boolean isNotOwner = cachedMemberDto == null || !topic.getMember().getId().equals(cachedMemberDto.getId());
         boolean isNotPassed = topic.getModerationStatus() != ModerationStatus.PASSED;
 
         if( isNotOwner && isPrivate) {

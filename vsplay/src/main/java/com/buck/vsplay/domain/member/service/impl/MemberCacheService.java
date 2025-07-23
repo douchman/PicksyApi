@@ -42,7 +42,6 @@ public class MemberCacheService implements IMemberCacheService {
         CachedMemberDto cachedMember = CachedMemberDto.builder()
                 .id(member.getId())
                 .loginId(member.getLoginId())
-                .memberName(member.getMemberName())
                 .build();
 
         redisTemplate.opsForValue().set(key, cachedMember, TTL);

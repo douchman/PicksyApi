@@ -1,6 +1,6 @@
 package com.buck.vsplay.domain.statistics.service.impl;
 
-import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
 import com.buck.vsplay.domain.statistics.dto.TopicStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.TopicStatistics;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
@@ -93,12 +93,12 @@ public class TopicStatisticsService implements ITopicStatisticsService {
     @Override
     public TopicStatisticsDto.TopicStatisticsResponse getTopicStatistics(Long topicId) {
 
-        Optional<Member> authUser = authUserService.getAuthUserOptional();
+        Optional<CachedMemberDto> cachedMemberOpt = authUserService.getCachedMemberOptional();
 
         VsTopic topic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-        TopicAccessGuard.validateTopicAccess(topic, authUser.orElse(null));
+        TopicAccessGuard.validateTopicAccess(topic, cachedMemberOpt.orElse(null));
 
         TopicStatisticsDto.TopicStatistics topicStatistics = topicStatisticsMapper.toTopicStatisticsDtoFromEntity(topicStatisticsRepository.findByVsTopic(topicId));
         topicStatistics.setEntryCount(entryRepository.countAvailableEntriesByTopicId(topicId).intValue());
