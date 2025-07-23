@@ -1,6 +1,6 @@
 package com.buck.vsplay.domain.entry.service.impl;
 
-import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.entry.dto.EntryDto;
 import com.buck.vsplay.domain.entry.entiity.TopicEntry;
@@ -74,10 +74,10 @@ public class EntryService implements IEntryService {
 
     @Override
     public void createEntries(Long topicId, EntryDto.CreateEntriesRequest request) {
-        Member member = authUserService.getAuthUser();
+        CachedMemberDto cachedMember = authUserService.getCachedMember();
 
         VsTopic vsTopic = topicFinder.findExistingById(topicId);
-        TopicAccessGuard.validateTopicAccess(vsTopic, member);
+        TopicAccessGuard.validateTopicAccess(vsTopic, cachedMember);
         entryRequestChecker.checkEntryCreateRequest(request);
 
         List<TopicEntry> topicEntries = new ArrayList<>();
@@ -95,10 +95,10 @@ public class EntryService implements IEntryService {
 
     @Override
     public void updateEntries(Long topicId, EntryDto.UpdateEntryRequest updatedRequest) {
-        Member member = authUserService.getAuthUser();
+        CachedMemberDto cachedMember = authUserService.getCachedMember();
 
         VsTopic vsTopic = topicFinder.findExistingById(topicId);
-        TopicAccessGuard.validateTopicAccess(vsTopic, member);
+        TopicAccessGuard.validateTopicAccess(vsTopic, cachedMember);
 
 
         List<EntryDto.UpdateEntry> entriesToUpdate = Optional
