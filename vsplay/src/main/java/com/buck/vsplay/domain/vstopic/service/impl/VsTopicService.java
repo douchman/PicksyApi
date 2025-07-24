@@ -1,6 +1,7 @@
 package com.buck.vsplay.domain.vstopic.service.impl;
 
-import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
+import com.buck.vsplay.domain.member.repository.MemberRepository;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.vstopic.dto.VsTopicDto;
 import com.buck.vsplay.domain.vstopic.entity.TopicTournament;
@@ -49,15 +50,16 @@ public class VsTopicService implements IVsTopicService {
     private final S3Util s3Util;
     private final TopicRequestChecker topicRequestChecker;
     private final TopicFinder topicFinder;
+    private final MemberRepository memberRepository;
 
     @Override
     public VsTopicDto.VsTopicCreateResponse createVsTopic(VsTopicDto.VsTopicCreateRequest createVsTopicRequest) {
-        Member existMember = authUserService.getAuthUser();
+        CachedMemberDto cachedMemberDto = authUserService.getCachedMember();
 
         topicRequestChecker.checkTopicCreateRequest(createVsTopicRequest);
 
         VsTopic vsTopic = vsTopicMapper.toEntityFromVstopicCreateRequestDtoWithoutThumbnail(createVsTopicRequest);
-        vsTopic.setMember(existMember);
+        vsTopic.setMember(memberRepository.getReferenceById(cachedMemberDto.getId()));
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
         vsTopic.setThumbnail(createVsTopicRequest.getThumbnail());
 
@@ -77,10 +79,10 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public void updateVsTopic(Long topicId, VsTopicDto.VsTopicUpdateRequest updateVsTopicRequest) {
-        Member member = authUserService.getAuthUser();
+        CachedMemberDto cachedMemberDto = authUserService.getCachedMember();
 
         VsTopic vsTopic = topicFinder.findExistingById(topicId);
-        TopicAccessGuard.validateTopicAccess(vsTopic, member);
+        TopicAccessGuard.validateTopicAccess(vsTopic, cachedMemberDto);
         topicRequestChecker.checkTopicUpdateRequest(updateVsTopicRequest);
 
         vsTopic.setModerationStatus(ModerationStatus.PASSED);
@@ -96,10 +98,10 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public VsTopicDto.VsTopicDetailWithAccessCodeResponse getVsTopicDetailWithAccessCode(Long topicId) {
-        Optional<Member> authUser = authUserService.getAuthUserOptional();
+        Optional<CachedMemberDto> cachedMemberDtoOpt = authUserService.getCachedMemberOptional();
 
         VsTopic vsTopic = topicFinder.findExistingById(topicId);
-        TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
+        TopicAccessGuard.validateTopicAccess(vsTopic, cachedMemberDtoOpt.orElse(null));
 
         return VsTopicDto.VsTopicDetailWithAccessCodeResponse.builder()
                 .topic(vsTopicMapper.toVsTopicDtoFromEntityWithAccessCode(vsTopic, s3Util))
@@ -108,10 +110,10 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public VsTopicDto.VsTopicDetailWithTournamentsResponse getVsTopicDetailWithTournaments(Long topicId) {
-        Optional<Member> authUser = authUserService.getAuthUserOptional();
+        Optional<CachedMemberDto> cachedMemberDtoOpt = authUserService.getCachedMemberOptional();
 
         VsTopic vsTopic = topicFinder.findExistingById(topicId);
-        TopicAccessGuard.validateTopicAccess(vsTopic, authUser.orElse(null));
+        TopicAccessGuard.validateTopicAccess(vsTopic, cachedMemberDtoOpt.orElse(null));
 
         List<VsTopicDto.Tournament> tournamentList = new ArrayList<>();
         List<TopicTournament> topicTournaments = tournamentRepository.findByVsTopicIdAndActiveTrue(vsTopic.getId());
@@ -170,12 +172,12 @@ public class VsTopicService implements IVsTopicService {
 
     @Override
     public VsTopicDto.MyTopicsResponse getMyVsTopics(VsTopicDto.VsTopicSearchRequest vsTopicSearchRequest) {
-        Member member = authUserService.getAuthUser();
+        CachedMemberDto cachedMemberDto = authUserService.getCachedMember();
 
         int page = Math.max(vsTopicSearchRequest.getPage() - 1 , 0); // index 조정
         Page<VsTopic> topicsWithPage;
 
-        topicsWithPage = vsTopicRepository.findTopicsByMemberIdAndTitleAndVisibility(member.getId(), vsTopicSearchRequest.getKeyword(), vsTopicSearchRequest.getVisibility(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
+        topicsWithPage = vsTopicRepository.findTopicsByMemberIdAndTitleAndVisibility(cachedMemberDto.getId(), vsTopicSearchRequest.getKeyword(), vsTopicSearchRequest.getVisibility(), PageRequest.of(page, vsTopicSearchRequest.getSize()));
 
         return VsTopicDto.MyTopicsResponse.builder()
                 .topicList(vsTopicMapper.toVsTopicDtoWithModerationListFromEntityList(topicsWithPage.getContent(), s3Util))
