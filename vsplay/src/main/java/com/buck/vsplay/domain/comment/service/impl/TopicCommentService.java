@@ -4,6 +4,8 @@ import com.buck.vsplay.domain.comment.dto.TopicCommentDto;
 import com.buck.vsplay.domain.comment.entity.TopicComment;
 import com.buck.vsplay.domain.comment.mapper.CommentMapper;
 import com.buck.vsplay.domain.comment.service.ITopicCommentService;
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
+import com.buck.vsplay.domain.member.repository.MemberRepository;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicException;
 import com.buck.vsplay.domain.vstopic.exception.vstopic.VsTopicExceptionCode;
@@ -20,6 +22,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,16 +35,25 @@ public class TopicCommentService implements ITopicCommentService {
     private final TopicCommentRepository topicCommentRepository;
     private final TopicFinder topicFinder;
     private final CommentMapper commentMapper;
+    private final MemberRepository memberRepository;
 
     @Override
     public TopicCommentDto.CommentCreateResponse createTopicComment(Long topicId, TopicCommentDto.CommentCreateRequest commentCreateRequest) {
 
+        Optional<CachedMemberDto> cachedMemberOpt = authUserService.getCachedMemberOptional();
+
         VsTopic vsTopic = topicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-        TopicComment savedComment = topicCommentRepository.save(
-                commentMapper.toEntityFromCommentCreateRequest(
-                        vsTopic,authUserService.getAuthUserOptional().orElse(null) , commentCreateRequest));
+        TopicComment.TopicCommentBuilder topicComment = TopicComment.builder()
+                .topic(vsTopic)
+                .author(commentCreateRequest.getAuthor())
+                .content(commentCreateRequest.getContent());
+
+        cachedMemberOpt.ifPresent(cachedMemberDto ->
+                topicComment.member(memberRepository.getReferenceById(cachedMemberDto.getId())));
+
+        TopicComment savedComment = topicCommentRepository.save(topicComment.build());
 
         return TopicCommentDto.CommentCreateResponse.builder()
                 .author(savedComment.getAuthor())

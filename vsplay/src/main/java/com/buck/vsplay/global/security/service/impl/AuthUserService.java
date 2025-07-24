@@ -1,8 +1,8 @@
 package com.buck.vsplay.global.security.service.impl;
 
-import com.buck.vsplay.domain.member.entity.Member;
-import com.buck.vsplay.domain.member.repository.MemberRepository;
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
 import com.buck.vsplay.global.security.service.IAuthUserService;
+import com.buck.vsplay.global.security.user.CustomUserDetail;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -17,24 +17,22 @@ import java.util.Optional;
 @Slf4j
 public class AuthUserService implements IAuthUserService {
 
-    private final MemberRepository memberRepository;
-
     @Override
-    public Optional<Member> getAuthUserOptional() {
+    public Optional<CachedMemberDto> getCachedMemberOptional() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // 인증 정보가 없거나 principal이 Long 타입이 아니면 비로그인
-        if (authentication == null || !(authentication.getPrincipal() instanceof Long memberId)) {
+        // 인증 정보가 없거나 principal 이 CustomUserDetail 가 아니면 비로그인
+        if(authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetail userDetail )) {
             return Optional.empty();
         }
 
-        // DB에서 사용자 정보 조회 후 반환
-        return memberRepository.findById(memberId);
+        return Optional.of(
+                new CachedMemberDto(userDetail.getId(), userDetail.getUsername())
+        );
     }
 
     @Override
-    public Member getAuthUser() {
-        return getAuthUserOptional()
-                .orElseThrow(() -> new IllegalStateException("유저 정보를 확인할 수 없습니다."));
+    public CachedMemberDto getCachedMember() {
+        return getCachedMemberOptional().orElseThrow(() -> new IllegalStateException("유저 정보를 확인할 수 없습니다."));
     }
 }

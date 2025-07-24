@@ -6,7 +6,7 @@ import com.buck.vsplay.domain.match.entity.EntryMatch;
 import com.buck.vsplay.domain.match.entity.TopicPlayRecord;
 import com.buck.vsplay.domain.match.repository.EntryMatchRepository;
 import com.buck.vsplay.domain.match.repository.TopicPlayRecordRepository;
-import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
@@ -60,13 +60,13 @@ import java.util.*;
     @Override
     public TopicPlayRecordDto.PlayRecordResponse createTopicPlayRecord(Long topicId, TopicPlayRecordDto.PlayRecordRequest playRecordRequest) {
 
-        Optional<Member> authUser = authUserService.getAuthUserOptional();
+        Optional<CachedMemberDto> cachedMemberOpt = authUserService.getCachedMemberOptional();
 
         try {
             VsTopic topic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
                     () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-            TopicAccessGuard.validateTopicAccess(topic, authUser.orElse(null));
+            TopicAccessGuard.validateTopicAccess(topic, cachedMemberOpt.orElse(null));
 
             if(isPasswordTopic(topic.getVisibility()) && !isTopicAccessCodeValid(topic.getAccessCode(), playRecordRequest.getAccessCode())){
                 throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_INVALID);

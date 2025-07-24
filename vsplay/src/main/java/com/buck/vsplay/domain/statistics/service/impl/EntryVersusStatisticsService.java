@@ -1,6 +1,6 @@
 package com.buck.vsplay.domain.statistics.service.impl;
 
-import com.buck.vsplay.domain.member.entity.Member;
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
 import com.buck.vsplay.domain.statistics.dto.EntryVersusStatisticsDto;
 import com.buck.vsplay.domain.statistics.entity.EntryVersusStatistics;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
@@ -67,11 +67,11 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
 
         List<EntryVersusStatisticsDto.OpponentEntryInfoWithMatchRecord> opponentEntryInfoWithMatchRecords = new ArrayList<>();
 
-        Optional<Member> authUser = authUserService.getAuthUserOptional();
+        Optional<CachedMemberDto> cachedMemberOpt = authUserService.getCachedMemberOptional();
         VsTopic targetTopic = topicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(() ->
                 new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
 
-        TopicAccessGuard.validateTopicAccess(targetTopic, authUser.orElse(null));
+        TopicAccessGuard.validateTopicAccess(targetTopic, cachedMemberOpt.orElse(null));
 
         TopicEntry topicEntry = entryRepository.findWithTopicByEntryId(entryId);
 

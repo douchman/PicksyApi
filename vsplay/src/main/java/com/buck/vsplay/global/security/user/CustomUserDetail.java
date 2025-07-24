@@ -1,9 +1,9 @@
 package com.buck.vsplay.global.security.user;
 
+import com.buck.vsplay.domain.member.dto.CachedMemberDto;
 import com.buck.vsplay.domain.member.entity.Member;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,7 +15,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@ToString
 public class CustomUserDetail implements UserDetails {
     private final Long id;
     private final String username;
@@ -23,10 +22,17 @@ public class CustomUserDetail implements UserDetails {
     private final List<GrantedAuthority> authorities;
 
     public CustomUserDetail(Member member){
-        id = member.getId();
-        username = member.getLoginId();
-        password = member.getPassword();
-        authorities = List.of(new SimpleGrantedAuthority(member.getRole().getRoleName()));
+        this.id = member.getId();
+        this.username = member.getLoginId();
+        this.password = member.getPassword();
+        this.authorities = List.of(new SimpleGrantedAuthority(member.getRole().getRoleName()));
+    }
+
+    public CustomUserDetail(CachedMemberDto cachedMemberDto, Collection<? extends GrantedAuthority> authorities) {
+        this.id = cachedMemberDto.getId();
+        this.username = cachedMemberDto.getLoginId();
+        this.password = null;
+        this.authorities = List.of(new SimpleGrantedAuthority(authorities.toString()));
     }
 
     @Override
