@@ -30,12 +30,10 @@ public class MemberCacheService implements IMemberCacheService {
         Object cached = redisTemplate.opsForValue().get(key);
 
         if(cached instanceof CachedMemberDto dto) {
-            log.info("✅ Redis Cache Hit");
             return dto;
         }
 
         // 캐시 미존재 : cache miss
-        log.info("❌ Redis Cache Missed");
         Member member = memberRepository.findById(memberId).orElseThrow(() ->
                 new MemberException(MemberExceptionCode.MEMBER_NOT_FOUND));
 
