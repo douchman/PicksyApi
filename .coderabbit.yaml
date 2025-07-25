@@ -1,0 +1,19 @@
+# .coderabbit.yaml 
+language: "ko-KR" # 한국어로 설정
+early_access: false
+
+reviews:
+  profile: "chill" # 리뷰 강도 설정 : 	부드럽고 관대한 스타일 (지적 최소)
+  request_changes_workflow: true # 리뷰 통과 시 자동 승인
+  high_level_summary: true # 리뷰 요약 포함
+  poem: false # 리뷰 마지막 시 ( just Fun ) : 비활성화
+  review_status: true # "Review skipped " 메시지 표시 : 활성화
+  collapse_walkthrough: false # 리뷰 상세 설명 접기 : 비활성화
+
+  auto_review:
+    enabled: true # 자동 리뷰 : 활성화
+    drafts: false # draft PR 리뷰 : 비활성화
+    target_branches:  # 리뷰 대상 브랜치
+      - "dev" 
+chat:
+  auto_reply: true # PR 코멘트에 대한 자동 응답
