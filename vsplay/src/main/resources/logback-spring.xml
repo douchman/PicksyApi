@@ -17,6 +17,13 @@
     </springProfile>
 
     <springProfile name="prod">
+
+        <appender name="STARTUP_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
         <springProperty scope="context" name="LOG_PATH" source="logging.file.path"/>
         <!-- Spring Security 로그 레벨 설정 : WARN noisy 최소화 -->
         <logger name="org.springframework.security" level="WARN"/>
@@ -37,6 +44,10 @@
         <!-- 커넥션 풀 (Hikari) 로그는 최소화 -->
         <logger name="com.zaxxer.hikari" level="INFO"/>
 
+        <logger name="org.springframework.boot" level="INFO" additivity="false">
+            <appender-ref ref="STARTUP_CONSOLE"/>
+        </logger>
+
         <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>${LOG_PATH}/app.json</file>
             <append>true</append>
@@ -53,6 +64,7 @@
 
         <root level="INFO">
             <appender-ref ref="FILE_JSON"/>
+            <appender-ref ref="STARTUP_CONSOLE"/>
         </root>
     </springProfile>
 </configuration>
