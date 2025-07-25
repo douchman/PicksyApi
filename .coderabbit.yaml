@@ -3,7 +3,7 @@ language: "ko-KR" # 한국어로 설정
 early_access: false
 
 reviews:
-  profile: "balanced" # 리뷰 강도 설정 : 적당한 날카로움 + 설명
+  profile: "chill" # 리뷰 강도 설정 : 	부드럽고 관대한 스타일 (지적 최소)
   request_changes_workflow: true # 리뷰 통과 시 자동 승인
   high_level_summary: true # 리뷰 요약 포함
   poem: false # 리뷰 마지막 시 ( just Fun ) : 비활성화
