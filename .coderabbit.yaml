@@ -13,7 +13,6 @@ reviews:
   auto_review:
     enabled: true # 자동 리뷰 : 활성화
     drafts: false # draft PR 리뷰 : 비활성화
-    target_branches:  # 리뷰 대상 브랜치
-      - "dev" 
+
 chat:
   auto_reply: true # PR 코멘트에 대한 자동 응답
