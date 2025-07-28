@@ -29,7 +29,8 @@ public class PublicPaths {
             Map.entry("/topics/*/comments", Set.of(HttpMethod.GET, HttpMethod.POST)),
             Map.entry("/statistics/**", Set.of(HttpMethod.GET)),
             Map.entry("/actuator/prometheus", Set.of(HttpMethod.GET)),
-            Map.entry("/inquiry", Set.of(HttpMethod.POST))
+            Map.entry("/inquiry", Set.of(HttpMethod.POST)),
+            Map.entry("/notices/**", Set.of(HttpMethod.GET, HttpMethod.POST))
     );
 
     public static final Map<String, Set<HttpMethod>> OPTIONAL_AUTH_ENDPOINTS = Map.ofEntries(
