@@ -31,6 +31,10 @@ public class Notice extends Timestamp {
     @Comment("공지 사항 제목")
     private String title;
 
+    @Column(name = "summary")
+    @Comment("요약")
+    private String summary;
+
     @Lob
     @Column(name = "content")
     @Comment("공지 내용")
