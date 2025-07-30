@@ -17,7 +17,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long>{
     SELECT n
     FROM Notice n
     WHERE (:title IS NULL OR :title = '' OR n.title LIKE CONCAT('%', :title ,'%'))
-    AND n.noticeType = :noticeType
+    AND (:noticeType IS NULL OR n.noticeType = :noticeType)
     ORDER BY n.createdAt DESC
     """)
     Page<Notice> searchByTitleAndType(@Param("title") String title, @Param("noticeType") NoticeType noticeType, Pageable pageable);
