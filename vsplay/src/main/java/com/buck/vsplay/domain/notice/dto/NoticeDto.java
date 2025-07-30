@@ -14,17 +14,17 @@ public class NoticeDto {
     @Getter
     public static class Notice{
         Long id;
-        String noticeType;
+        NoticeType noticeType;
         String title;
+        String createdAt;
     }
 
     @Builder
     @Getter
     public static class NoticeDetail{
-        String noticeType;
+        NoticeType noticeType;
         String title;
         String content;
-        String createdAt;
     }
 
     @Getter
