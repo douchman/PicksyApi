@@ -16,6 +16,7 @@ public class NoticeDto {
         Long id;
         NoticeType noticeType;
         String title;
+        String summary;
         String createdAt;
     }
 

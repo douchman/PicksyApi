@@ -14,6 +14,7 @@ public interface NoticeMapper {
         return NoticeDto.Notice.builder()
                 .id(notice.getId())
                 .noticeType(notice.getNoticeType())
+                .summary(notice.getSummary())
                 .title(notice.getTitle())
                 .createdAt(DateTimeUtil.formatDateToSting(notice.getCreatedAt()))
                 .build();
