@@ -12,13 +12,12 @@ import org.hibernate.annotations.Comment;
 @Getter
 @Setter
 @Entity
-@SequenceGenerator(name = "NOTICE_SEQ_GENERATOR", sequenceName = "NOTICE_SEQ")
 @Table(name = "NOTICE")
 public class Notice extends Timestamp {
 
     @Id
     @Column(name = "notice_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "NOTICE_SEQ_GENERATOR")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Builder.Default
