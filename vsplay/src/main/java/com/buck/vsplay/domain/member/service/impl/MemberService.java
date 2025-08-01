@@ -9,6 +9,7 @@ import com.buck.vsplay.domain.member.mapper.MemberMapper;
 import com.buck.vsplay.domain.member.repository.MemberRepository;
 import com.buck.vsplay.domain.member.role.Role;
 import com.buck.vsplay.domain.member.service.IMemberService;
+import com.buck.vsplay.domain.member.validator.MemberInfoValidator;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ public class MemberService implements IMemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;
+    private final MemberInfoValidator memberInfoValidator;
 
     @Override
     public MemberDto.MemberInfo getMemberInfo() {
@@ -40,6 +42,9 @@ public class MemberService implements IMemberService {
 
     @Override
     public void createMember(MemberDto.CreateMemberRequest createMemberRequest) {
+
+        memberInfoValidator.validateRegisterMember(createMemberRequest);
+
         if (memberRepository.findByLoginId(createMemberRequest.getLoginId()).isPresent()) {
             throw new MemberException(MemberExceptionCode.MEMBER_DUPLICATE_ID);
         }
