@@ -35,7 +35,7 @@ public class Notice extends Timestamp {
     private String summary;
 
     @Lob
-    @Column(name = "content")
+    @Column(name = "content", columnDefinition = "TEXT")
     @Comment("공지 내용")
     private String content;
 
