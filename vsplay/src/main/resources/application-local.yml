@@ -46,6 +46,9 @@ aws:
     secret-key: ${VSPLAY_S3_SECRET}
   region: ${VSPLAY_S3_REGION}
 
+slack:
+  webhook:
+    inquiry: ${SLACK_INQUIRY_URL}
 
 management:
   endpoints:
