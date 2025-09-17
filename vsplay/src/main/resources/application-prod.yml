@@ -1,4 +1,6 @@
 app:
+  cookie:
+    domain: .buck93.com
   base-domain: ${VSPLAY_APP_BASE_URL}
   gpt-api-key : ${GPT_API_KEY}
 
