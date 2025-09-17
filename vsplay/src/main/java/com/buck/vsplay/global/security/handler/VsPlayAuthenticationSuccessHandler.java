@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -21,9 +20,7 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class VsPlayAuthenticationSuccessHandler implements AuthenticationSuccessHandler{
 
-    @Value("${app.cookie.domain:#{null}}")
-    String cookieDomain;
-
+    private final String cookieDomain;
     private final JwtService jwtService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 

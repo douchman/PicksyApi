@@ -10,6 +10,7 @@ import com.buck.vsplay.global.security.jwt.JwtAuthenticationEntryPoint;
 import com.buck.vsplay.global.security.jwt.JwtService;
 import com.buck.vsplay.global.security.jwt.exception.JwtExceptionHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +29,10 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    @Value("${app.cookie.domain:#{null}}")
+    String cookieDomain;
+
     private final JwtService jwtService;
     private final JwtExceptionHandler jwtExceptionHandler;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -96,7 +101,7 @@ public class SecurityConfig {
     private JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager);
         jwtAuthenticationFilter.setFilterProcessesUrl("/member/login");
-        jwtAuthenticationFilter.setAuthenticationSuccessHandler(new VsPlayAuthenticationSuccessHandler(jwtService));
+        jwtAuthenticationFilter.setAuthenticationSuccessHandler(new VsPlayAuthenticationSuccessHandler(cookieDomain, jwtService));
         jwtAuthenticationFilter.setAuthenticationFailureHandler(new VsPlayAuthenticationFailureHandler());
 
         return jwtAuthenticationFilter;
