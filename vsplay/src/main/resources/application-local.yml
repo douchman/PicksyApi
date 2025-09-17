@@ -1,4 +1,6 @@
 app:
+  cookie:
+    domain: null
   base-domain: ${VSPLAY_APP_BASE_URL}
   gpt-api-key : ${GPT_API_KEY}
 
