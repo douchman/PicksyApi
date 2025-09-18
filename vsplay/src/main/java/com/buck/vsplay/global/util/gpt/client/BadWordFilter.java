@@ -23,9 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -39,6 +37,11 @@ public class BadWordFilter {
     private String openaiApiKey;
 
     public boolean containsBadWords(List<String> textList){
+
+        if(textList == null || textList.isEmpty()){
+            return false;
+        }
+
         boolean apiSuccess = true;
         GptModelType gptModel = GptModelType.GPT_4_1;
         String gptApiUrl = "https://api.openai.com/v1/chat/completions";
@@ -56,7 +59,7 @@ public class BadWordFilter {
         Map<String, Boolean> resultMap = Map.of(); // safe 하게 기본값 초기화
 
         try {
-            apiInput =createBadWordGptApiInput(textList); // 입력 변환
+            apiInput = createBadWordGptApiInput(textList); // 입력 변환
 
             // 프롬프트 설정
             Map<String, Object> systemMsg = Map.of(
@@ -68,7 +71,7 @@ public class BadWordFilter {
 
             Map<String, Object> requestBody = Map.of(
                     "model", gptModel.getModelName(),
-                    "messages", List.of(systemMsg, userMsg)
+                    "messages", Arrays.asList(systemMsg, userMsg)
             );
 
             // API 호출
@@ -132,7 +135,8 @@ public class BadWordFilter {
 
         for(int i = 0; i < stringList.size(); i++) {
             String key = String.valueOf(i + 1);
-            gptInputMap.put(key, Map.of("text", stringList.get(i)));
+            String value = Optional.ofNullable(stringList.get(i)).orElse("");
+            gptInputMap.put(key, Map.of("text", value));
         }
 
         return objectMapper.writeValueAsString(gptInputMap);
