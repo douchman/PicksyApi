@@ -100,19 +100,18 @@ public class EntryService implements IEntryService {
         VsTopic vsTopic = topicFinder.findExistingById(topicId);
         TopicAccessGuard.validateTopicAccess(vsTopic, cachedMember);
 
-
         List<EntryDto.UpdateEntry> entriesToUpdate = Optional
                 .ofNullable(updatedRequest.getEntriesToUpdate())
                 .orElse(Collections.emptyList()); // null safe 하게 리스트 재구성
 
         if( entriesToUpdate.isEmpty() ) return; // early return
 
+        entryRequestChecker.filterEntriesContentTexts(
+                entryTextExtractor.extractTextFromUpdateEntryList(entriesToUpdate)); // 텍스트 컨텐츠 추출 후 비속어 필터링 ( 삭제 대상 제외 )
 
         List<Long> updateTargetEntryIds = entriesToUpdate.stream()
                 .map(EntryDto.UpdateEntry::getId)
                 .toList(); // 업데이트 대상 entry id 추출
-
-        entryRequestChecker.filterEntriesContentTexts(entryTextExtractor.extractTextFromUpdateEntryList(entriesToUpdate)); // 텍스트 컨텐츠 추출 후 비속어 필터링 ( 삭제 대상 제외 )
 
         List<TopicEntry> existingEntries = entryRepository.findByTopicIdAndIdIn(topicId, updateTargetEntryIds); // entity 조회
 
