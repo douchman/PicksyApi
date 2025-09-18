@@ -16,7 +16,7 @@ public interface EntryMatchRepository extends JpaRepository<EntryMatch, Long> {
 
     @Query(value = """
         SELECT *
-        FROM ENTRY_MATCH em
+        FROM entry_match em
         WHERE em.play_record_id = :playRecordId
           AND em.tournament_round = :tournamentRound
           AND em.status = 'IN_PROGRESS'
