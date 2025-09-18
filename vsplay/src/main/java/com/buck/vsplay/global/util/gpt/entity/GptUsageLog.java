@@ -53,7 +53,7 @@ public class GptUsageLog extends Timestamp {
     private Long responseTimeMills;
 
     @Lob
-    @Column(name = "input_preview")
+    @Column(name = "input_preview", columnDefinition = "TEXT")
     @Comment("입력 데이터")
     private String inputPreview;
 
