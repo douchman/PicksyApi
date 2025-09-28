@@ -116,7 +116,7 @@ public class VsTopicService implements IVsTopicService {
         TopicAccessGuard.validateTopicAccess(vsTopic, cachedMemberDtoOpt.orElse(null));
 
         List<VsTopicDto.Tournament> tournamentList = new ArrayList<>();
-        List<TopicTournament> topicTournaments = tournamentRepository.findByVsTopicIdAndActiveTrue(vsTopic.getId());
+        List<TopicTournament> topicTournaments = tournamentRepository.findByVsTopicIdAndActiveTrueOrderByTournamentStageAsc(vsTopic.getId());
 
         if ( topicTournaments != null && !topicTournaments.isEmpty() ) {
             for (TopicTournament tournament : topicTournaments) {
