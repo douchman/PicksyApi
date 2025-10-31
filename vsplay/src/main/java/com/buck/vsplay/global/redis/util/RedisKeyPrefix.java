@@ -8,4 +8,5 @@ public final class RedisKeyPrefix {
     public static final String USER = "user_";
     public static final String TOPIC = "topic_";
     public static final String ENTRY = "entry_";
+    public static final String TOPIC_ENTRIES = "topic_entries_";
 }
