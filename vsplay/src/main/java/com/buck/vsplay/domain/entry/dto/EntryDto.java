@@ -14,6 +14,8 @@ public class EntryDto {
     @Getter
     @Setter
     @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Entry{
         private Long id;
         private String entryName;
