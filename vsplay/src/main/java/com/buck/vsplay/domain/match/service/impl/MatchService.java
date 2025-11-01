@@ -58,44 +58,17 @@ import java.util.*;
     @Override
     public TopicPlayRecordDto.PlayRecordResponse createTopicPlayRecord(Long topicId, TopicPlayRecordDto.PlayRecordRequest playRecordRequest) {
 
-        Optional<CachedMemberDto> cachedMemberOpt = authUserService.getCachedMemberOptional();
+        VsTopic topic = findAndValidateTopic(topicId, playRecordRequest.getAccessCode()); // 주제 조회 및 접근 검증
+        TopicTournament topicTournament = findValidTournament(topicId, playRecordRequest.getTournamentStage()); // 유효 토너먼트 조회
+        TopicPlayRecord savedTopicPlayRecord = saveTopicPlayRecord(topic, playRecordRequest.getTournamentStage()); // 주제 시작 기록
+        initializeFirstTournament(savedTopicPlayRecord); // 대결 진행 기록 후 첫 대진표 생성
 
-        try {
-            VsTopic topic = vsTopicRepository.findByIdAndDeletedFalse(topicId).orElseThrow(
-                    () -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+        applicationEventPublisher.publishEvent(new TopicEvent.PlayEvent(topic));
+        applicationEventPublisher.publishEvent(new TournamentEvent.PlayEvent(topicTournament));
 
-            TopicAccessGuard.validateTopicAccess(topic, cachedMemberOpt.orElse(null));
-
-            if(isPasswordTopic(topic.getVisibility()) && !isTopicAccessCodeValid(topic.getAccessCode(), playRecordRequest.getAccessCode())){
-                throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_INVALID);
-            }
-
-            TopicTournament topicTournament = tournamentRepository.findByTopicIdAndTournamentStage(topicId, playRecordRequest.getTournamentStage());
-
-            if( topicTournament == null ){
-                throw new TournamentException(TournamentExceptionCode.TOURNAMENT_INVALID);
-            }
-
-            TopicPlayRecord savedTopicPlayRecord = topicPlayRecordRepository.save(TopicPlayRecord.builder()
-                    .topic(topic)
-                    .selectedTournament(playRecordRequest.getTournamentStage())
-                    .currentTournamentStage(playRecordRequest.getTournamentStage())
-                    .status(PlayStatus.IN_PROGRESS)
-                    .build());
-
-            initializeFirstTournament(savedTopicPlayRecord); // 대결 진행 기록 후 첫 대진표 생성
-
-            applicationEventPublisher.publishEvent(new TopicEvent.PlayEvent(topic));
-            applicationEventPublisher.publishEvent(new TournamentEvent.PlayEvent(topicTournament));
-
-            return TopicPlayRecordDto.PlayRecordResponse.builder()
-                    .playRecordId(savedTopicPlayRecord.getId())
-                    .build();
-
-        }catch (PlayRecordException e) {
-            log.error("토너먼트 대진표 초기화 중 오류가 발생했습니다", e);
-            throw e;
-        }
+        return TopicPlayRecordDto.PlayRecordResponse.builder()
+                .playRecordId(savedTopicPlayRecord.getId())
+                .build();
     }
 
     @Override
@@ -282,12 +255,41 @@ import java.util.*;
         return entryMatch.getStatus().equals(PlayStatus.COMPLETED);
     }
 
-    private boolean isPasswordTopic(Visibility visibility){
-        return visibility.equals(Visibility.PASSWORD);
+
+    private void validateTopicPassword(Visibility visibility, String accessCode, String inputAccessCode){
+        boolean isPrivateTopic =  visibility.equals(Visibility.PASSWORD);
+        boolean isTopicAccessCoedValid = Objects.equals(accessCode, inputAccessCode);
+
+        if(isPrivateTopic && !isTopicAccessCoedValid){
+            throw new VsTopicException(VsTopicExceptionCode.TOPIC_PASSWORD_INVALID);
+        }
     }
 
-    private boolean isTopicAccessCodeValid(String topicAccessCode, String inputAccessCode){
-        return Objects.equals(topicAccessCode, inputAccessCode);
+    private VsTopic findAndValidateTopic(Long topicId, String accessCode){
+        Optional<CachedMemberDto> cachedMemberOpt = authUserService.getCachedMemberOptional();
+
+        VsTopic topic = vsTopicRepository.findByIdAndDeletedFalse(topicId)
+                .orElseThrow(() -> new VsTopicException(VsTopicExceptionCode.TOPIC_NOT_FOUND));
+
+        TopicAccessGuard.validateTopicAccess(topic, cachedMemberOpt.orElse(null));
+
+        validateTopicPassword(topic.getVisibility(), topic.getAccessCode(), accessCode);
+
+        return topic;
+    }
+
+    private TopicTournament findValidTournament(Long topicId, Integer tournamentStage) {
+        return tournamentRepository.findByTopicIdAndTournamentStage(topicId, tournamentStage)
+                .orElseThrow(() -> new TournamentException(TournamentExceptionCode.TOURNAMENT_INVALID));
+    }
+
+    private TopicPlayRecord saveTopicPlayRecord(VsTopic topic, Integer tournamentStage){
+        return topicPlayRecordRepository.save(TopicPlayRecord.builder()
+                .topic(topic)
+                .selectedTournament(tournamentStage)
+                .currentTournamentStage(tournamentStage)
+                .status(PlayStatus.IN_PROGRESS)
+                .build());
     }
 
 }
