@@ -79,65 +79,30 @@ import java.util.*;
     @Override
     public EntryMatchDto.UpdateEntryMatchResultResponse updateEntryMatchResult(Long playRecordId, Long matchId, EntryMatchDto.EntryMatchResultRequest entryMatchResultRequest) {
 
-        TopicPlayRecord topicPlayRecord = topicPlayRecordRepository.findById(playRecordId).orElseThrow(
-                () -> new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND));
+        TopicPlayRecord topicPlayRecord = findTournamentByPlayRecordId(playRecordId);
+        EntryMatch entryMatch = findEntryMatchById(matchId);
 
-        EntryMatch entryMatch = entryMatchRepository.findById(matchId).orElseThrow(
-                () -> new PlayRecordException(PlayRecordExceptionCode.MATCH_NOT_FOUND));
+        validateEntryMatch(entryMatch, topicPlayRecord.getId()); // 엔트리 매치 검증
+        validateEntryBelongsToMatch(entryMatch, entryMatchResultRequest.getWinnerEntryId(), entryMatchResultRequest.getLoserEntryId()); // 엔트리 소속 검증
+        assignMatchResultEntries(entryMatch, entryMatchResultRequest.getWinnerEntryId(), entryMatchResultRequest.getLoserEntryId()); // 대결 결과 엔트리 정보 조회
+        entryMatch.setStatus(PlayStatus.COMPLETED); // 매치 완료
 
-        if( !entryMatch.getTopicPlayRecord().getId().equals(topicPlayRecord.getId())){ // 매치와 기록의 식별자 일치여부
-            throw new PlayRecordException(PlayRecordExceptionCode.MATCH_NOT_ASSOCIATED_WITH_RECORD);
+        if(!isCurrentTournamentStageFinish(topicPlayRecord)){ // #1 현재 토너먼트 스테이지 남음 -> 현 토너먼트 스테이지 진행
+            return buildMatchUpdateResultResponse(topicPlayRecord, false);
         }
 
-        if ( entryMatch.getStatus().equals(PlayStatus.COMPLETED)){ // 이미 완료된 매치 확인
-            throw new PlayRecordException(PlayRecordExceptionCode.MATCH_ALREADY_COMPLETED);
+        if(isAllTournamentStageFinish(topicPlayRecord)){ // #2 현재 스테이지 완료 및 모든 스테이지 완료 -> 대결 완전 종료
+            topicPlayRecord.setStatus(PlayStatus.COMPLETED);
+            applicationEventPublisher.publishEvent(new TopicEvent.PlayCompleteEvent(topicPlayRecord.getTopic())); // 완전히 종료된 대결 횟수 갱신 이벤트 발행
+            return buildMatchUpdateResultResponse(topicPlayRecord, true);
         }
 
-        Long winnerEntryId = entryMatchResultRequest.getWinnerEntryId();
-        Long loserEntryId = entryMatchResultRequest.getLoserEntryId();
+        createNextTournamentStageEntryMatches(topicPlayRecord); // #3 현재 토너먼트 스테이지 완료 -> 다음 스테이지로 넘어가기
 
-        List<Long> matchEntryIds = List.of(
-                entryMatch.getEntryA().getId(),
-                entryMatch.getEntryB().getId()
-        );
-
-        if (!matchEntryIds.contains(winnerEntryId) || !matchEntryIds.contains(loserEntryId)) {
-            throw new PlayRecordException(PlayRecordExceptionCode.INVALID_ENTRY_FOR_MATCH);
-        }
-
-        if( winnerEntryId.equals(loserEntryId)){ // 동일한 엔트리 검사
-            throw new PlayRecordException(PlayRecordExceptionCode.DUPLICATE_WINNER_LOSER_ENTRY);
-        }
-
-        entryMatch.setWinnerEntry(
-                entryRepository.findById(winnerEntryId).orElseThrow(
-                () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND)));
-        entryMatch.setLoserEntry(
-                entryRepository.findById(loserEntryId).orElseThrow(
-                () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND)));
-
-        entryMatch.setStatus(PlayStatus.COMPLETED);
-        entryMatchRepository.save(entryMatch);
         applicationEventPublisher.publishEvent(new EntryEvent.MatchCompleteEvent(entryMatch));
         applicationEventPublisher.publishEvent(new EntryEvent.VersusStatisticsEvent(entryMatch)); // 대결이 종료되면 상성 데이터 업데이트 ( 비동기 )
 
-        boolean isAllTournamentStageFinish = isAllTournamentStageFinish(topicPlayRecord);
-
-        if(isCurrentTournamentStageFinish(topicPlayRecord)){ // 진행중인 토너먼트 종료 여부 확인
-            if ( isAllTournamentStageFinish){ // 현 토너먼트 완료 및 예정되어있는 모든 대진표를 완료 시
-                topicPlayRecord.setStatus(PlayStatus.COMPLETED);
-                topicPlayRecordRepository.save(topicPlayRecord);
-                applicationEventPublisher.publishEvent(new TopicEvent.PlayCompleteEvent(topicPlayRecord.getTopic())); // 완전히 종료된 대결 횟수 갱신 이벤트 발행
-            } else{ // 현 토너먼트 종료 -> 남아있는 다음 토너먼트 대진표 생성
-                createNextTournamentStageEntryMatches(topicPlayRecord);
-            }
-        }
-
-        return EntryMatchDto.UpdateEntryMatchResultResponse.builder()
-                .message( isAllTournamentStageFinish ? "모든 대결이 완료되었습니다." : "다음 대결을 진행하세요.")
-                .nextTournament(topicPlayRecord.getCurrentTournamentStage())
-                .isAllMatchedCompleted(isAllTournamentStageFinish)
-                .build();
+        return buildMatchUpdateResultResponse(topicPlayRecord, false);
     }
 
     /**
@@ -197,7 +162,6 @@ import java.util.*;
         }
 
         topicPlayRecord.setCurrentTournamentStage(nextTournamentStage); // 진행 스테이지 변경
-        topicPlayRecordRepository.save(topicPlayRecord);
     }
 
     private boolean isCurrentTournamentStageFinish(TopicPlayRecord topicPlayRecord){
@@ -213,15 +177,7 @@ import java.util.*;
     }
 
     private boolean isAllTournamentStageFinish(TopicPlayRecord topicPlayRecord){
-        Integer currentTournamentStage = topicPlayRecord.getCurrentTournamentStage();
-
-        if( !currentTournamentStage.equals(2)){ // 결승전이 아님
-            return false;
-        }
-
-        EntryMatch entryMatch = entryMatchRepository.findByPlayRecordIdAndTournamentRoundOrderBySeqAsc(topicPlayRecord.getId(),currentTournamentStage);
-
-        return entryMatch.getStatus().equals(PlayStatus.COMPLETED);
+        return topicPlayRecord.getCurrentTournamentStage().equals(2);
     }
 
 
@@ -296,6 +252,56 @@ import java.util.*;
                 () -> new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND));
     }
 
+    private EntryMatch findEntryMatchById(Long matchId){
+       return entryMatchRepository.findById(matchId).orElseThrow(
+                () -> new PlayRecordException(PlayRecordExceptionCode.MATCH_NOT_FOUND));
+    }
+
+    private void validateEntryMatch(EntryMatch entryMatch, Long playRecordId){
+
+        if( !entryMatch.getTopicPlayRecord().getId().equals(playRecordId)){ // 매치와 기록의 식별자 일치여부
+            throw new PlayRecordException(PlayRecordExceptionCode.MATCH_NOT_ASSOCIATED_WITH_RECORD);
+        }
+
+        if ( entryMatch.getStatus().equals(PlayStatus.COMPLETED)){ // 이미 완료된 매치 확인
+            throw new PlayRecordException(PlayRecordExceptionCode.MATCH_ALREADY_COMPLETED);
+        }
+
+    }
+
+    private void validateEntryBelongsToMatch(EntryMatch entryMatch, Long winnerEntryId, Long loserEntryId){
+
+        List<Long> matchEntryIds = List.of(
+                entryMatch.getEntryA().getId(),
+                entryMatch.getEntryB().getId()
+        );
+
+        if (!matchEntryIds.contains(winnerEntryId) || !matchEntryIds.contains(loserEntryId)) {
+            throw new PlayRecordException(PlayRecordExceptionCode.INVALID_ENTRY_FOR_MATCH);
+        }
+
+        if( winnerEntryId.equals(loserEntryId)){ // 동일한 엔트리 검사
+            throw new PlayRecordException(PlayRecordExceptionCode.DUPLICATE_WINNER_LOSER_ENTRY);
+        }
+    }
+
+    private void assignMatchResultEntries(EntryMatch entryMatch, Long winnerEntryId, Long loserEntryId){
+        entryMatch.setWinnerEntry(
+                entryRepository.findById(winnerEntryId).orElseThrow(
+                        () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND)));
+        entryMatch.setLoserEntry(
+                entryRepository.findById(loserEntryId).orElseThrow(
+                        () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND)));
+
+    }
+
+    private EntryMatchDto.UpdateEntryMatchResultResponse buildMatchUpdateResultResponse(TopicPlayRecord topicPlayRecord, boolean isAllCompleted){
+        return EntryMatchDto.UpdateEntryMatchResultResponse.builder()
+                .nextTournament(topicPlayRecord.getCurrentTournamentStage())
+                .isAllMatchedCompleted(isAllCompleted)
+                .build();
+
+    }
     private TopicPlayRecord saveTopicPlayRecord(VsTopic topic, Integer tournamentStage){
         return topicPlayRecordRepository.save(TopicPlayRecord.builder()
                 .topic(topic)
