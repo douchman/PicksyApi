@@ -73,38 +73,7 @@ import java.util.*;
 
     @Override
     public EntryMatchDto.EntryMatchResponse getEntryMatch(Long playRecordId) {
-
-        TopicPlayRecord topicPlayRecord = topicPlayRecordRepository.findById(playRecordId).orElseThrow(
-                () -> new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND));
-
-        PlayStatus playStatus = topicPlayRecord.getStatus();
-
-        EntryMatchDto.EntryMatchResponse entryMatchResponse = EntryMatchDto.EntryMatchResponse.builder()
-                .playStatus(playStatus)
-                .build();
-
-        entryMatchResponse.setCurrentTournament(TournamentStage.findStageNameByStage(topicPlayRecord.getCurrentTournamentStage()));
-
-        if( PlayStatus.IN_PROGRESS == playStatus){ // 진행 중인 대결
-            EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
-            EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
-            entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
-            entryMatchResponse.setEntryMatch(EntryMatchDto.EntryMatch.builder()
-                    .entryA(topicEntryMapper.toEntryDtoFromEntryEntity(entryMatchWithEntries.getEntryA(), s3Util))
-                    .entryB(topicEntryMapper.toEntryDtoFromEntryEntity(entryMatchWithEntries.getEntryB(), s3Util))
-                    .build());
-        } else { // 완료 된 대결
-            EntryMatch completedEntryMatch = entryMatchRepository.findByTopicPlayRecordIdAndTournamentRound(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
-            entryMatchResponse.setMatchId(completedEntryMatch.getId());
-            entryMatchResponse.setWinnerEntryId(completedEntryMatch.getWinnerEntry().getId());
-
-            entryMatchResponse.setEntryMatch(EntryMatchDto.EntryMatch.builder()
-                    .entryA(topicEntryMapper.toEntryDtoFromEntryEntity(completedEntryMatch.getEntryA(), s3Util))
-                    .entryB(topicEntryMapper.toEntryDtoFromEntryEntity(completedEntryMatch.getEntryB(), s3Util))
-                    .build());
-        }
-
-        return entryMatchResponse;
+        return buildEntryMatchResponse(playRecordId);
     }
 
     @Override
@@ -281,6 +250,50 @@ import java.util.*;
     private TopicTournament findValidTournament(Long topicId, Integer tournamentStage) {
         return tournamentRepository.findByTopicIdAndTournamentStage(topicId, tournamentStage)
                 .orElseThrow(() -> new TournamentException(TournamentExceptionCode.TOURNAMENT_INVALID));
+    }
+
+    private EntryMatchDto.EntryMatchResponse buildEntryMatchResponse(Long playRecordId) {
+
+        TopicPlayRecord topicPlayRecord = findTournamentByPlayRecordId(playRecordId);
+
+        EntryMatchDto.EntryMatchResponse entryMatchResponse = EntryMatchDto.EntryMatchResponse.builder()
+                .playStatus(topicPlayRecord.getStatus())
+                .build();
+
+        entryMatchResponse.setCurrentTournament(TournamentStage.findStageNameByStage(topicPlayRecord.getCurrentTournamentStage()));
+
+        if( PlayStatus.IN_PROGRESS == topicPlayRecord.getStatus()){ // 진행 중인 대결
+            buildInProgressMatch(entryMatchResponse, topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
+        } else { // 완료 된 대결
+            buildCompletedMatch(entryMatchResponse, topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
+        }
+
+        return entryMatchResponse;
+    }
+
+    private void buildInProgressMatch(EntryMatchDto.EntryMatchResponse response, Long playRecordId, Integer currentTournamentStage){
+        EntryMatch entryMatch = entryMatchRepository.findFirstByTopicPlayRecordOrderBySeqAsc(playRecordId, currentTournamentStage);
+        EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
+        response.setMatchId(entryMatchWithEntries.getId());
+        response.setEntryMatch(EntryMatchDto.EntryMatch.builder()
+                .entryA(topicEntryMapper.toEntryDtoFromEntryEntity(entryMatchWithEntries.getEntryA(), s3Util))
+                .entryB(topicEntryMapper.toEntryDtoFromEntryEntity(entryMatchWithEntries.getEntryB(), s3Util))
+                .build());
+    }
+
+    private void buildCompletedMatch(EntryMatchDto.EntryMatchResponse response, Long playRecordId, Integer currentTournamentStage){
+        EntryMatch completedEntryMatch = entryMatchRepository.findByTopicPlayRecordIdAndTournamentRound(playRecordId, currentTournamentStage);
+        response.setMatchId(completedEntryMatch.getId());
+        response.setWinnerEntryId(completedEntryMatch.getWinnerEntry().getId());
+        response.setEntryMatch(EntryMatchDto.EntryMatch.builder()
+                .entryA(topicEntryMapper.toEntryDtoFromEntryEntity(completedEntryMatch.getEntryA(), s3Util))
+                .entryB(topicEntryMapper.toEntryDtoFromEntryEntity(completedEntryMatch.getEntryB(), s3Util))
+                .build());
+    }
+
+    private TopicPlayRecord findTournamentByPlayRecordId(Long playRecordId){
+        return topicPlayRecordRepository.findById(playRecordId).orElseThrow(
+                () -> new PlayRecordException(PlayRecordExceptionCode.RECORD_NOT_FOUND));
     }
 
     private TopicPlayRecord saveTopicPlayRecord(VsTopic topic, Integer tournamentStage){
