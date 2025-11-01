@@ -12,20 +12,9 @@ public interface TopicEntryMapper {
 
     TopicEntry toEntityFromCreatedEntryDto(EntryDto.CreateEntry topicEntry);
 
-    @Mapping(target = "mediaUrl", expression = "java(s3Util.getUploadedObjectUrl(topicEntry.getMediaUrl()))")
-    @Mapping(target = "thumbnail", expression = "java(s3Util.getUploadedObjectUrl(topicEntry.getThumbnail()))")
-    EntryDto.Entry toEntryDtoFromEntity(TopicEntry topicEntry, S3Util s3Util);
-
-
     @Mapping(target = "mediaUrl", expression = "java(resolveMediaUrl(topicEntry, s3Util))")
     @Mapping(target = "thumbnail", expression = "java(s3Util.getUploadedObjectUrl(topicEntry.getThumbnail()))")
     EntryDto.Entry toEntryDtoFromEntryEntity(TopicEntry topicEntry, S3Util s3Util);
-
-
-
-    @Mapping(target = "thumbnail", expression = "java(s3Util.getUploadedObjectUrl(topicEntry.getThumbnail()))")
-    EntryDto.Entry toEntryDtoFromEntityWithoutSignedMediaUrl(TopicEntry topicEntry, S3Util s3Util);
-
 
     default String resolveMediaUrl(TopicEntry topicEntry, S3Util s3Util) {
         if(topicEntry.getMediaType() == MediaType.YOUTUBE){
