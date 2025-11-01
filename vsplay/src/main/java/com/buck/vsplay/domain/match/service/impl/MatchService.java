@@ -10,7 +10,6 @@ import com.buck.vsplay.domain.member.dto.CachedMemberDto;
 import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.event.TopicEvent;
 import com.buck.vsplay.domain.statistics.event.TournamentEvent;
-import com.buck.vsplay.domain.entry.dto.EntryDto;
 import com.buck.vsplay.domain.match.dto.EntryMatchDto;
 import com.buck.vsplay.domain.match.dto.TopicPlayRecordDto;
 import com.buck.vsplay.domain.vstopic.entity.*;
@@ -26,7 +25,6 @@ import com.buck.vsplay.domain.entry.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.*;
 import com.buck.vsplay.domain.match.service.IMatchService;
-import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.PlayStatus;
 import com.buck.vsplay.global.constants.TournamentStage;
 import com.buck.vsplay.global.constants.Visibility;
@@ -119,8 +117,8 @@ import java.util.*;
             EntryMatch entryMatchWithEntries = entryMatchRepository.findWithEntriesById(entryMatch.getId());
             entryMatchResponse.setMatchId(entryMatchWithEntries.getId());
             entryMatchResponse.setEntryMatch(EntryMatchDto.EntryMatch.builder()
-                    .entryA(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryA()))
-                    .entryB(mappingTopicEntryToEntryDto(entryMatchWithEntries.getEntryB()))
+                    .entryA(topicEntryMapper.toEntryDtoFromEntryEntity(entryMatchWithEntries.getEntryA(), s3Util))
+                    .entryB(topicEntryMapper.toEntryDtoFromEntryEntity(entryMatchWithEntries.getEntryB(), s3Util))
                     .build());
         } else { // 완료 된 대결
             EntryMatch completedEntryMatch = entryMatchRepository.findByTopicPlayRecordIdAndTournamentRound(topicPlayRecord.getId(), topicPlayRecord.getCurrentTournamentStage());
@@ -128,8 +126,8 @@ import java.util.*;
             entryMatchResponse.setWinnerEntryId(completedEntryMatch.getWinnerEntry().getId());
 
             entryMatchResponse.setEntryMatch(EntryMatchDto.EntryMatch.builder()
-                    .entryA(mappingTopicEntryToEntryDto(completedEntryMatch.getEntryA()))
-                    .entryB(mappingTopicEntryToEntryDto(completedEntryMatch.getEntryB()))
+                    .entryA(topicEntryMapper.toEntryDtoFromEntryEntity(completedEntryMatch.getEntryA(), s3Util))
+                    .entryB(topicEntryMapper.toEntryDtoFromEntryEntity(completedEntryMatch.getEntryB(), s3Util))
                     .build());
         }
 
@@ -282,14 +280,6 @@ import java.util.*;
         EntryMatch entryMatch = entryMatchRepository.findByPlayRecordIdAndTournamentRoundOrderBySeqAsc(topicPlayRecord.getId(),currentTournamentStage);
 
         return entryMatch.getStatus().equals(PlayStatus.COMPLETED);
-    }
-
-    private EntryDto.Entry mappingTopicEntryToEntryDto(TopicEntry topicEntry){
-        if(MediaType.YOUTUBE == topicEntry.getMediaType()){
-            return topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(topicEntry, s3Util);
-        } else {
-            return topicEntryMapper.toEntryDtoFromEntity(topicEntry, s3Util);
-        }
     }
 
     private boolean isPasswordTopic(Visibility visibility){

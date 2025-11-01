@@ -7,7 +7,6 @@ import com.buck.vsplay.domain.statistics.event.EntryEvent;
 import com.buck.vsplay.domain.statistics.mapper.EntryStatisticsMapper;
 import com.buck.vsplay.domain.statistics.repository.EntryStatisticsRepository;
 import com.buck.vsplay.domain.statistics.service.IEntryStatisticsService;
-import com.buck.vsplay.domain.entry.dto.EntryDto;
 import com.buck.vsplay.domain.match.entity.EntryMatch;
 import com.buck.vsplay.domain.entry.entiity.TopicEntry;
 import com.buck.vsplay.domain.vstopic.entity.VsTopic;
@@ -20,7 +19,6 @@ import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
 import com.buck.vsplay.global.batch.entity.BatchJobExecution;
 import com.buck.vsplay.global.batch.repository.BatchJobExecutionRepository;
-import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.dto.Pagination;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.DateTimeUtil;
@@ -140,14 +138,9 @@ public class EntryStatisticsService implements IEntryStatisticsService {
         }
 
         for (EntryStatistics entryStatistic : entryStatistics) {
-            boolean isYouTube = MediaType.YOUTUBE == entryStatistic.getTopicEntry().getMediaType();
             entriesStatistics.add(
                     EntryStatisticsDto.EntryStatWithEntryInfo.builder()
-                            .entry(
-                                    isYouTube ?
-                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryStatistic.getTopicEntry(), s3Util)
-                                            :topicEntryMapper.toEntryDtoFromEntity(entryStatistic.getTopicEntry(), s3Util)
-                            )
+                            .entry(topicEntryMapper.toEntryDtoFromEntryEntity(entryStatistic.getTopicEntry(), s3Util))
                             .statistics(entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistic))
                             .build()
             );
@@ -189,15 +182,9 @@ public class EntryStatisticsService implements IEntryStatisticsService {
                 () -> new EntryException(EntryExceptionCode.ENTRY_NOT_FOUND)
         );
 
-        boolean isYoutubeMediaType = MediaType.YOUTUBE == entryStatistics.getTopicEntry().getMediaType();
-        EntryDto.Entry entry = isYoutubeMediaType?
-                        topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryStatistics.getTopicEntry(), s3Util)
-                        : topicEntryMapper.toEntryDtoFromEntity(entryStatistics.getTopicEntry(), s3Util);
-        EntryStatisticsDto.EntryStatistics statistics = entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistics);
-
         return EntryStatisticsDto.SingleEntryStatsResponse.builder()
-                .entry(entry)
-                .statistics(statistics)
+                .entry(topicEntryMapper.toEntryDtoFromEntryEntity(entryStatistics.getTopicEntry(), s3Util))
+                .statistics(entryStatisticsMapper.toEntryStatisticsDtoFromEntity(entryStatistics))
                 .build();
     }
 }
