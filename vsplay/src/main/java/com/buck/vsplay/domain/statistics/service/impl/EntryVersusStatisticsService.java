@@ -17,7 +17,6 @@ import com.buck.vsplay.domain.entry.mapper.TopicEntryMapper;
 import com.buck.vsplay.domain.vstopic.moderation.TopicAccessGuard;
 import com.buck.vsplay.domain.entry.repository.EntryRepository;
 import com.buck.vsplay.domain.vstopic.repository.VsTopicRepository;
-import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
 import lombok.RequiredArgsConstructor;
@@ -86,13 +85,10 @@ public class EntryVersusStatisticsService implements IEntryVersusStatisticsServi
 
         if ( entryVersusStatistics != null && !entryVersusStatistics.isEmpty()){
             for (EntryVersusStatistics entryVersusStatistic : entryVersusStatistics) {
-                boolean isYoutubeMediaType = MediaType.YOUTUBE == entryVersusStatistic.getOpponentEntry().getMediaType();
                 opponentEntryInfoWithMatchRecords.add(
                         EntryVersusStatisticsDto.OpponentEntryInfoWithMatchRecord.builder()
                                 .opponentEntry(
-                                        isYoutubeMediaType ?
-                                            topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(entryVersusStatistic.getOpponentEntry(), s3Util)
-                                            : topicEntryMapper.toEntryDtoFromEntity(entryVersusStatistic.getOpponentEntry(), s3Util))
+                                        topicEntryMapper.toEntryDtoFromEntryEntity(entryVersusStatistic.getOpponentEntry(), s3Util))
                                 .matchRecord(EntryVersusStatisticsDto.MatchRecord.builder()
                                         .totalMatches(entryVersusStatistic.getTotalMatches())
                                         .wins(entryVersusStatistic.getWins())
