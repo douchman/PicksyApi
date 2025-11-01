@@ -1,6 +1,6 @@
 package com.buck.vsplay.domain.match.service.impl;
 
-import com.buck.vsplay.domain.entry.entiity.TopicEntry;
+import com.buck.vsplay.domain.entry.entity.TopicEntry;
 import com.buck.vsplay.domain.entry.repository.EntryRepository;
 import com.buck.vsplay.domain.match.entity.EntryMatch;
 import com.buck.vsplay.domain.match.entity.TopicPlayRecord;

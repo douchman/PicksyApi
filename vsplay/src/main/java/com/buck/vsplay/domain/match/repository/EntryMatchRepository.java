@@ -1,7 +1,7 @@
 package com.buck.vsplay.domain.match.repository;
 
 import com.buck.vsplay.domain.match.entity.EntryMatch;
-import com.buck.vsplay.domain.entry.entiity.TopicEntry;
+import com.buck.vsplay.domain.entry.entity.TopicEntry;
 import com.buck.vsplay.domain.match.entity.TopicPlayRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
