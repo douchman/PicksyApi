@@ -14,7 +14,6 @@ import com.buck.vsplay.domain.vstopic.service.finder.TopicFinder;
 import com.buck.vsplay.domain.entry.service.handler.EntryUpdateHandler;
 import com.buck.vsplay.domain.entry.service.support.EntryTextExtractor;
 import com.buck.vsplay.domain.entry.service.support.TournamentHandler;
-import com.buck.vsplay.global.constants.MediaType;
 import com.buck.vsplay.global.constants.ModerationStatus;
 import com.buck.vsplay.global.security.service.impl.AuthUserService;
 import com.buck.vsplay.global.util.aws.s3.S3Util;
@@ -45,30 +44,23 @@ public class EntryService implements IEntryService {
     private final TopicFinder topicFinder;
     private final EntryRequestChecker entryRequestChecker;
     private final EntryTextExtractor entryTextExtractor;
+    private final IEntryCache entryCache;
 
     @Override
     public EntryDto.EntryList getEntriesByTopicId(Long topicId) {
 
         topicFinder.validateTopicExists(topicId);
 
-        List<EntryDto.Entry> entryList = new ArrayList<>();
-        List<TopicEntry> createdEntries = entryRepository.findByTopicIdAndDeletedFalse(topicId);
-
-        if( createdEntries != null && !createdEntries.isEmpty()){
-            for (TopicEntry createdEntry : createdEntries) {
-
-                boolean isYoutube = MediaType.YOUTUBE == createdEntry.getMediaType();
-
-                entryList.add(
-                        isYoutube ?
-                                topicEntryMapper.toEntryDtoFromEntityWithoutSignedMediaUrl(createdEntry, s3Util)
-                                : topicEntryMapper.toEntryDtoFromEntity(createdEntry, s3Util)
-                );
-            }
-        }
-
         return EntryDto.EntryList.builder()
-                .entries(entryList)
+                .entries(Optional.ofNullable(entryCache.getCachedEntries(topicId))
+                        .orElseGet(() -> {
+                            List<EntryDto.Entry> entryList = new ArrayList<>(entryRepository.findByTopicIdAndDeletedFalse(topicId)
+                                    .stream()
+                                    .map( entry -> topicEntryMapper.toEntryDtoFromEntryEntity(entry, s3Util))
+                                    .toList());
+                            entryCache.putEntries(topicId, entryList);
+                            return entryList;
+                        }))
                 .build();
     }
 
@@ -89,6 +81,9 @@ public class EntryService implements IEntryService {
         }
 
         entryRepository.saveAll(topicEntries);
+
+        entryCache.evictEntries(topicId); // 캐시 삭제
+
         applicationEventPublisher.publishEvent(new EntryEvent.CreateEvent(topicEntries));
         tournamentHandler.handleTournament(vsTopic);
     }
@@ -128,6 +123,8 @@ public class EntryService implements IEntryService {
                         }
                     });
         }
+
+        entryCache.evictEntries(topicId); // 캐시 삭제
         tournamentHandler.handleTournament(vsTopic); // 갱신된 엔트리를 기준으로 토너먼트 재구성
     }
 }

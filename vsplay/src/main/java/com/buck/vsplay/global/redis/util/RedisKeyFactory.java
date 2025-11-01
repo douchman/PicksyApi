@@ -8,4 +8,5 @@ public class RedisKeyFactory {
     public static String user(Long memberId){
         return RedisKeyPrefix.USER + memberId;
     }
+    public static String topicEntries(Long topicId) { return RedisKeyPrefix.TOPIC_ENTRIES + topicId; }
 }
