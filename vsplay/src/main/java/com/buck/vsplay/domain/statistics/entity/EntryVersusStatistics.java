@@ -1,6 +1,6 @@
 package com.buck.vsplay.domain.statistics.entity;
 
-import com.buck.vsplay.domain.entry.entiity.TopicEntry;
+import com.buck.vsplay.domain.entry.entity.TopicEntry;
 import com.buck.vsplay.global.entity.Timestamp;
 import jakarta.persistence.*;
 import lombok.*;

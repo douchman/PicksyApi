@@ -2,7 +2,7 @@ package com.buck.vsplay.domain.statistics.service;
 
 import com.buck.vsplay.domain.statistics.dto.EntryStatisticsDto;
 import com.buck.vsplay.domain.match.entity.EntryMatch;
-import com.buck.vsplay.domain.entry.entiity.TopicEntry;
+import com.buck.vsplay.domain.entry.entity.TopicEntry;
 
 import java.util.List;
 
