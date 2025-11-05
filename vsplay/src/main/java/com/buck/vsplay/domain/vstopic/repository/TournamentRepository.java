@@ -7,11 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TournamentRepository extends JpaRepository<TopicTournament, Long> {
 
     @Query("SELECT tt FROM TopicTournament tt WHERE tt.vsTopic.id = :topicId AND tt.tournamentStage = :tournamentStage")
-    TopicTournament findByTopicIdAndTournamentStage(@Param("topicId") Long topicId, @Param("tournamentStage") Integer tournamentStage);
+    Optional<TopicTournament> findByTopicIdAndTournamentStage(@Param("topicId") Long topicId, @Param("tournamentStage") Integer tournamentStage);
 
     List<TopicTournament> findByVsTopicIdAndActiveTrueOrderByTournamentStageAsc(Long topicId);
 
